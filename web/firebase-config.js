@@ -1,8 +1,8 @@
 // ══════════════════════════════════════════════════════════════════════
-// LOST CARD — Firebase Configuration (VeilKey Protocol)
+// LOST CARD - Firebase Configuration (VeilKey Protocol)
 // ══════════════════════════════════════════════════════════════════════
 //
-//  SETUP — 5 minutes, completely free:
+//  SETUP - 5 minutes, completely free:
 //
 //  STEP 1 → firebase.google.com → Add project → name "lostcard" → Continue
 //            Disable Google Analytics → Create project → Continue
@@ -55,6 +55,6 @@ const FIREBASE_CONFIG = {
 // Automatically detects if config has been filled in
 const FIREBASE_ENABLED = !FIREBASE_CONFIG.apiKey.includes('PASTE_YOUR');
 
-// Admin UID — after first sign-up go to:
+// Admin UID - after first sign-up go to:
 //   Firebase Console → Authentication → Users → copy your UID → paste here
 const ADMIN_UID = 'PASTE_YOUR_ADMIN_UID_HERE';

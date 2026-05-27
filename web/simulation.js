@@ -1,4 +1,4 @@
-// LOST CARD — Simulation Engine
+// LOST CARD - Simulation Engine
 // JavaScript mirror of main.cpp (C++17) by S. M. Minhal Abbas Rizvi
 // BSSE | Data Structures & Algorithms | The Bet of Belief
 
@@ -14,7 +14,7 @@ const P1_SOFT = [
   "I'm sorry I made you feel like that. You didn't deserve it.",
   "That took courage to say. Thank you for trusting me with it.",
   "I think about that too. More than you know.",
-  "I'm here now. Whatever you need to say — I'm listening.",
+  "I'm here now. Whatever you need to say - I'm listening.",
   "You're not wrong. And I hate that you're not wrong.",
   "I've been carrying that too. We should have talked sooner.",
   "You've been more patient with me than I deserved.",
@@ -31,7 +31,7 @@ const P1_SOFT = [
   "That's an honest thing to say. I respect it.",
   "I value what we have. I need to start acting like it.",
   "You deserve someone who shows up. I want to be that.",
-  "I've missed this — actually talking to you.",
+  "I've missed this - actually talking to you.",
   "I'm not making excuses. You're right.",
   "What would help right now? Tell me.",
   "I see you. I just haven't been very good at showing it.",
@@ -109,19 +109,19 @@ const P2_SOFT = [
   "I've been thinking about that night too. I'm sorry I wasn't there.",
   "You're not overthinking it. I've been pulling away. That's real.",
   "I don't want to lose what we have. I'm going to try harder.",
-  "That hurt to hear. And it should — because it's true.",
+  "That hurt to hear. And it should - because it's true.",
   "You've been carrying that alone for too long. I'm sorry.",
   "Tell me what the friendship feels like from your end. I need to know.",
   "I knew something was wrong. I just didn't want to be the one to name it.",
   "I'm scared to admit how much I've been checked out. But I have been.",
   "You deserved better than what I've been giving. I know that.",
   "I want to understand how we got here. Walk me through it.",
-  "The fact that you still want to talk to me — that means everything.",
+  "The fact that you still want to talk to me - that means everything.",
   "I've been confusing being around with being present. They're not the same.",
-  "Whatever distance you felt — it was real. It wasn't in your head.",
+  "Whatever distance you felt - it was real. It wasn't in your head.",
   "I see how much this has cost you. I haven't been paying attention to that.",
   "I don't want to be the person who made you feel like this.",
-  "I'm listening. Not defensively. Just — listening.",
+  "I'm listening. Not defensively. Just - listening.",
   "You were right to bring this up. I was hoping you wouldn't have to.",
   "That's on me. I built this wall without realizing it.",
   "I think about what you said a lot. More than you know.",
@@ -129,7 +129,7 @@ const P2_SOFT = [
   "I've been protecting myself from a conversation I should have started.",
   "You gave me more chances than I earned. I know that.",
   "I hear the exhaustion in that. I put it there.",
-  "You've been trying to reach me and I've been just — elsewhere.",
+  "You've been trying to reach me and I've been just - elsewhere.",
   "I should have asked how you were long before you had to tell me.",
   "What I gave you wasn't enough. I'm not defending that.",
   "You deserved the full version of me. I kept giving you the edited one.",
@@ -215,7 +215,7 @@ const P3_SOFT = [
   "I know I've been inconsistent. I'm asking for the chance to not be.",
   "You're worth showing up for. I should have been doing that all along.",
   "I don't want to be the person you used to trust. I want to be the person you still do.",
-  "Whatever form this takes from here — I want to be part of it.",
+  "Whatever form this takes from here - I want to be part of it.",
   "I know this is fragile right now. I'll be careful with it.",
   "You said 'slowly'. Okay. Slowly. I can do slowly.",
   "I don't need it to go back to how it was. I just need it to go forward.",
@@ -227,9 +227,9 @@ const P3_SOFT = [
   "We've both changed. Let's find out if we still fit.",
   "I know I've made this hard. I'm asking for the chance to make it easier.",
   "You said you can't do another fall. I don't want to be your falling point.",
-  "I'll be consistent. Not perfectly — but genuinely.",
+  "I'll be consistent. Not perfectly - but genuinely.",
   "I hear you saying goodbye in that. I'm saying: not yet.",
-  "Whatever trust is left — I'll protect it. I promise.",
+  "Whatever trust is left - I'll protect it. I promise.",
   "I want to know the version of you that exists now. Will you let me?",
   "The roof photo. The way things felt then. I want to find our way back to something like that.",
   "I'm not ready to let this be a memory. I think you aren't either.",
@@ -307,28 +307,28 @@ const P3_SILE = [
 
 const SCENARIOS = [
   { hani: "Hey. You free this evening? I found that old photo. The one from the roof.", subtext: "(He's been looking at it for twenty minutes before texting. He won't say that.)", conflict: "Dismissing a memory", salvation: false },
-  { hani: "I was just cleaning up and it came up. We looked so — I don't know. Less complicated.", subtext: "(He almost said 'happy'. He stopped himself. He doesn't know why.)", conflict: "Invalidating nostalgia", salvation: false },
+  { hani: "I was just cleaning up and it came up. We looked so - I don't know. Less complicated.", subtext: "(He almost said 'happy'. He stopped himself. He doesn't know why.)", conflict: "Invalidating nostalgia", salvation: false },
   { hani: "I called you three times last week. You picked up once, said you'd call back in five minutes. That was three weeks ago.", subtext: "(He counted. He wasn't going to say that. He just did.)", conflict: "Being called out on absence", salvation: true },
-  { hani: "It's not about the calls. I don't need you to call me every day. I just — when I actually reach out, I want it to mean something.", subtext: "(He's been rehearsing this. Not the words — the courage to say them.)", conflict: "Minimizing his need", salvation: true },
-  { hani: "Do you remember what you said the last time we actually talked — properly talked? You said things were going to be different.", subtext: "(He believed it when she said it. That's the part that hurts.)", conflict: "Broken promise unaddressed", salvation: false },
-  { hani: "I'm not trying to make you feel bad. I just think I've been pretending everything is fine for a while now. And it's — tiring.", subtext: "(He's been waiting to say this. Not to punish her. Just to stop carrying it alone.)", conflict: "Deflecting his honesty", salvation: true },
+  { hani: "It's not about the calls. I don't need you to call me every day. I just - when I actually reach out, I want it to mean something.", subtext: "(He's been rehearsing this. Not the words - the courage to say them.)", conflict: "Minimizing his need", salvation: true },
+  { hani: "Do you remember what you said the last time we actually talked - properly talked? You said things were going to be different.", subtext: "(He believed it when she said it. That's the part that hurts.)", conflict: "Broken promise unaddressed", salvation: false },
+  { hani: "I'm not trying to make you feel bad. I just think I've been pretending everything is fine for a while now. And it's - tiring.", subtext: "(He's been waiting to say this. Not to punish her. Just to stop carrying it alone.)", conflict: "Deflecting his honesty", salvation: true },
   { hani: "I think I've been lonely. Not in general. Specifically when I'm talking to you.", subtext: "(He said it. He didn't plan to say it today. He can't take it back.)", conflict: "Contradicting his experience", salvation: true },
   { hani: "I used to tell you things I didn't tell anyone else. I stopped. I'm not sure exactly when.", subtext: "(He knows exactly when. He's protecting her from knowing.)", conflict: "Dismissing trust erosion", salvation: false },
-  { hani: "There was a night — I don't remember the exact date — where I was genuinely not okay. And I opened your chat and just closed it again.", subtext: "(That night was six months ago. He remembers the exact date.)", conflict: "Blaming him for his own silence", salvation: true },
-  { hani: "Because I'd done it before. Reached out. And you were — you were there, but not there. Physically responding, emotionally somewhere else.", subtext: "(He's never said this to anyone. He's terrified she's going to get defensive.)", conflict: "Defending unavailability", salvation: false },
+  { hani: "There was a night - I don't remember the exact date - where I was genuinely not okay. And I opened your chat and just closed it again.", subtext: "(That night was six months ago. He remembers the exact date.)", conflict: "Blaming him for his own silence", salvation: true },
+  { hani: "Because I'd done it before. Reached out. And you were - you were there, but not there. Physically responding, emotionally somewhere else.", subtext: "(He's never said this to anyone. He's terrified she's going to get defensive.)", conflict: "Defending unavailability", salvation: false },
   { hani: "I'm not asking for 24/7. I'm asking for the one time I actually needed you. Just that one time.", subtext: "(He's shaking slightly. He's kept this in for a very long time.)", conflict: "Minimizing a specific wound", salvation: true },
-  { hani: "The thing is — I still wanted to talk to you. After everything. That's what I can't explain.", subtext: "(He's trying to say: I still chose you. He doesn't know if that's strength or stupidity.)", conflict: "Missing the weight of his loyalty", salvation: false },
+  { hani: "The thing is - I still wanted to talk to you. After everything. That's what I can't explain.", subtext: "(He's trying to say: I still chose you. He doesn't know if that's strength or stupidity.)", conflict: "Missing the weight of his loyalty", salvation: false },
   { hani: "I just need to know if this is still something you're invested in. Because I can't keep guessing.", subtext: "(He's asked himself this question fifty times. He's finally asking her.)", conflict: "Demanding proof without giving it", salvation: true },
   { hani: "Because I stopped assuming. That's what happens when things shift and no one acknowledges it.", subtext: "(He's watched too many people leave without ever saying they were leaving.)", conflict: "Excusing drift as inevitable", salvation: false },
-  { hani: "I just — I wish you'd told me you were drifting instead of making me feel like I was imagining it.", subtext: "(He felt crazy for a while. He's only recently understood he wasn't.)", conflict: "Gaslighting response", salvation: true },
+  { hani: "I just - I wish you'd told me you were drifting instead of making me feel like I was imagining it.", subtext: "(He felt crazy for a while. He's only recently understood he wasn't.)", conflict: "Gaslighting response", salvation: true },
   { hani: "What would it take. Actually. For this to be what it used to be.", subtext: "(He doesn't think it's possible. He's asking anyway. For closure if nothing else.)", conflict: "Closing the door on repair", salvation: true },
-  { hani: "I'm not sure I believe that anymore. Not because of you — because of how many times I've believed it.", subtext: "(He's not angry. He's tired. That's worse.)", conflict: "Confirming hopelessness", salvation: false },
+  { hani: "I'm not sure I believe that anymore. Not because of you - because of how many times I've believed it.", subtext: "(He's not angry. He's tired. That's worse.)", conflict: "Confirming hopelessness", salvation: false },
   { hani: "Maybe some friendships just have a natural end. Maybe this is it.", subtext: "(He doesn't believe this. He's testing if she does.)", conflict: "Accepting dissolution", salvation: true },
   { hani: "You know what I keep thinking about? That moment on the roof. Before all of this. We didn't need to say anything.", subtext: "(He's grieving something that is still technically alive.)", conflict: "Erasing the memory", salvation: false },
-  { hani: "I'm going to be honest. If we stop talking now — I don't think I'd reach out again. I've done the reaching.", subtext: "(He means it. He's not saying it to hurt her. He's saying it so she understands the weight.)", conflict: "Conceding the loss", salvation: true },
+  { hani: "I'm going to be honest. If we stop talking now - I don't think I'd reach out again. I've done the reaching.", subtext: "(He means it. He's not saying it to hurt her. He's saying it so she understands the weight.)", conflict: "Conceding the loss", salvation: true },
   { hani: "I want to believe you. I genuinely do. I just don't know how much of that is hope and how much is habit.", subtext: "(He's distinguishing between them for the first time. It scares him.)", conflict: "Dismissing his doubt", salvation: false },
-  { hani: "Okay. I'll try. But I need you to understand — I'm not the same person I was when we started. Some of that is gone.", subtext: "(He's giving her one last opening. He doesn't know if she'll walk through it.)", conflict: "Acknowledging change without engaging", salvation: true },
-  { hani: "Then — okay. Let's try. But slowly. I can't do another fall.", subtext: "(He means: I can't survive losing this twice.)", conflict: "Final rejection", salvation: true }
+  { hani: "Okay. I'll try. But I need you to understand - I'm not the same person I was when we started. Some of that is gone.", subtext: "(He's giving her one last opening. He doesn't know if she'll walk through it.)", conflict: "Acknowledging change without engaging", salvation: true },
+  { hani: "Then - okay. Let's try. But slowly. I can't do another fall.", subtext: "(He means: I can't survive losing this twice.)", conflict: "Final rejection", salvation: true }
 ];
 
 // ─── Move types ─────────────────────────────────────────────────────────────
@@ -510,7 +510,7 @@ class HaniChessEngine {
       {w:"Rg1",b:"cxb5",wp:"Rook",br:"pawn recapture"},
       {w:"h4",b:"Qg6",wp:"Pawn",br:"queen sidesteps"},
       {w:"h5",b:"Qg5",wp:"Pawn",br:"queen holds position"},
-      {w:"Qf3",b:"Ng8",wp:"Queen",br:"knight retreats — lost tempo"},
+      {w:"Qf3",b:"Ng8",wp:"Queen",br:"knight retreats - lost tempo"},
       {w:"Bxf4",b:"Qf6",wp:"Bishop",br:"queen activates"},
       {w:"Nc3",b:"Bc5",wp:"Knight",br:"bishop joins attack"},
       {w:"Nd5",b:"Qxb2",wp:"Knight",br:"queen raids queenside"},
@@ -519,7 +519,7 @@ class HaniChessEngine {
       {w:"Ke2",b:"Na6",wp:"King",br:"knight enters the board"},
       {w:"Nxg7+",b:"Kd8",wp:"Knight",br:"king forced to flee"},
       {w:"Qf6+",b:"Nxf6",wp:"Queen",br:"knight interposes"},
-      {w:"Be7#",b:"",wp:"Bishop",br:"CHECKMATE — bishop delivers finality"}
+      {w:"Be7#",b:"",wp:"Bishop",br:"CHECKMATE - bishop delivers finality"}
     ];
     this.moveIndex = 0;
     this.positionEval = 0;
@@ -699,7 +699,7 @@ class LostCardSim {
         this.lostMemories.push(this.dag.labels[4]);
         result.cardDrops.push({
           card:'PRESENCE', color:'#98C379', move:this.move+1,
-          reason: d1 ? "Three silences. You were physically there — psychologically gone."
+          reason: d1 ? "Three silences. You were physically there - psychologically gone."
                      : "Three consecutive moves under extreme neurological load. Presence confirmed absent."
         });
       }
@@ -742,12 +742,12 @@ class LostCardSim {
 
   getTerminalLabel(tc) {
     switch(tc) {
-      case TC_SALVATION:     return 'HAND FULL — ALL CARDS INTACT';
-      case TC_CHECKMATE:     return 'CHECKMATE — THE GAME IS OVER';
-      case TC_AMYGDALA:      return 'AMYGDALA OVERRIDE — RATIONAL MIND OFFLINE';
-      case TC_STACK_OVERFLOW:return 'CORTISOL BUFFER FULL — STACK OVERFLOW';
+      case TC_SALVATION:     return 'HAND FULL - ALL CARDS INTACT';
+      case TC_CHECKMATE:     return 'CHECKMATE - THE GAME IS OVER';
+      case TC_AMYGDALA:      return 'AMYGDALA OVERRIDE - RATIONAL MIND OFFLINE';
+      case TC_STACK_OVERFLOW:return 'CORTISOL BUFFER FULL - STACK OVERFLOW';
       case TC_TRUST_FLOOR:   return 'TRUST FLOOR REACHED';
-      case TC_ALL_CARDS_LOST:return 'HAND EMPTY — ALL CARDS LOST';
+      case TC_ALL_CARDS_LOST:return 'HAND EMPTY - ALL CARDS LOST';
       case TC_MAX_MOVES:     return '23 MOVES COMPLETE';
       default: return '';
     }

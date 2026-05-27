@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════
-   LOST CARD — style.css
+   LOST CARD - style.css
    Dark GitHub/terminal theme
 ═══════════════════════════════════════════════════════════════ */
 
@@ -82,7 +82,7 @@
   background: linear-gradient(145deg, rgba(220,245,220,0.95), rgba(190,235,190,0.8));
   box-shadow: 0 6px 20px rgba(26,127,55,0.2);
 }
-/* (hero-orbit removed — replaced by hero-fly-wrap animation) */
+/* (hero-orbit removed - replaced by hero-fly-wrap animation) */
 [data-theme="light"] body {
   background-image:
     radial-gradient(ellipse 80% 40% at 50% -10%, rgba(9,105,218,0.04) 0%, transparent 70%),
@@ -268,7 +268,7 @@ body {
 }
 
 /* ══════════════════════════════════════════════════════════
-   LANDING — HERO
+   LANDING - HERO
 ══════════════════════════════════════════════════════════ */
 /* ══════════════════════════════════════════════════════════
    GLOBAL KEYFRAMES
@@ -329,7 +329,7 @@ body {
 }
 
 /* ── SMOOTH SECTION TRANSITIONS ─────────────────────────────────────
-   Subtle opacity + tiny drift — never more than 16px movement.
+   Subtle opacity + tiny drift - never more than 16px movement.
    Full-viewport slides look jarring; this is the iOS/Material approach.
 ──────────────────────────────────────────────────────────────────── */
 .section.active { animation: none; }   /* no default flash */
@@ -351,7 +351,7 @@ body {
   to   { opacity: 1; transform: none; }
 }
 
-/* 240ms, ease-out — clean and fast, never jarring */
+/* 240ms, ease-out - clean and fast, never jarring */
 .section.sec-enter-left   { animation: secInLeft  0.24s ease-out both; }
 .section.sec-enter-right  { animation: secInRight 0.24s ease-out both; }
 .section.sec-enter-behind { animation: secInScale 0.26s ease-out both; }
@@ -794,7 +794,7 @@ body {
   opacity: 0.8;
 }
 
-/* Feature cards — pure CSS animation, no JS required */
+/* Feature cards - pure CSS animation, no JS required */
 /* Cards always visible; JS pending class is now a no-op */
 .feature-card.scroll-anim-pending {
   opacity: 1;
@@ -2158,7 +2158,7 @@ select.form-input option { background: var(--bg3); }
 }
 
 /* ══════════════════════════════════════════════════════════
-   REPORT MODAL — tabbed overlay
+   REPORT MODAL - tabbed overlay
 ══════════════════════════════════════════════════════════ */
 .report-modal-box {
   max-width: 720px !important;
@@ -2230,7 +2230,7 @@ select.form-input option { background: var(--bg3); }
 .fs-report-btn:hover { border-color: var(--blue); color: var(--blue); }
 
 /* ══════════════════════════════════════════════════════════
-   HISTORY DETAIL MODAL — stats grid
+   HISTORY DETAIL MODAL - stats grid
 ══════════════════════════════════════════════════════════ */
 .hd-stats-grid {
   display: grid;
@@ -2267,7 +2267,7 @@ select.form-input option { background: var(--bg3); }
 }
 
 /* ══════════════════════════════════════════════════════════
-   ABOUT SECTION — AUTHOR CARD
+   ABOUT SECTION - AUTHOR CARD
 ══════════════════════════════════════════════════════════ */
 .author-card {
   display: flex;
@@ -2533,7 +2533,7 @@ select.form-input option { background: var(--bg3); }
 .font-mono    { font-family: 'Consolas', monospace; }
 
 /* ══════════════════════════════════════════════════════════
-   ABOUT — EXTENDED SECTIONS
+   ABOUT - EXTENDED SECTIONS
 ══════════════════════════════════════════════════════════ */
 
 /* Simple explanation box */
@@ -2670,7 +2670,7 @@ select.form-input option { background: var(--bg3); }
   z-index: 5;
 }
 
-/* Individual fly-cards — sized & positioned to exactly match SVG cards */
+/* Individual fly-cards - sized & positioned to exactly match SVG cards */
 /* SVG viewBox 340×340 → rendered 280px: scale = 280/340 = 0.8235 */
 .hf-card {
   position: absolute;
@@ -2723,7 +2723,7 @@ select.form-input option { background: var(--bg3); }
   filter: drop-shadow(0 0 3px rgba(88,166,255,0.5));
 }
 
-/* Landing flash — card pulses bright when it arrives */
+/* Landing flash - card pulses bright when it arrives */
 @keyframes hfLandFlash {
   0%   { filter: brightness(2.2) saturate(2); box-shadow: 0 0 28px currentColor; }
   60%  { filter: brightness(1.4) saturate(1.5); }
@@ -2789,7 +2789,7 @@ select.form-input option { background: var(--bg3); }
 .obj-card.scroll-anim-pending {
   opacity: 0;
   transform: translateY(22px);
-  transition: none !important;  /* instant hide — no flash */
+  transition: none !important;  /* instant hide - no flash */
 }
 
 .stat-card.animate-in,
@@ -2803,7 +2803,7 @@ select.form-input option { background: var(--bg3); }
 }
 
 /* ══════════════════════════════════════════════════════════
-   THEME TRANSITION — RIPPLE EFFECT
+   THEME TRANSITION - RIPPLE EFFECT
 ══════════════════════════════════════════════════════════ */
 .theme-ripple {
   position: fixed;
@@ -3332,7 +3332,7 @@ html.theme-anim *::after {
 }
 
 /* ══════════════════════════════════════════════════════════
-   NEW FEATURES — v2.0
+   NEW FEATURES - v2.0
 ══════════════════════════════════════════════════════════ */
 
 /* ── Threshold Alert ── */

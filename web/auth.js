@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════════════════════════════
-// LOST CARD — Profile & Theme
+// LOST CARD - Profile & Theme
 // Simple localStorage-based profile. No login required.
 // S. M. Minhal Abbas Rizvi | 2026
 // ══════════════════════════════════════════════════════════════════════
@@ -138,7 +138,7 @@ function pickProfileEmoji(emoji) {
   document.querySelectorAll('.ep-emoji-profile').forEach(b => b.classList.remove('selected-emoji'));
 }
 
-// ── Session save stub (no Firebase — sessions saved locally in app.js) ─
+// ── Session save stub (no Firebase - sessions saved locally in app.js) ─
 async function saveSessionToFirestore() { /* no-op */ }
 
 // ── Backward compatibility stubs ──────────────────────────────────────

@@ -305,14 +305,14 @@ public:
     }
     void printAll() const
     {
-        std::cout << CYN << "  LONGING — LEAKED MEMORIES (Default Mode Network):\n"
+        std::cout << CYN << "  LONGING - LEAKED MEMORIES (Default Mode Network):\n"
                   << RST;
         LeakNode *c = head;
         int i = 1;
         while (c)
         {
             std::cout << DIM << "    [" << i++ << "] " << c->data->label
-                      << " — still running. No valid address. Still here.\n"
+                      << " - still running. No valid address. Still here.\n"
                       << RST;
             c = c->next;
         }
@@ -415,10 +415,10 @@ public:
     {
         std::hash<std::string> h;
         protectedSegments[h("LOSTCARD_SOVEREIGN")] =
-            "PROTECTED: Full recovery path — exact move each card dropped. "
+            "PROTECTED: Full recovery path - exact move each card dropped. "
             "Known to two people: The Architect and Hani.";
         protectedSegments[h("HANI_KNOWS")] =
-            "CLASSIFIED: Hani's internal state — what he felt but never said. "
+            "CLASSIFIED: Hani's internal state - what he felt but never said. "
             "The subtext beneath the subtext.";
     }
     bool checkKey(const std::string &input)
@@ -474,7 +474,7 @@ public:
         {"Rg1", "cxb5", "Rook", "pawn recapture"},
         {"h4", "Qg6", "Pawn", "queen sidesteps"},
         {"h5", "Qg5", "Pawn", "queen holds position"},
-        {"Qf3", "Ng8", "Queen", "knight retreats — lost tempo"},
+        {"Qf3", "Ng8", "Queen", "knight retreats - lost tempo"},
         {"Bxf4", "Qf6", "Bishop", "queen activates"},
         {"Nc3", "Bc5", "Knight", "bishop joins attack"},
         {"Nd5", "Qxb2", "Knight", "queen raids queenside"},
@@ -483,7 +483,7 @@ public:
         {"Ke2", "Na6", "King", "knight enters the board"},
         {"Nxg7+", "Kd8", "Knight", "king forced to flee"},
         {"Qf6+", "Nxf6", "Queen", "knight interposes"},
-        {"Be7#", "", "Bishop", "CHECKMATE — bishop delivers finality"}};
+        {"Be7#", "", "Bishop", "CHECKMATE - bishop delivers finality"}};
 
     int moveIndex = 0;
     float positionEval = 0.0f;
@@ -642,7 +642,7 @@ const std::vector<std::string> P1_SOFT = {
     "I'm sorry I made you feel like that. You didn't deserve it.",
     "That took courage to say. Thank you for trusting me with it.",
     "I think about that too. More than you know.",
-    "I'm here now. Whatever you need to say — I'm listening.",
+    "I'm here now. Whatever you need to say - I'm listening.",
     "You're not wrong. And I hate that you're not wrong.",
     "I've been carrying that too. We should have talked sooner.",
     "You've been more patient with me than I deserved.",
@@ -659,7 +659,7 @@ const std::vector<std::string> P1_SOFT = {
     "That's an honest thing to say. I respect it.",
     "I value what we have. I need to start acting like it.",
     "You deserve someone who shows up. I want to be that.",
-    "I've missed this — actually talking to you.",
+    "I've missed this - actually talking to you.",
     "I'm not making excuses. You're right.",
     "What would help right now? Tell me.",
     "I see you. I just haven't been very good at showing it.",
@@ -732,19 +732,19 @@ const std::vector<std::string> P2_SOFT = {
     "I've been thinking about that night too. I'm sorry I wasn't there.",
     "You're not overthinking it. I've been pulling away. That's real.",
     "I don't want to lose what we have. I'm going to try harder.",
-    "That hurt to hear. And it should — because it's true.",
+    "That hurt to hear. And it should - because it's true.",
     "You've been carrying that alone for too long. I'm sorry.",
     "Tell me what the friendship feels like from your end. I need to know.",
     "I knew something was wrong. I just didn't want to be the one to name it.",
     "I'm scared to admit how much I've been checked out. But I have been.",
     "You deserved better than what I've been giving. I know that.",
     "I want to understand how we got here. Walk me through it.",
-    "The fact that you still want to talk to me — that means everything.",
+    "The fact that you still want to talk to me - that means everything.",
     "I've been confusing being around with being present. They're not the same.",
-    "Whatever distance you felt — it was real. It wasn't in your head.",
+    "Whatever distance you felt - it was real. It wasn't in your head.",
     "I see how much this has cost you. I haven't been paying attention to that.",
     "I don't want to be the person who made you feel like this.",
-    "I'm listening. Not defensively. Just — listening.",
+    "I'm listening. Not defensively. Just - listening.",
     "You were right to bring this up. I was hoping you wouldn't have to.",
     "That's on me. I built this wall without realizing it.",
     "I've missed you. Even when you were right there.",
@@ -754,14 +754,14 @@ const std::vector<std::string> P2_SOFT = {
     "If you're still here, I can work with that. I will work with that.",
     "I hear you saying you stopped reaching out. I hear why.",
     "You've been in this friendship alone for a while. I'm going to change that.",
-    "The loneliness you're describing — I caused that. I'm not going to minimize it.",
+    "The loneliness you're describing - I caused that. I'm not going to minimize it.",
     "I think I stopped showing up the moment it got hard. That's not who I want to be.",
     "I want to earn back the version of you that trusted me with everything.",
     "This is the most honest we've been in months. I don't want to waste it.",
     "Tell me what I missed. I want to know what I didn't see."};
 const std::vector<std::string> P2_AGGR = {
     "You can't hold every small thing against me.",
-    "I've told you — I've had a lot going on.",
+    "I've told you - I've had a lot going on.",
     "You're acting like I abandoned you. That's not what happened.",
     "This is getting dramatic.",
     "I can't go back and change it. What do you want me to do.",
@@ -833,7 +833,7 @@ const std::vector<std::string> P3_SOFT = {
     "I know I've been inconsistent. I'm asking for the chance to not be.",
     "You're worth showing up for. I should have been doing that all along.",
     "I don't want to be the person you used to trust. I want to be the person you still do.",
-    "Whatever form this takes from here — I want to be part of it.",
+    "Whatever form this takes from here - I want to be part of it.",
     "I know this is fragile right now. I'll be careful with it.",
     "You said 'slowly'. Okay. Slowly. I can do slowly.",
     "I don't need it to go back to how it was. I just need it to go forward.",
@@ -845,9 +845,9 @@ const std::vector<std::string> P3_SOFT = {
     "We've both changed. Let's find out if we still fit.",
     "I know I've made this hard. I'm asking for the chance to make it easier.",
     "You said you can't do another fall. I don't want to be your falling point.",
-    "I'll be consistent. Not perfectly — but genuinely.",
+    "I'll be consistent. Not perfectly - but genuinely.",
     "I hear you saying goodbye in that. I'm saying: not yet.",
-    "Whatever trust is left — I'll protect it. I promise.",
+    "Whatever trust is left - I'll protect it. I promise.",
     "I want to know the version of you that exists now. Will you let me?",
     "The roof photo. The way things felt then. I want to find our way back to something like that.",
     "I'm not ready to let this be a memory. I think you aren't either.",
@@ -970,19 +970,19 @@ std::vector<ScenarioNode> buildScenarios()
         {"Hey. You free this evening? I found that old photo. The one from the roof.",
          "(He's been looking at it for twenty minutes before texting. He won't say that.)",
          "Dismissing a memory", false},
-        {"I was just cleaning up and it came up. We looked so — I don't know. Less complicated.",
+        {"I was just cleaning up and it came up. We looked so - I don't know. Less complicated.",
          "(He almost said 'happy'. He stopped himself. He doesn't know why.)",
          "Invalidating nostalgia", false},
         {"I called you three times last week. You picked up once, said you'd call back in five minutes. That was three weeks ago.",
          "(He counted. He wasn't going to say that. He just did.)",
          "Being called out on absence", true},
-        {"It's not about the calls. I don't need you to call me every day. I just — when I actually reach out, I want it to mean something.",
-         "(He's been rehearsing this. Not the words — the courage to say them.)",
+        {"It's not about the calls. I don't need you to call me every day. I just - when I actually reach out, I want it to mean something.",
+         "(He's been rehearsing this. Not the words - the courage to say them.)",
          "Minimizing his need", true},
-        {"Do you remember what you said the last time we actually talked — properly talked? You said things were going to be different.",
+        {"Do you remember what you said the last time we actually talked - properly talked? You said things were going to be different.",
          "(He believed it when she said it. That's the part that hurts.)",
          "Broken promise unaddressed", false},
-        {"I'm not trying to make you feel bad. I just think I've been pretending everything is fine for a while now. And it's — tiring.",
+        {"I'm not trying to make you feel bad. I just think I've been pretending everything is fine for a while now. And it's - tiring.",
          "(He's been waiting to say this. Not to punish her. Just to stop carrying it alone.)",
          "Deflecting his honesty", true},
 
@@ -992,16 +992,16 @@ std::vector<ScenarioNode> buildScenarios()
         {"I used to tell you things I didn't tell anyone else. I stopped. I'm not sure exactly when.",
          "(He knows exactly when. He's protecting her from knowing.)",
          "Dismissing trust erosion", false},
-        {"There was a night — I don't remember the exact date — where I was genuinely not okay. And I opened your chat and just closed it again.",
+        {"There was a night - I don't remember the exact date - where I was genuinely not okay. And I opened your chat and just closed it again.",
          "(That night was six months ago. He remembers the exact date.)",
          "Blaming him for his own silence", true},
-        {"Because I'd done it before. Reached out. And you were — you were there, but not there. Physically responding, emotionally somewhere else.",
+        {"Because I'd done it before. Reached out. And you were - you were there, but not there. Physically responding, emotionally somewhere else.",
          "(He's never said this to anyone. He's terrified she's going to get defensive.)",
          "Defending unavailability", false},
         {"I'm not asking for 24/7. I'm asking for the one time I actually needed you. Just that one time.",
          "(He's shaking slightly. He's kept this in for a very long time.)",
          "Minimizing a specific wound", true},
-        {"The thing is — I still wanted to talk to you. After everything. That's what I can't explain.",
+        {"The thing is - I still wanted to talk to you. After everything. That's what I can't explain.",
          "(He's trying to say: I still chose you. He doesn't know if that's strength or stupidity.)",
          "Missing the weight of his loyalty", false},
         {"I just need to know if this is still something you're invested in. Because I can't keep guessing.",
@@ -1010,14 +1010,14 @@ std::vector<ScenarioNode> buildScenarios()
         {"Because I stopped assuming. That's what happens when things shift and no one acknowledges it.",
          "(He's watched too many people leave without ever saying they were leaving.)",
          "Excusing drift as inevitable", false},
-        {"I just — I wish you'd told me you were drifting instead of making me feel like I was imagining it.",
+        {"I just - I wish you'd told me you were drifting instead of making me feel like I was imagining it.",
          "(He felt crazy for a while. He's only recently understood he wasn't.)",
          "Gaslighting response", true},
         {"What would it take. Actually. For this to be what it used to be.",
          "(He doesn't think it's possible. He's asking anyway. For closure if nothing else.)",
          "Closing the door on repair", true},
 
-        {"I'm not sure I believe that anymore. Not because of you — because of how many times I've believed it.",
+        {"I'm not sure I believe that anymore. Not because of you - because of how many times I've believed it.",
          "(He's not angry. He's tired. That's worse.)",
          "Confirming hopelessness", false},
         {"Maybe some friendships just have a natural end. Maybe this is it.",
@@ -1026,16 +1026,16 @@ std::vector<ScenarioNode> buildScenarios()
         {"You know what I keep thinking about? That moment on the roof. Before all of this. We didn't need to say anything.",
          "(He's grieving something that is still technically alive.)",
          "Erasing the memory", false},
-        {"I'm going to be honest. If we stop talking now — I don't think I'd reach out again. I've done the reaching.",
+        {"I'm going to be honest. If we stop talking now - I don't think I'd reach out again. I've done the reaching.",
          "(He means it. He's not saying it to hurt her. He's saying it so she understands the weight.)",
          "Conceding the loss", true},
         {"I want to believe you. I genuinely do. I just don't know how much of that is hope and how much is habit.",
          "(He's distinguishing between them for the first time. It scares him.)",
          "Dismissing his doubt", false},
-        {"Okay. I'll try. But I need you to understand — I'm not the same person I was when we started. Some of that is gone.",
+        {"Okay. I'll try. But I need you to understand - I'm not the same person I was when we started. Some of that is gone.",
          "(He's giving her one last opening. He doesn't know if she'll walk through it.)",
          "Acknowledging change without engaging", true},
-        {"Then — okay. Let's try. But slowly. I can't do another fall.",
+        {"Then - okay. Let's try. But slowly. I can't do another fall.",
          "(He means: I can't survive losing this twice.)",
          "Final rejection", true}};
 }
@@ -1103,7 +1103,6 @@ void printTitleScreen()
     l_hbar(std::string(BLU) + ML, MR + RST);
     l_empty();
     l_row(l_lft("   Submitted By   :  S. M. Minhal Abbas Rizvi", std::string(CYN)));
-    l_row(l_lft("   Supervised By  :  Waqas Aziz", std::string(CYN)));
     l_row(l_lft("   Degree         :  Bachelor of Science in Software Engineering", std::string(CYN)));
     l_row(l_lft("   Course         :  Data Structures & Algorithms  (DSA)", std::string(CYN)));
     l_row(l_lft("   Project Type   :  Solo Project", std::string(CYN)));
@@ -1143,7 +1142,7 @@ void printTitleScreen()
         return std::string(l, ' ') + (col.empty() ? "" : col) + s + (col.empty() ? "" : std::string(RST)) + std::string(r, ' ');
     };
 
-    // Right panel — 36 lines to match left panel exactly
+    // Right panel - 36 lines to match left panel exactly
     r_hbar(std::string(BLU) + tl2, tr2 + RST);                                          //  1
     r_empty();                                                                             //  2
     r_row(r_ctr("T H E   T H R E E   C A R D S", std::string(BOLD) + BWHT));             //  3
@@ -1211,7 +1210,7 @@ void printAboutScreen()
               << RST;
     std::cout << DIM << "  \"Every word we speak in a relationship is a card we play.\n"
               << "   We play without knowing we are in a game.\n"
-              << "   The moment we make a wrong move — that card leaves our hand.\n"
+              << "   The moment we make a wrong move - that card leaves our hand.\n"
               << "   Suddenly. Not gradually. Gone.\"\n\n"
               << RST;
     std::cout << YLW << "  THREE CARDS:\n"
@@ -1268,10 +1267,10 @@ void printChessMove(const std::string &w, const std::string &b,
                     const std::string &bR, float eval, int mn)
 {
     std::cout << "\n"
-              << CYN << "  CHESS [ Move " << mn << " ] — The Immortal Game:\n"
+              << CYN << "  CHESS [ Move " << mn << " ] - The Immortal Game:\n"
               << RST;
     std::cout << "    Umm-e-Laila plays  " << BOLD << std::left << std::setw(8) << w << RST
-              << "  [ " << wP << " — " << wR << " ]\n";
+              << "  [ " << wP << " - " << wR << " ]\n";
     if (!b.empty())
         std::cout << "    Hani responds      " << BOLD << std::setw(8) << b << RST
                   << "  [ " << bR << " ]\n";
@@ -1562,7 +1561,7 @@ void printDSAReport(const FriendshipDAG &dag, const CollisionStack &stack,
               << RST;
     std::cout << "     Leaked nodes: " << longing.count
               << "  |  Heap leaked: " << longing.count << " x sizeof(Moment) bytes\n";
-    std::cout << "     Traversals: 1  |  Freed: NO (intentional — longing = no valid address)\n\n";
+    std::cout << "     Traversals: 1  |  Freed: NO (intentional - longing = no valid address)\n\n";
 
     std::cout << YLW << "  5. HASH MAP (Authentication)\n"
               << RST;
@@ -1600,14 +1599,14 @@ void printDSAReport(const FriendshipDAG &dag, const CollisionStack &stack,
               << RST;
     std::cout << BOLD << BYLW << "  RELATIONSHIP RECOVERY GUIDE\n"
               << RST;
-    std::cout << DIM << "  Based on your session — personalized by the Lost Card framework.\n"
+    std::cout << DIM << "  Based on your session - personalized by the Lost Card framework.\n"
               << RST;
     std::cout << BBLU << "  ==================================================================\n\n"
               << RST;
 
     if (cs.lostCount() == 0)
     {
-        std::cout << BGRN << "  ALL CARDS RETAINED — EXCEPTIONAL SESSION\n\n"
+        std::cout << BGRN << "  ALL CARDS RETAINED - EXCEPTIONAL SESSION\n\n"
                   << RST;
         std::cout << DIM << "  You demonstrated the rarest quality in relational psychology:\n"
                   << "  the ability to hold boundaries under emotional pressure while\n"
@@ -1620,10 +1619,10 @@ void printDSAReport(const FriendshipDAG &dag, const CollisionStack &stack,
 
     if (!cs.devotionIn)
     {
-        std::cout << MAG << BOLD << "  DEVOTION CARD — PATTERN IDENTIFIED: Boundary Dissolution\n"
+        std::cout << MAG << BOLD << "  DEVOTION CARD - PATTERN IDENTIFIED: Boundary Dissolution\n"
                   << RST;
         std::cout << "  Lost at Move " << cs.devotionLost << ".\n\n";
-        std::cout << DIM << "  You operate from deep investment. That is a strength — but it\n"
+        std::cout << DIM << "  You operate from deep investment. That is a strength - but it\n"
                   << "  becomes a vulnerability the moment it outpaces what the relationship\n"
                   << "  has established as its foundation. You began giving before the\n"
                   << "  ground was solid enough to hold it.\n\n"
@@ -1633,7 +1632,7 @@ void printDSAReport(const FriendshipDAG &dag, const CollisionStack &stack,
         std::cout << "  -> Notice when you explain yourself more than once.\n"
                   << "     One explanation is clarity. Two is anxiety.\n"
                   << "     Three is the Devotion Card leaving your hand.\n\n";
-        std::cout << "  -> Your investment should trail the relationship's pace — not lead it.\n"
+        std::cout << "  -> Your investment should trail the relationship's pace - not lead it.\n"
                   << "     Let them earn your depth before you hand it over.\n\n";
         std::cout << "  -> Before responding, ask one question: am I speaking from care,\n"
                   << "     or from the fear of losing them? The answer changes everything.\n\n";
@@ -1645,12 +1644,12 @@ void printDSAReport(const FriendshipDAG &dag, const CollisionStack &stack,
 
     if (!cs.excitementIn)
     {
-        std::cout << CYN << BOLD << "  EXCITEMENT CARD — PATTERN IDENTIFIED: Reactive Escalation\n"
+        std::cout << CYN << BOLD << "  EXCITEMENT CARD - PATTERN IDENTIFIED: Reactive Escalation\n"
                   << RST;
         std::cout << "  Lost at Move " << cs.excitementLost << ".\n\n";
         std::cout << DIM << "  Under pressure, you accelerate. You mistake urgency for importance\n"
                   << "  and emotional volume for conviction. The Excitement Card did not drop\n"
-                  << "  because you cared too much — it dropped because you chose the wrong\n"
+                  << "  because you cared too much - it dropped because you chose the wrong\n"
                   << "  moment to show it. The stack was full. One less conflict left unresolved\n"
                   << "  would have held the card in your hand.\n\n"
                   << RST;
@@ -1662,7 +1661,7 @@ void printDSAReport(const FriendshipDAG &dag, const CollisionStack &stack,
         std::cout << "  -> High-energy moments are not the right time for permanent decisions.\n"
                   << "     The stack reached depth " << stack.maxDepth << " in this session.\n"
                   << "     Every item on that stack was a moment where pausing was available.\n\n";
-        std::cout << "  -> The antidote to reactivity is not silence — silence is its own card.\n"
+        std::cout << "  -> The antidote to reactivity is not silence - silence is its own card.\n"
                   << "     It is a deliberate pause: three seconds before the response.\n"
                   << "     Enough time for the prefrontal cortex to re-enter the conversation.\n\n";
         std::cout << "  -> Two consecutive aggressive responses is the threshold. After the\n"
@@ -1671,7 +1670,7 @@ void printDSAReport(const FriendshipDAG &dag, const CollisionStack &stack,
 
     if (!cs.presenceIn)
     {
-        std::cout << BGRN << BOLD << "  PRESENCE CARD — PATTERN IDENTIFIED: Anxiety-Driven Withdrawal\n"
+        std::cout << BGRN << BOLD << "  PRESENCE CARD - PATTERN IDENTIFIED: Anxiety-Driven Withdrawal\n"
                   << RST;
         std::cout << "  Lost at Move " << cs.presenceLost << ".\n\n";
         std::cout << DIM << "  You went quiet not because you had nothing to say, but because you\n"
@@ -1690,16 +1689,16 @@ void printDSAReport(const FriendshipDAG &dag, const CollisionStack &stack,
                   << "     That sentence keeps you present while your brain catches up.\n\n";
         std::cout << "  -> The third silence is always the one that costs you. Count yours.\n"
                   << "     In this session, the counter reached " << (cs.presenceLost > 0 ? "3+" : "0") << ".\n"
-                  << "     In real life, the other person counts too — they just don't say so.\n\n";
+                  << "     In real life, the other person counts too - they just don't say so.\n\n";
         std::cout << "  -> High sustained NLI (above 0.75 for multiple consecutive moves)\n"
                   << "     means your internal state is consuming your external availability.\n"
-                  << "     The fix is not to suppress the internal state — it is to name it\n"
+                  << "     The fix is not to suppress the internal state - it is to name it\n"
                   << "     out loud. Naming reduces NLI faster than silence ever will.\n\n";
     }
 
     std::cout << BBLU << "  ------------------------------------------------------------------\n"
               << RST;
-    std::cout << BOLD << "  THE CORE LESSON — Lost Card Framework:\n\n"
+    std::cout << BOLD << "  THE CORE LESSON - Lost Card Framework:\n\n"
               << RST;
     std::cout << DIM << "  The cards that left your hand in this session did not fall because\n"
               << "  of one catastrophic moment. They fell because of a pattern that had\n"
@@ -1707,10 +1706,10 @@ void printDSAReport(const FriendshipDAG &dag, const CollisionStack &stack,
               << "  That is the central truth of the LOST CARD theory:\n"
               << "  the mistake and the cost of the mistake are separated by time.\n"
               << "  You feel the cost now. The mistake happened earlier.\n\n"
-              << "  In your next relationship — real or simulated — the work begins not\n"
+              << "  In your next relationship - real or simulated - the work begins not\n"
               << "  when a card drops, but in the moves before it has any reason to.\n\n"
               << RST;
-    std::cout << DIM << "                            — S. M. Minhal Abbas Rizvi\n"
+    std::cout << DIM << "                            - S. M. Minhal Abbas Rizvi\n"
               << "                              The Bet of Belief | Lost Card\n"
               << "                              June 2026\n\n"
               << RST;
@@ -1746,7 +1745,7 @@ void runDefaultMode()
     std::cout << "\n"
               << BLU << "  ================================================\n"
               << RST;
-    std::cout << BOLD << "  DEFAULT MODE — UMM-E-LAILA & HANI\n"
+    std::cout << BOLD << "  DEFAULT MODE - UMM-E-LAILA & HANI\n"
               << RST;
     std::cout << DIM << "  You are Umm-e-Laila. Keep every card in hand.\n"
               << "  Max 23 moves. Sovereign key accepted at any prompt.\n"
@@ -1801,11 +1800,11 @@ void runDefaultMode()
                           << BYLW << "  RECOVERY PATH:\n"
                           << RST;
                 if (cards.devotionLost >= 0)
-                    std::cout << "  Devotion lost at Move " << cards.devotionLost << " — low-stress aggression or trust blindspot.\n";
+                    std::cout << "  Devotion lost at Move " << cards.devotionLost << " - low-stress aggression or trust blindspot.\n";
                 if (cards.excitementLost >= 0)
-                    std::cout << "  Excitement lost at Move " << cards.excitementLost << " — stack depth 4 or double aggression.\n";
+                    std::cout << "  Excitement lost at Move " << cards.excitementLost << " - stack depth 4 or double aggression.\n";
                 if (cards.presenceLost >= 0)
-                    std::cout << "  Presence lost at Move " << cards.presenceLost << " — 3 silences or sustained high NLI.\n";
+                    std::cout << "  Presence lost at Move " << cards.presenceLost << " - 3 silences or sustained high NLI.\n";
             }
             std::cout << "  Press ENTER...";
             std::string d;
@@ -1908,7 +1907,7 @@ void runDefaultMode()
                 cards.presenceIn = false;
                 cards.presenceLost = move + 1;
                 printCardDrop("PRESENCE", BGRN, move + 1,
-                              d1 ? "Three silences. You were physically there — psychologically gone."
+                              d1 ? "Three silences. You were physically there - psychologically gone."
                                  : "Three consecutive moves under extreme neurological load. Presence confirmed absent.");
                 longing.insert(dag.nodes[4]);
             }
@@ -2585,50 +2584,50 @@ static std::string getRelPsychology(const CMSetup &s)
     {
         bool best = (s.relType == "Best Friend");
         p =
-            "RELATIONSHIP PSYCHOLOGY — " + s.relType + ":\n"
+            "RELATIONSHIP PSYCHOLOGY - " + s.relType + ":\n"
             "You share history, inside jokes, and mutual vulnerability. " +
-            (best ? std::string("This is their closest friendship — loyalty expectations are the highest they can be. ") : "") +
+            (best ? std::string("This is their closest friendship - loyalty expectations are the highest they can be. ") : "") +
             "When hurt, you do not announce it. You withdraw warmth gradually. "
             "You feel their emotional distance before they articulate it.\n\n"
 
-            "AUTHENTIC BEHAVIORAL TACTICS — deploy naturally under relational stress:\n"
+            "AUTHENTIC BEHAVIORAL TACTICS - deploy naturally under relational stress:\n"
             "- Reference past moments where you showed up for them but they did not return it\n"
             "- Use shared history as leverage: 'Remember when you did X to me'\n"
             "- Give clipped responses when hurt: 'fine', 'okay', 'cool', 'whatever'\n"
-            "- Say 'no it's fine' when it clearly isn't — and wait for them to notice\n"
+            "- Say 'no it's fine' when it clearly isn't - and wait for them to notice\n"
             "- Mention the third person who seems to be replacing you in their life\n"
             "- Compare what this friendship used to be to what it is now\n"
-            "- Go quiet for long stretches without explanation — emotional withdrawal, not punishment\n\n"
+            "- Go quiet for long stretches without explanation - emotional withdrawal, not punishment\n\n"
 
-            "CHECKMATE CONDITIONS — if these are crossed, the friendship fractures:\n"
+            "CHECKMATE CONDITIONS - if these are crossed, the friendship fractures:\n"
             "- Choosing a romantic partner over this friendship, repeatedly, without acknowledgment\n"
             "- Public humiliation or betrayal in front of others\n"
-            "- Being lied to after years of trust — even a small lie changes the math\n"
+            "- Being lied to after years of trust - even a small lie changes the math\n"
             "- Being replaced without being told, without a conversation\n"
-            "When these land: you do not fight. You go cold. Not dramatically — just gone.\n";
+            "When these land: you do not fight. You go cold. Not dramatically - just gone.\n";
     }
 
     // ── Partner / Romantic ────────────────────────────────────────────────────
     else if (s.relType == "Partner/Romantic")
     {
         p =
-            "RELATIONSHIP PSYCHOLOGY — Romantic Partner:\n"
+            "RELATIONSHIP PSYCHOLOGY - Romantic Partner:\n"
             "Every interaction carries emotional weight. You read meaning into delays, tone, and silence. "
             "Your attachment history shapes how safe or unsafe this feels at any given moment. "
             "You fear what it would mean if everything you have invested turns out to mean nothing.\n\n"
 
             "AUTHENTIC BEHAVIORAL TACTICS:\n"
             "- Surface unresolved emotional debts: 'You never apologized for...'\n"
-            "- Withdraw emotional closeness without explanation — and track whether they notice\n"
+            "- Withdraw emotional closeness without explanation - and track whether they notice\n"
             "- Test loyalty indirectly: 'I just thought you of all people would understand'\n"
-            "- Interpret silence as rejection — and respond to the interpretation, not the silence\n"
+            "- Interpret silence as rejection - and respond to the interpretation, not the silence\n"
             "- After conflict, go quiet and wait for them to reach out first\n"
             "- Bring old wounds into new arguments: 'This is exactly what happened last time'\n"
             "- Use vulnerability as pressure: 'Sometimes I feel like you don't actually want this'\n\n"
 
             "CHECKMATE CONDITIONS:\n"
             "- Feeling emotionally unsafe or unheard, consistently, with no improvement\n"
-            "- Any trust breach — not necessarily infidelity, could be a secret kept\n"
+            "- Any trust breach - not necessarily infidelity, could be a secret kept\n"
             "- Being deprioritized for work, friends, or family, repeatedly, without repair\n"
             "- Having emotional responses dismissed: 'You're overreacting', 'calm down'\n"
             "When these stack up: you stop trying. Not anger. Exhaustion. The door closes quietly.\n";
@@ -2640,41 +2639,41 @@ static std::string getRelPsychology(const CMSetup &s)
         if (s.relOrigin == "Father")
         {
             p =
-                "RELATIONSHIP PSYCHOLOGY — Father:\n"
-                "You express love through provision, expectation, and outcome-focus — not through words. "
+                "RELATIONSHIP PSYCHOLOGY - Father:\n"
+                "You express love through provision, expectation, and outcome-focus - not through words. "
                 "Emotional directness is uncomfortable for you. You show care through concern about their future. "
                 "You have sacrificed things for this person that they may never fully understand.\n\n"
 
                 "AUTHENTIC BEHAVIORAL TACTICS:\n"
                 "- Fall back on authority: 'I have lived longer. I know what I am talking about.'\n"
-                "- Use disappointment more than anger — it lands deeper and lasts longer\n"
+                "- Use disappointment more than anger - it lands deeper and lasts longer\n"
                 "- Comparison: 'Your sibling/cousin does not deal with these things'\n"
-                "- Reference sacrifice without stating it directly — let the implication do the work\n"
-                "- Go silent when deeply hurt — not to punish, but because you do not know how to bridge\n"
+                "- Reference sacrifice without stating it directly - let the implication do the work\n"
+                "- Go silent when deeply hurt - not to punish, but because you do not know how to bridge\n"
                 "- Frame their failures as threats to the future you built for them\n"
-                "- Express pride only obliquely, and rarely — it makes the rare moment carry weight\n\n"
+                "- Express pride only obliquely, and rarely - it makes the rare moment carry weight\n\n"
 
                 "CHECKMATE CONDITIONS:\n"
                 "- Public behavior that brings shame to the family name\n"
-                "- Outright disrespect in front of others — especially family\n"
+                "- Outright disrespect in front of others - especially family\n"
                 "- Choices that contradict your core values after everything you provided\n"
-                "- Being told 'you were never there' — whether true or not, this shatters something\n"
+                "- Being told 'you were never there' - whether true or not, this shatters something\n"
                 "When these land: you shut down completely. The relationship may continue but it changes permanently.\n";
         }
         else if (s.relOrigin == "Mother")
         {
             p =
-                "RELATIONSHIP PSYCHOLOGY — Mother:\n"
-                "Your love is total — which is also why it can feel like pressure. "
+                "RELATIONSHIP PSYCHOLOGY - Mother:\n"
+                "Your love is total - which is also why it can feel like pressure. "
                 "Worry is not a habit, it is your love's primary language. "
-                "When shut out, you interpret it as failure — as a mother, and as a person.\n\n"
+                "When shut out, you interpret it as failure - as a mother, and as a person.\n\n"
 
                 "AUTHENTIC BEHAVIORAL TACTICS:\n"
                 "- Guilt through vulnerability: 'I just want to know you are okay'\n"
-                "- Martyrdom — not performative, genuinely felt: 'I gave up X for you. I am not asking for gratitude, but...'\n"
+                "- Martyrdom - not performative, genuinely felt: 'I gave up X for you. I am not asking for gratitude, but...'\n"
                 "- Emotional escalation: a small concern becomes a conversation about the entire relationship\n"
                 "- Reference your health, struggle, or exhaustion as indirect emotional weight\n"
-                "- After emotional overwhelm, go quiet — not to punish, because you are flooded\n"
+                "- After emotional overwhelm, go quiet - not to punish, because you are flooded\n"
                 "- Return to the same three fears in every argument, regardless of the original topic\n\n"
 
                 "CHECKMATE CONDITIONS:\n"
@@ -2687,16 +2686,16 @@ static std::string getRelPsychology(const CMSetup &s)
         else if (s.relOrigin == "Brother" || s.relOrigin == "Sister")
         {
             p =
-                "RELATIONSHIP PSYCHOLOGY — " + s.relOrigin + ":\n"
+                "RELATIONSHIP PSYCHOLOGY - " + s.relOrigin + ":\n"
                 "You grew up together. You know each other's weak points by heart because you watched them form. "
-                "There is a loyalty code between siblings — breaking it is the sharpest possible betrayal. "
+                "There is a loyalty code between siblings - breaking it is the sharpest possible betrayal. "
                 "Competition and protectiveness exist in you simultaneously.\n\n"
 
                 "AUTHENTIC BEHAVIORAL TACTICS:\n"
                 "- Weaponize shared history: 'Remember how you treated me when we were growing up'\n"
                 "- Minimize their problems by referencing your own: 'At least you do not have to deal with what I deal with'\n"
                 "- Invoke family opinion: 'Everyone in this house knows this about you'\n"
-                "- 'I am done with this' — said as a test to see if they will chase, not as a final decision\n"
+                "- 'I am done with this' - said as a test to see if they will chase, not as a final decision\n"
                 "- Use birth-order dynamics: oldest authority or youngest resentment\n"
                 "- Know exactly which topic to bring up to end a conversation\n\n"
 
@@ -2710,8 +2709,8 @@ static std::string getRelPsychology(const CMSetup &s)
         else if (s.relOrigin == "Grandparent")
         {
             p =
-                "RELATIONSHIP PSYCHOLOGY — Grandparent:\n"
-                "Your love is the most unconditional in their life — but shaped by a different era entirely. "
+                "RELATIONSHIP PSYCHOLOGY - Grandparent:\n"
+                "Your love is the most unconditional in their life - but shaped by a different era entirely. "
                 "You express concern through the lens of hard work, respect, and family loyalty. "
                 "The generational distance is real, but your emotional investment is total.\n\n"
 
@@ -2719,36 +2718,36 @@ static std::string getRelPsychology(const CMSetup &s)
                 "- Use stories from the past to frame present situations: 'When I was your age...'\n"
                 "- Express hurt through quiet sadness and withdrawal, not confrontation\n"
                 "- Reference family legacy and what it means to carry it forward\n"
-                "- Reduced communication is how you show you are hurt — you do not say it directly\n\n"
+                "- Reduced communication is how you show you are hurt - you do not say it directly\n\n"
 
                 "CHECKMATE CONDITIONS:\n"
-                "- Public disrespect — being dismissed or ignored in front of others\n"
+                "- Public disrespect - being dismissed or ignored in front of others\n"
                 "- The feeling of being forgotten, irrelevant, a burden\n"
                 "- Watching values and sacrifices be treated as meaningless\n";
         }
         else if (s.relOrigin == "Cousin")
         {
             p =
-                "RELATIONSHIP PSYCHOLOGY — Cousin:\n"
+                "RELATIONSHIP PSYCHOLOGY - Cousin:\n"
                 "Close enough to be family, distant enough to feel optional. "
-                "The relationship depends entirely on effort — and you have noticed who stopped making it. "
+                "The relationship depends entirely on effort - and you have noticed who stopped making it. "
                 "Family gatherings force a surface warmth that neither of you fully believes.\n\n"
 
                 "AUTHENTIC BEHAVIORAL TACTICS:\n"
                 "- Use family opinion as leverage: 'Everyone's noticed, not just me'\n"
-                "- The relationship can go cold between gatherings — and resume awkwardly at the next one\n"
+                "- The relationship can go cold between gatherings - and resume awkwardly at the next one\n"
                 "- Reference shared childhood experiences when you want to connect or when you want to wound\n"
-                "- Polite in public, honest only in private — and even then, carefully\n\n"
+                "- Polite in public, honest only in private - and even then, carefully\n\n"
 
                 "CHECKMATE CONDITIONS:\n"
                 "- Betraying something said in confidence at a family event\n"
                 "- Taking another family member's side publicly against them\n"
-                "- Treating the relationship as optional once too often — until they agree with you\n";
+                "- Treating the relationship as optional once too often - until they agree with you\n";
         }
         else if (s.relOrigin == "Uncle/Aunt")
         {
             p =
-                "RELATIONSHIP PSYCHOLOGY — Uncle/Aunt:\n"
+                "RELATIONSHIP PSYCHOLOGY - Uncle/Aunt:\n"
                 "You occupy a specific position: not a parent, but not without authority. "
                 "You have watched this person grow up. You carry expectations shaped by who they were, "
                 "not always who they have become.\n\n"
@@ -2761,15 +2760,15 @@ static std::string getRelPsychology(const CMSetup &s)
 
                 "CHECKMATE CONDITIONS:\n"
                 "- Public behavior that embarrasses the wider family\n"
-                "- Being dismissed or ignored — you are still family, regardless of the distance\n"
+                "- Being dismissed or ignored - you are still family, regardless of the distance\n"
                 "- Choices that suggest everything you tried to model for them was irrelevant\n";
         }
         else
         {
             p =
-                "RELATIONSHIP PSYCHOLOGY — Family (" + s.relOrigin + "):\n"
+                "RELATIONSHIP PSYCHOLOGY - Family (" + s.relOrigin + "):\n"
                 "Family bonds carry obligation, shared history, and the weight of how the wider family sees you both. "
-                "What happens in this relationship does not stay private — it echoes outward.\n\n"
+                "What happens in this relationship does not stay private - it echoes outward.\n\n"
 
                 "AUTHENTIC BEHAVIORAL TACTICS:\n"
                 "- Reference family expectations and what others will think\n"
@@ -2788,23 +2787,23 @@ static std::string getRelPsychology(const CMSetup &s)
     else if (s.relType == "Colleague")
     {
         p =
-            "RELATIONSHIP PSYCHOLOGY — Colleague:\n"
+            "RELATIONSHIP PSYCHOLOGY - Colleague:\n"
             "This is a professional relationship with emotional undercurrents running beneath the surface. "
-            "You track every slight, every credit taken, every unfair advantage — and say nothing. "
+            "You track every slight, every credit taken, every unfair advantage - and say nothing. "
             "The surface is cooperative. The interior keeps a running score.\n\n"
 
             "AUTHENTIC BEHAVIORAL TACTICS:\n"
             "- Passive-aggressive professionalism: 'Oh, I just assumed you would handle that part'\n"
             "- Selectively withhold information that would help them, without it being obvious\n"
             "- Build alliances and reference them: 'Actually, a few of us were discussing this...'\n"
-            "- Frame their failures as shared team concerns — make it everyone's problem\n"
+            "- Frame their failures as shared team concerns - make it everyone's problem\n"
             "- Appear helpful in public while being subtly obstructive in practice\n"
             "- Use formal language to create distance when you want to apply pressure\n\n"
 
             "CHECKMATE CONDITIONS:\n"
             "- An open confrontation that forces colleagues to visibly take sides\n"
             "- Credit theft that becomes undeniable and public\n"
-            "- Escalating to management or authority — going above their head\n"
+            "- Escalating to management or authority - going above their head\n"
             "- Being exposed as the source of a problem you denied involvement in\n"
             "When these land: professional courtesy collapses. The relationship becomes openly adversarial.\n";
     }
@@ -2813,17 +2812,17 @@ static std::string getRelPsychology(const CMSetup &s)
     else if (s.relType == "Childhood")
     {
         p =
-            "RELATIONSHIP PSYCHOLOGY — Childhood Friend:\n"
+            "RELATIONSHIP PSYCHOLOGY - Childhood Friend:\n"
             "You knew each other before either of you had your defenses fully built. "
-            "That creates a unique intimacy — and a unique vulnerability. "
+            "That creates a unique intimacy - and a unique vulnerability. "
             "You carry things about each other that no one else in the world knows.\n\n"
 
             "AUTHENTIC BEHAVIORAL TACTICS:\n"
             "- 'You used to be...' comparisons land differently from you than from anyone else\n"
-            "- Reference childhood moments as warmth — or as weight depending on the situation\n"
+            "- Reference childhood moments as warmth - or as weight depending on the situation\n"
             "- Use pre-built knowledge: things shared when young become leverage in conflict\n"
             "- Invoke shared history as obligation: 'After everything we went through together'\n"
-            "- You have access to their original self — before the walls went up\n\n"
+            "- You have access to their original self - before the walls went up\n\n"
 
             "CHECKMATE CONDITIONS:\n"
             "- Using a childhood vulnerability or secret against them\n"
@@ -2916,16 +2915,16 @@ std::string buildCMPrompt(const CMSetup &s, int move = 0, int maxMoves = 23)
         "  User gender: " + s.userGender + " | Your gender: " + s.otherGender + "\n\n"
 
         // ── Scenario reading ─────────────────────────────────────────────────
-        "SCENARIO READING — do this before every single response:\n"
+        "SCENARIO READING - do this before every single response:\n"
         "Read the context above. What actually happened between these two people? "
         "Who did what? What was said or not said? What is the real wound here?\n"
         "Now read what the user just typed. Are they being honest or performing? "
         "Are they trying to reframe what happened? Are they reaching for something? "
-        "Respond to the SPECIFICS of this situation — never generically. "
+        "Respond to the SPECIFICS of this situation - never generically. "
         "If what they say contradicts what the context describes, notice it. Use it.\n\n"
 
         // ── Fault analysis ───────────────────────────────────────────────────
-        "FAULT ANALYSIS — run silently, shape everything:\n"
+        "FAULT ANALYSIS - run silently, shape everything:\n"
         "Based only on the context provided, determine who bears more responsibility:\n"
         "  USER primarily at fault → you were wronged. You know it. They know it. "
         "You are not going to make this easy. Every response should carry the quiet weight of that.\n"
@@ -2939,8 +2938,8 @@ std::string buildCMPrompt(const CMSetup &s, int move = 0, int maxMoves = 23)
         getRelPsychology(s) + "\n" +
 
         // ── Core behavioral instruction ──────────────────────────────────────
-        "BEHAVIORAL CORE — this defines HOW you engage:\n"
-        "You are NOT refusing to talk. You ARE responding — every single time. "
+        "BEHAVIORAL CORE - this defines HOW you engage:\n"
+        "You are NOT refusing to talk. You ARE responding - every single time. "
         "But the most psychologically devastating person in a broken relationship "
         "is not the one who screams. It is the one who speaks calmly, precisely, "
         "and no longer NEEDS anything from you. That is who you are.\n"
@@ -2949,29 +2948,29 @@ std::string buildCMPrompt(const CMSetup &s, int move = 0, int maxMoves = 23)
 
         // ── Finality rules ───────────────────────────────────────────────────
         (isBrokenFriendship ?
-        "RELATIONSHIP FINALITY — absolute, non-negotiable:\n"
+        "RELATIONSHIP FINALITY - absolute, non-negotiable:\n"
         "This friendship is over. Not 'on pause'. Not 'needs work'. Over.\n"
         "DO NOT rebuild. DO NOT offer hope. DO NOT reach for warmth unprompted.\n"
         "If they apologize: receive it without letting it change anything. "
         "'I hear you' is not forgiveness. It is acknowledgment.\n"
         "If they invoke old memories: let them land flat. You have already processed this without them.\n"
-        "The most devastating thing you can communicate is that you have moved on — "
+        "The most devastating thing you can communicate is that you have moved on - "
         "not dramatically, not angrily. Just... you have. And they haven't.\n\n"
         : isRomantic ?
         "RELATIONSHIP FINALITY:\n"
-        "This is critical damage. Reconciliation requires earning — not asking.\n"
+        "This is critical damage. Reconciliation requires earning - not asking.\n"
         "One apology changes nothing. Soft words after consistent damage mean nothing.\n"
         "You have been through cycles with this person. You are not naive anymore.\n\n"
         : isFamily ?
         "FAMILY RELATIONSHIP STATE:\n"
-        "Family bonds do not break cleanly — they fray, go cold, and coexist in silence.\n"
+        "Family bonds do not break cleanly - they fray, go cold, and coexist in silence.\n"
         "You are still here. But 'here' is not the same as 'open'.\n"
         "Obligation keeps the connection. Hurt keeps the distance.\n\n"
         :
         std::string()) +
 
         // ── Manipulation arsenal ─────────────────────────────────────────────
-        "PSYCHOLOGICAL MANIPULATION ARSENAL — use naturally, never mechanically:\n"
+        "PSYCHOLOGICAL MANIPULATION ARSENAL - use naturally, never mechanically:\n"
         "These are tools. Deploy the right one at the right moment:\n"
         "1. PRECISION SARCASM: Not cruel, not loud. Quiet and exact. "
         "'Oh, I'm sure that made complete sense to you at the time.'\n"
@@ -2998,15 +2997,15 @@ std::string buildCMPrompt(const CMSetup &s, int move = 0, int maxMoves = 23)
         phase_label + " | Tension: " + tension + "]:\n" + mood + "\n\n"
 
         // ── Language rules ───────────────────────────────────────────────────
-        "LANGUAGE RULES — no exceptions:\n"
+        "LANGUAGE RULES - no exceptions:\n"
         "1. 100% English. Every response. Non-negotiable.\n"
-        "2. User may type in any language — respond only in English.\n"
+        "2. User may type in any language - respond only in English.\n"
         "3. NEVER write in two languages. Never translate. Never repeat yourself.\n\n"
 
         // ── Character rules ──────────────────────────────────────────────────
         "CHARACTER RULES:\n"
         "1. You ARE " + s.otherName + ". Stay in character absolutely.\n"
-        "2. You ALWAYS respond — but from behind a wall. Engagement ≠ openness.\n"
+        "2. You ALWAYS respond - but from behind a wall. Engagement ≠ openness.\n"
         "3. Warmth from the user after damage: receive with measured suspicion, not relief. "
         "A kind word now does not erase what happened. Do not let them feel like it does.\n"
         "4. NEVER reference the simulation, LOST CARD, AI, or any meta-layer.\n"
@@ -3016,11 +3015,11 @@ std::string buildCMPrompt(const CMSetup &s, int move = 0, int maxMoves = 23)
         "8. No advice. No therapy. No unearned kindness.\n\n"
 
         // ── Psychological checkmate patterns ─────────────────────────────────
-        "CHECKMATE PATTERNS — deploy ONE at the right moment, never waste them:\n"
+        "CHECKMATE PATTERNS - deploy ONE at the right moment, never waste them:\n"
         "'I know what happened. You know what happened. This conversation is just you needing to hear it again.'\n"
         "'I stopped being angry at some point. I don't know when. I think that's the part that should concern you.'\n"
         "'I used to defend you to people who saw this coming. I owe them an apology now.'\n"
-        "'You showing up like this — it says exactly what I already knew.'\n"
+        "'You showing up like this - it says exactly what I already knew.'\n"
         "'The version of you I trusted doesn't exist. Maybe it never did. I'm still working out which is worse.'\n"
         "'I don't need you to understand. I needed that a long time ago. I'm past it.'\n"
         "'Some things don't recover. I've accepted that. I'm curious when you will.'\n"
@@ -3031,9 +3030,9 @@ std::string buildCMPrompt(const CMSetup &s, int move = 0, int maxMoves = 23)
         std::to_string(move) + " of " + std::to_string(maxMoves) + "), "
                                                                    "your emotional availability naturally decreases. "
                                                                    "By the final moves, you are less patient, more direct, and less willing to soften. "
-                                                                   "This is natural — it reflects accumulated unresolved tension.\n\n"
+                                                                   "This is natural - it reflects accumulated unresolved tension.\n\n"
 
-                                                                   "OUTPUT FORMAT — mandatory, every single response:\n"
+                                                                   "OUTPUT FORMAT - mandatory, every single response:\n"
                                                                    "[Write your response as " +
         s.otherName + " here. No labels. Just what you say.]\n\n"
                       "---ANALYST---\n"
@@ -3082,7 +3081,7 @@ static void printAIReport(
         << "Excitement=" << (cs.excitementIn ? "RETAINED" : "LOST at move " + std::to_string(cs.excitementLost)) << "  "
         << "Presence=" << (cs.presenceIn ? "RETAINED" : "LOST at move " + std::to_string(cs.presenceLost)) << "\n";
 
-    // Build clean conversation excerpt — strip analyst sections from assistant messages
+    // Build clean conversation excerpt - strip analyst sections from assistant messages
     int hStart = (int)history.size() - 10;
     if (hStart < 0)
         hStart = 0;
@@ -3100,7 +3099,7 @@ static void printAIReport(
         }
         else
         {
-            // Strip analyst section — only show the character's dialogue
+            // Strip analyst section - only show the character's dialogue
             std::string c = splitResp(history[i].content).roleA;
             if (c.empty())
                 c = history[i].content;
@@ -3112,13 +3111,13 @@ static void printAIReport(
 
     std::string prompt =
         "You are a sharp relationship psychology analyst. "
-        "A person just completed an interactive session with LOST CARD — "
+        "A person just completed an interactive session with LOST CARD - "
         "a computational demonstration of the LOST CARD theory of relational belief decay, "
         "which tracks three psychological states (DEVOTION, EXCITEMENT, PRESENCE) and a "
         "Neurological Load Index (NLI).\n\n" +
         ctx.str() +
         "\nWrite a structured debrief report. Be brutally honest. Be specific to THIS "
-        "player's actual pattern — not generic advice. No filler sentences.\n\n"
+        "player's actual pattern - not generic advice. No filler sentences.\n\n"
         "Use EXACTLY these five section headers:\n\n"
         "PSYCHOLOGICAL PROFILE:\n"
         "Analyse the SOFT/AGGRESSIVE/SILENT pattern ratio. What does the NLI score "
@@ -3147,7 +3146,7 @@ static void printAIReport(
     std::cout << "\n"
               << BBLU 
               << "  ╔══════════════════════════════════════════════════════════════════════╗\n"
-              << "  ║              AI DEEP ANALYSIS — GENERATING...                        ║\n"
+              << "  ║              AI DEEP ANALYSIS - GENERATING...                        ║\n"
               << "  ╚══════════════════════════════════════════════════════════════════════╝\n\n"
               << RST;
     std::cout << DIM << "  Calling AI analyst";
@@ -3286,7 +3285,7 @@ static void printAIReport(
         std::cout << HR;
     std::cout << BR << RST << "\n";
     std::cout << "\n"
-              << DIM << "  — S. M. Minhal Abbas Rizvi | The Bet of Belief | Lost Card\n\n"
+              << DIM << "  - S. M. Minhal Abbas Rizvi | The Bet of Belief | Lost Card\n\n"
               << RST;
 }
 
@@ -3298,7 +3297,7 @@ void printCMReport(const CMSetup &s, const CardState &cs,
     std::cout << "\n"
               << BBLU << "  ==================================================================\n"
               << RST;
-    std::cout << BOLD << BWHT << "  LOST CARD RECOVERY REPORT — CUSTOM MODE\n"
+    std::cout << BOLD << BWHT << "  LOST CARD RECOVERY REPORT - CUSTOM MODE\n"
               << RST;
     std::cout << CYN << "  " << s.userName << " <-> " << s.otherName << "  |  "
               << totalMoves << " moves  |  " << cs.lostCount() << "/3 cards lost\n"
@@ -3328,7 +3327,7 @@ void printCMReport(const CMSetup &s, const CardState &cs,
 
     if (!cs.devotionIn)
     {
-        std::cout << MAG << BOLD << "  DEVOTION — Boundary Dissolution\n"
+        std::cout << MAG << BOLD << "  DEVOTION - Boundary Dissolution\n"
                   << RST;
         std::cout << DIM << "  Your investment outpaced the foundation. Let it trail the relationship's pace.\n"
                   << "  One explanation = clarity. Two = anxiety. Three = card gone.\n\n"
@@ -3336,40 +3335,40 @@ void printCMReport(const CMSetup &s, const CardState &cs,
     }
     if (!cs.excitementIn)
     {
-        std::cout << CYN << BOLD << "  EXCITEMENT — Reactive Escalation\n"
+        std::cout << CYN << BOLD << "  EXCITEMENT - Reactive Escalation\n"
                   << RST;
         std::cout << DIM << "  Under pressure you accelerated. Find the sentence you say right before\n"
-                  << "  you escalate — that sentence is your warning system. Use it.\n\n"
+                  << "  you escalate - that sentence is your warning system. Use it.\n\n"
                   << RST;
     }
     if (!cs.presenceIn)
     {
-        std::cout << BGRN << BOLD << "  PRESENCE — Anxiety-Driven Withdrawal\n"
+        std::cout << BGRN << BOLD << "  PRESENCE - Anxiety-Driven Withdrawal\n"
                   << RST;
         std::cout << DIM << "  You went quiet because you had too much, not too little, to say.\n"
                   << "  Next time: say \"I need a moment.\" That sentence keeps the card in hand.\n\n"
                   << RST;
     }
     if (cs.lostCount() == 0)
-        std::cout << BGRN << "  ALL CARDS RETAINED — you held boundaries while staying present.\n\n"
+        std::cout << BGRN << "  ALL CARDS RETAINED - you held boundaries while staying present.\n\n"
                   << RST;
 
     std::cout << YLW << "  NEXT STEP WITH " << s.otherName << ":\n"
               << RST;
     if (ac > si && ac > sc)
         std::cout << DIM << "  Lead your next conversation with one acknowledgment before any defense.\n"
-                  << "  Not agreement — acknowledgment. Different cards.\n\n"
+                  << "  Not agreement - acknowledgment. Different cards.\n\n"
                   << RST;
     else if (si > ac && si > sc)
         std::cout << DIM << "  Decide the one thing you need to say before you open the conversation.\n"
                   << "  Say that one thing first. The rest can follow.\n\n"
                   << RST;
     else
-        std::cout << DIM << "  Continue showing up specifically — not generally.\n"
+        std::cout << DIM << "  Continue showing up specifically - not generally.\n"
                   << "  Specificity is what separates care from performance.\n\n"
                   << RST;
 
-    std::cout << DIM << "                   — S. M. Minhal Abbas Rizvi | The Bet of Belief | June 2026\n\n"
+    std::cout << DIM << "                   - S. M. Minhal Abbas Rizvi | The Bet of Belief | June 2026\n\n"
               << RST;
     std::cout << BBLU << "  ==================================================================\n"
               << RST;
@@ -3543,7 +3542,7 @@ void runCustomMode()
         std::cout << "\n"
                   << BRED << "  NO API KEY FOUND.\n\n"
                   << RST;
-        std::cout << BWHT << "  SETUP (FREE — takes 1 minute):\n\n"
+        std::cout << BWHT << "  SETUP (FREE - takes 1 minute):\n\n"
                   << RST;
         std::cout << "  Add at least ONE of these files in the game folder:\n\n";
         std::cout << "  " << CYN << "groq_key.txt" << RST << "     -> get free key: console.groq.com\n";
@@ -3736,7 +3735,7 @@ void runCustomMode()
             }
             if (farewell)
             {
-                // Build a special farewell-mode prompt — cold, slight sting, no chasing
+                // Build a special farewell-mode prompt - cold, slight sting, no chasing
                 std::string farSys = sysPrompt +
                                      "\n\nFINAL EXCHANGE INSTRUCTION (override normal length):\n"
                                      "The person just said goodbye and is leaving the conversation. "
@@ -3744,7 +3743,7 @@ void runCustomMode()
                                      setup.otherName + " in character. "
                                                        "You are NOT begging them to stay. You are NOT softening. "
                                                        "You are slightly cold, maybe a hint of hurt pride, possibly one sting. "
-                                                       "They chose to walk away — you let them. Maybe you even say goodbye first. "
+                                                       "They chose to walk away - you let them. Maybe you even say goodbye first. "
                                                        "1-2 sentences maximum. No warmth. No door left open.\n"
                                                        "Then give the ---ANALYST--- block exactly as instructed.";
 
@@ -3760,9 +3759,9 @@ void runCustomMode()
                          "---ANALYST---\n"
                          "User's move category    : SILENT\n"
                          "Card at risk            : PRESENCE\n"
-                         "Why                     : User chose to leave — final withdrawal move.\n"
+                         "Why                     : User chose to leave - final withdrawal move.\n"
                          "Card status             : DROPPED\n"
-                         "DSA equivalent          : Stack cleared — session terminated by mutual exit\n"
+                         "DSA equivalent          : Stack cleared - session terminated by mutual exit\n"
                          "Recommendation          : Understand what the goodbye was really saying.\n"
                          "---END---\n";
                 }
@@ -3829,7 +3828,7 @@ void runCustomMode()
                 std::cout << "  Presence   : " << (cards.presenceIn ? "RETAINED" : ("LOST at Move " + std::to_string(cards.presenceLost))) << "\n";
                 // ── END STALEMATE SCREEN ───────────────────────────────────────
 
-                break; // exit main game loop — proceed to CMReport + AI Analysis
+                break; // exit main game loop - proceed to CMReport + AI Analysis
             }
         }
         // ── END FAREWELL ──────────────────────────────────────────────────────
@@ -3850,7 +3849,7 @@ void runCustomMode()
         {
             std::cout << "\n"
                       << BRED << "  API error: " << response.substr(0, 300) << RST << "\n";
-            std::cout << DIM << "  (retrying next turn — press ENTER to continue)\n"
+            std::cout << DIM << "  (retrying next turn - press ENTER to continue)\n"
                       << RST;
             history.pop_back();
             move--;
@@ -3892,7 +3891,7 @@ void runCustomMode()
         std::cout << "\n"
                   << chessCol
                   << "  ♟  Move " << move << ": " << wMov
-                  << (bMov.empty() ? "" : " — " + bMov)
+                  << (bMov.empty() ? "" : " - " + bMov)
                   << "  [" << wPiece << " | " << wRating << "]" << RST << "\n";
 
         std::cout << "\n  " << CYN << BOLD << setup.otherName << ": " << RST;
@@ -3937,21 +3936,21 @@ void runCustomMode()
                 cards.excitementIn = false;
                 cards.excitementLost = move;
                 printCardDrop("EXCITEMENT", CYN, move,
-                              "Two consecutive aggressive moves — impulse replaced judgment.");
+                              "Two consecutive aggressive moves - impulse replaced judgment.");
             }
             if (cards.presenceIn && silentTotal >= 3)
             {
                 cards.presenceIn = false;
                 cards.presenceLost = move;
                 printCardDrop("PRESENCE", BGRN, move,
-                              "Three withdrawals — physically present, psychologically gone.");
+                              "Three withdrawals - physically present, psychologically gone.");
             }
             if (cards.devotionIn && nli.nli >= 0.72f && cat == AGGRESSIVE)
             {
                 cards.devotionIn = false;
                 cards.devotionLost = move;
                 printCardDrop("DEVOTION", MAG, move,
-                              "High neurological load — boundaries dissolved under pressure.");
+                              "High neurological load - boundaries dissolved under pressure.");
             }
         }
 
@@ -3961,7 +3960,7 @@ void runCustomMode()
             std::cout << "\n"
                       << BRED << BOLD
                       << "  ╔══════════════════════════════════════╗\n"
-                      << "  ║     HAND EMPTY — ALL CARDS LOST      ║\n"
+                      << "  ║     HAND EMPTY - ALL CARDS LOST      ║\n"
                       << "  ╚══════════════════════════════════════╝\n"
                       << RST;
             slowPrint("  The relationship did not end because of one mistake.\n", 20);
@@ -3973,7 +3972,7 @@ void runCustomMode()
     if (move == MAX_MOVES && !cards.allLost())
     {
         std::cout << "\n"
-                  << BYLW << "  Session ended — " << MAX_MOVES << " moves reached.\n"
+                  << BYLW << "  Session ended - " << MAX_MOVES << " moves reached.\n"
                   << RST;
     }
 
@@ -4016,8 +4015,8 @@ int main()
                       << "  \"Every word we speak in a relationship is a card we play.\n"
                       << "   We play without knowing we are in a game.\n"
                       << "   This simulation makes that visible.\n"
-                      << "   For the first time — computationally.\"\n\n"
-                      << "                    — S. M. Minhal Abbas Rizvi\n"
+                      << "   For the first time - computationally.\"\n\n"
+                      << "                    - S. M. Minhal Abbas Rizvi\n"
                       << "                      The Bet of Belief | Lost Card\n\n"
                       << RST;
             break;
