@@ -52,7 +52,7 @@ const FIREBASE_CONFIG = {
 //   2. Firebase Console → Authentication → Users → copy YOUR uid
 //   3. Paste it below (keep quotes)
 // ──────────────────────────────────────────────────────────────────────
-const ADMIN_UID = 'PASTE_YOUR_UID_HERE';
+const ADMIN_UID = 'gHFlKHBDODOp1zXQ1T304skhITi1';
 
 // ──────────────────────────────────────────────────────────────────────
 // DO NOT EDIT BELOW
