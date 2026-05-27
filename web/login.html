@@ -283,6 +283,8 @@
 // ── Firebase init ──────────────────────────────────────────────────────
 let auth = null, db = null;
 
+let isSigningUp = false; // flag to prevent onAuthStateChanged redirect during signup
+
 function initFirebase() {
   if (!FIREBASE_ENABLED) {
     showAuthMsg('Firebase not configured yet. Contact the developer.', 'error');
@@ -309,7 +311,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // If already signed in, go straight to app
   auth.onAuthStateChanged(user => {
-    if (user) {
+    if (user && !isSigningUp) {
       window.location.href = 'index.html';
     }
   });
@@ -366,6 +368,7 @@ async function handleAuth(e) {
     if (currentTab === 'signup') {
       // Create account
       if (!name) { showAuthMsg('Please enter your name.', 'error'); resetBtn(btn); return; }
+      isSigningUp = true;
       const cred = await auth.createUserWithEmailAndPassword(email, password);
       await cred.user.updateProfile({ displayName: name });
 
@@ -382,6 +385,7 @@ async function handleAuth(e) {
 
       // Sign out so user manually signs in
       await auth.signOut();
+      isSigningUp = false;
       showAuthMsg('Account created! Now sign in to continue.', 'success');
       setTimeout(() => {
         switchTab('signin');
@@ -406,6 +410,7 @@ async function handleAuth(e) {
     }
 
   } catch (err) {
+    isSigningUp = false;
     const msg = firebaseErrMsg(err.code);
     showAuthMsg(msg, 'error');
     resetBtn(btn);

@@ -880,6 +880,9 @@ function openChat(id) {
   currentChatId = id;
   isCustomMode  = false;
 
+  // Mobile: slide chat list out, slide chat panel in
+  mobileSwitchToChat();
+
   if (id === 'default') {
     startDefaultMode();
   } else if (id === 'ai_assistant') {
@@ -887,6 +890,95 @@ function openChat(id) {
   } else {
     // Custom chats ALWAYS ask fresh - names, gender, scenario every time
     openSetupModal(id);
+  }
+}
+
+// ── Mobile panel switching ────────────────────────────────────────────
+function isMobile() { return window.innerWidth <= 768; }
+
+function mobileSwitchToChat() {
+  if (!isMobile()) return;
+  const listPanel  = document.querySelector('.chat-list-panel');
+  const rightPanel = document.querySelector('.chat-right-panel');
+  if (listPanel)  listPanel.classList.add('mobile-slide-out');
+  if (rightPanel) rightPanel.classList.add('mobile-slide-in');
+}
+
+function mobileBackToList() {
+  const listPanel  = document.querySelector('.chat-list-panel');
+  const rightPanel = document.querySelector('.chat-right-panel');
+  if (listPanel)  listPanel.classList.remove('mobile-slide-out');
+  if (rightPanel) rightPanel.classList.remove('mobile-slide-in');
+  closeMobileStatsDrawer();
+}
+
+function toggleMobileStatsDrawer() {
+  const drawer  = document.getElementById('mobileStatsDrawer');
+  const overlay = document.getElementById('mobileStatsOverlay');
+  if (!drawer) return;
+  const isOpen = drawer.classList.contains('open');
+  if (isOpen) { closeMobileStatsDrawer(); }
+  else {
+    drawer.classList.add('open');
+    if (overlay) overlay.style.display = 'block';
+  }
+}
+
+function closeMobileStatsDrawer() {
+  const drawer  = document.getElementById('mobileStatsDrawer');
+  const overlay = document.getElementById('mobileStatsOverlay');
+  if (drawer)  drawer.classList.remove('open');
+  if (overlay) overlay.style.display = 'none';
+}
+
+// ── Update mobile stats bar ────────────────────────────────────────────
+function updateMobileStats(nli, trust, cards, stackSize, pfc, cor, dop, state) {
+  if (!isMobile()) return;
+
+  // Mini bar
+  const nliDot = document.getElementById('msbNliDot');
+  const nliVal = document.getElementById('msbNliVal');
+  const trustEl= document.getElementById('msbTrust');
+  if (nliDot) {
+    const col = nli < 0.30 ? 'var(--green)' : nli < 0.70 ? 'var(--yellow)' : 'var(--red)';
+    nliDot.style.background = col;
+  }
+  if (nliVal) nliVal.textContent = nli.toFixed(2);
+  if (trustEl) trustEl.textContent = 'Trust ' + Math.round(trust*100) + '%';
+
+  // Card dots
+  const dotD = document.getElementById('msbDotD');
+  const dotE = document.getElementById('msbDotE');
+  const dotP = document.getElementById('msbDotP');
+  if (dotD) dotD.style.opacity = (cards && !cards.devotion)   ? '0.2' : '1';
+  if (dotE) dotE.style.opacity = (cards && !cards.excitement) ? '0.2' : '1';
+  if (dotP) dotP.style.opacity = (cards && !cards.presence)   ? '0.2' : '1';
+
+  // Drawer
+  const msdNli   = document.getElementById('msdNli');
+  const msdPfc   = document.getElementById('msdPfc');
+  const msdCor   = document.getElementById('msdCor');
+  const msdDop   = document.getElementById('msdDop');
+  const msdTrust = document.getElementById('msdTrust');
+  const msdState = document.getElementById('msdState');
+  const msdStack = document.getElementById('msdStack');
+  if (msdNli)   { msdNli.textContent = nli.toFixed(3); msdNli.style.color = nli<0.30?'var(--green)':nli<0.70?'var(--yellow)':'var(--red)'; }
+  if (msdPfc)   msdPfc.textContent   = Math.round((pfc||0)*100) + '%';
+  if (msdCor)   msdCor.textContent   = Math.round((cor||0)*100) + '%';
+  if (msdDop)   msdDop.textContent   = Math.round((dop||0)*100) + '%';
+  if (msdTrust) msdTrust.textContent = Math.round(trust*100) + '%';
+  if (msdState) { msdState.textContent = state||'HARMONY'; msdState.style.color = state==='HARMONY'?'var(--green)':state==='FRACTURE'?'var(--yellow)':'var(--red)'; }
+  if (msdStack) msdStack.textContent = (stackSize||0) + ' / 7';
+
+  // Card statuses in drawer
+  const cards_map = { D: 'Dev', E: 'Exc', P: 'Pre' };
+  if (cards) {
+    const devEl = document.getElementById('msdDevStatus');
+    const excEl = document.getElementById('msdExcStatus');
+    const preEl = document.getElementById('msdPreStatus');
+    if (devEl) { devEl.textContent = cards.devotion   ? 'IN HAND' : 'LOST'; devEl.style.color = cards.devotion   ? 'var(--green)' : 'var(--red)'; }
+    if (excEl) { excEl.textContent = cards.excitement ? 'IN HAND' : 'LOST'; excEl.style.color = cards.excitement ? 'var(--green)' : 'var(--red)'; }
+    if (preEl) { preEl.textContent = cards.presence   ? 'IN HAND' : 'LOST'; preEl.style.color = cards.presence   ? 'var(--green)' : 'var(--red)'; }
   }
 }
 
@@ -2220,11 +2312,13 @@ function animateCardDrop(cardName) {
 
 // ══════════════════════════════════════════════════════════════════════
 function updateSimUI(result) {
-  // Restore sidebars if hidden (e.g. coming from AI chat)
-  const rightSidebar = document.querySelector('.conv-right-sidebar');
-  if (rightSidebar) rightSidebar.style.display = '';
-  const leftSidebar = document.querySelector('.conv-left-sidebar');
-  if (leftSidebar) leftSidebar.style.display = '';
+  // Restore sidebars if hidden (e.g. coming from AI chat) - only on desktop
+  if (!isMobile()) {
+    const rightSidebar = document.querySelector('.conv-right-sidebar');
+    if (rightSidebar) rightSidebar.style.display = '';
+    const leftSidebar = document.querySelector('.conv-left-sidebar');
+    if (leftSidebar) leftSidebar.style.display = '';
+  }
 
   const nli = result.nli ?? 0;
   const pct = Math.round(nli * 100);
@@ -2274,6 +2368,15 @@ function updateSimUI(result) {
 
   // Live graph
   updateLiveGraph();
+
+  // Mobile stats bar + drawer
+  if (sim) {
+    updateMobileStats(
+      nli, trust, result.cards, result.stackSize,
+      sim.ns.pfcLoad, sim.ns.cortisol, sim.ns.dopamine,
+      result.state || 'HARMONY'
+    );
+  }
 }
 
 function updateLiveGraph() {

@@ -485,6 +485,7 @@
       <div class="chat-conv" id="chatConv" style="display:none">
         <div class="chat-conv-header">
           <div class="cch-left">
+            <button class="mobile-back-btn" onclick="mobileBackToList()" title="Back to chats">&#8592;</button>
             <button class="back-btn" onclick="exitChat()" title="Exit this chat - saved as stalemate">&#8592; Back</button>
             <div class="cch-avatar" id="cchAvatar">UH</div>
             <div>
@@ -496,6 +497,21 @@
             <div class="header-status-badge" id="headerStatusBadge">HARMONY</div>
             <div class="move-badge" id="moveBadge">Move 0 / 23</div>
           </div>
+        </div>
+
+        <!-- Mobile stats bar (tap to expand) -->
+        <div class="mobile-stats-bar" id="mobileStatsBar" onclick="toggleMobileStatsDrawer()">
+          <div class="msb-nli">
+            <div class="msb-nli-dot" id="msbNliDot"></div>
+            <span id="msbNliVal">0.10</span>
+          </div>
+          <div class="msb-cards">
+            <div class="msb-card-dot" id="msbDotD" style="background:var(--devotion)" title="DEVOTION"></div>
+            <div class="msb-card-dot" id="msbDotE" style="background:var(--excite)" title="EXCITEMENT"></div>
+            <div class="msb-card-dot" id="msbDotP" style="background:var(--presence)" title="PRESENCE"></div>
+          </div>
+          <div class="msb-trust" id="msbTrust">Trust 80%</div>
+          <div class="msb-expand-hint">TAP FOR STATS ▲</div>
         </div>
 
         <!-- Three-column chat layout -->
@@ -1442,6 +1458,42 @@
     </div>
   </div>
 </div>
+
+<!-- Mobile stats drawer -->
+<div class="mobile-stats-drawer" id="mobileStatsDrawer">
+  <div class="msd-handle"></div>
+  <div style="font-size:12px;font-weight:800;color:var(--muted);letter-spacing:1px;margin-bottom:12px">LIVE STATS</div>
+  <div class="msd-row"><div class="msd-label">NLI (Neurological Load)</div><div class="msd-val" id="msdNli" style="color:var(--green)">0.10</div></div>
+  <div class="msd-row"><div class="msd-label">PFC Load</div><div class="msd-val" id="msdPfc">10%</div></div>
+  <div class="msd-row"><div class="msd-label">Cortisol</div><div class="msd-val" id="msdCor">5%</div></div>
+  <div class="msd-row"><div class="msd-label">Dopamine</div><div class="msd-val" id="msdDop">80%</div></div>
+  <div class="msd-row"><div class="msd-label">Trust</div><div class="msd-val" id="msdTrust">80%</div></div>
+  <div class="msd-row"><div class="msd-label">State</div><div class="msd-val" id="msdState" style="color:var(--green)">HARMONY</div></div>
+  <div class="msd-row" style="margin-top:4px">
+    <div style="display:flex;gap:16px;width:100%">
+      <div style="flex:1;text-align:center">
+        <div style="font-size:20px;font-weight:900;color:var(--devotion)" id="msdDevCard">💜</div>
+        <div style="font-size:10px;color:var(--muted)">DEVOTION</div>
+        <div style="font-size:11px;font-weight:700" id="msdDevStatus">IN HAND</div>
+      </div>
+      <div style="flex:1;text-align:center">
+        <div style="font-size:20px;font-weight:900;color:var(--excite)" id="msdExcCard">💙</div>
+        <div style="font-size:10px;color:var(--muted)">EXCITEMENT</div>
+        <div style="font-size:11px;font-weight:700" id="msdExcStatus">IN HAND</div>
+      </div>
+      <div style="flex:1;text-align:center">
+        <div style="font-size:20px;font-weight:900;color:var(--presence)" id="msdPreCard">💚</div>
+        <div style="font-size:10px;color:var(--muted)">PRESENCE</div>
+        <div style="font-size:11px;font-weight:700" id="msdPreStatus">IN HAND</div>
+      </div>
+    </div>
+  </div>
+  <div class="msd-row"><div class="msd-label">Conflict Stack</div><div class="msd-val" id="msdStack">0 / 7</div></div>
+  <div style="text-align:center;margin-top:14px">
+    <button onclick="closeMobileStatsDrawer()" style="background:var(--bg3);border:1px solid var(--border);color:var(--muted);padding:8px 24px;border-radius:8px;font-size:12px;cursor:pointer">Close ▼</button>
+  </div>
+</div>
+<div id="mobileStatsOverlay" onclick="closeMobileStatsDrawer()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:499"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
 <script src="firebase-config.js"></script>
