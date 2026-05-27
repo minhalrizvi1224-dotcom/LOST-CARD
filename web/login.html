@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+  <title>LOST CARD - Sign In</title>
+  <meta name="theme-color" content="#0D1117"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0D1117;
+      --surface:   #161B22;
+      --border:    #30363D;
+      --text:      #E6EDF3;
+      --text-muted:#8B949E;
+      --accent:    #58A6FF;
+      --accent2:   #F0883E;
+      --error:     #FF7B72;
+      --success:   #56D364;
+      --devotion:  #C678DD;
+      --excitement:#56B6C2;
+      --presence:  #98C379;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      overflow: hidden;
+    }
+
+    /* ── Background particles ── */
+    .bg-glow {
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 20% 20%, rgba(88,166,255,0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 40% at 80% 80%, rgba(198,120,221,0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 30% at 50% 50%, rgba(240,136,62,0.04) 0%, transparent 70%);
+    }
+
+    /* ── Floating cards bg ── */
+    .floating-cards {
+      position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden;
+    }
+    .fc {
+      position: absolute; border-radius: 8px; opacity: 0.04;
+      font-size: 11px; font-weight: 700; letter-spacing: 1px;
+      padding: 6px 10px; border: 1px solid;
+      animation: floatUp linear infinite;
+    }
+    .fc-d { color: var(--devotion); border-color: var(--devotion); top: 110%; left: 15%; animation-duration: 18s; animation-delay: 0s; }
+    .fc-e { color: var(--excitement); border-color: var(--excitement); top: 110%; left: 40%; animation-duration: 22s; animation-delay: 4s; }
+    .fc-p { color: var(--presence); border-color: var(--presence); top: 110%; left: 70%; animation-duration: 16s; animation-delay: 8s; }
+    .fc-d2 { color: var(--devotion); border-color: var(--devotion); top: 110%; left: 85%; animation-duration: 20s; animation-delay: 2s; }
+    .fc-e2 { color: var(--excitement); border-color: var(--excitement); top: 110%; left: 5%; animation-duration: 25s; animation-delay: 6s; }
+    @keyframes floatUp {
+      0%   { transform: translateY(0) rotate(-5deg); opacity: 0; }
+      5%   { opacity: 0.04; }
+      95%  { opacity: 0.04; }
+      100% { transform: translateY(-120vh) rotate(10deg); opacity: 0; }
+    }
+
+    /* ── Main layout ── */
+    .auth-wrap {
+      position: relative; z-index: 1;
+      min-height: 100dvh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+    }
+
+    .auth-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 40px 36px;
+      width: 100%; max-width: 420px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+      animation: slideUp 0.4s ease;
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Logo ── */
+    .auth-logo {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 28px; justify-content: center;
+    }
+    .auth-logo-icon {
+      width: 38px; height: 38px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--devotion), var(--accent));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 800; color: #fff; letter-spacing: 1px;
+    }
+    .auth-logo-text {
+      font-size: 20px; font-weight: 800;
+      letter-spacing: 3px; color: var(--text);
+    }
+
+    /* ── Tabs ── */
+    .auth-tabs {
+      display: flex; border-bottom: 1px solid var(--border);
+      margin-bottom: 28px;
+    }
+    .auth-tab {
+      flex: 1; padding: 10px; text-align: center;
+      font-size: 14px; font-weight: 600; cursor: pointer;
+      color: var(--text-muted); border-bottom: 2px solid transparent;
+      transition: all 0.2s; background: none; border-top: none;
+      border-left: none; border-right: none;
+    }
+    .auth-tab.active {
+      color: var(--accent); border-bottom-color: var(--accent);
+    }
+
+    /* ── Form ── */
+    .auth-form { display: flex; flex-direction: column; gap: 16px; }
+
+    .field-label {
+      display: block; font-size: 12px; font-weight: 600;
+      color: var(--text-muted); margin-bottom: 6px;
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .field-input {
+      width: 100%; padding: 12px 14px;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text);
+      font-size: 14px; transition: border-color 0.2s;
+      outline: none;
+    }
+    .field-input:focus { border-color: var(--accent); }
+    .field-input::placeholder { color: var(--text-muted); }
+
+    /* name field (signup only) */
+    .field-name { display: none; }
+    .mode-signup .field-name { display: block; }
+
+    /* ── Submit button ── */
+    .auth-btn {
+      width: 100%; padding: 13px;
+      background: var(--accent); color: #0D1117;
+      border: none; border-radius: 8px;
+      font-size: 15px; font-weight: 700; cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+      margin-top: 4px;
+    }
+    .auth-btn:hover { opacity: 0.9; }
+    .auth-btn:active { transform: scale(0.98); }
+    .auth-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* ── Divider ── */
+    .auth-or {
+      display: flex; align-items: center; gap: 12px;
+      color: var(--text-muted); font-size: 12px;
+    }
+    .auth-or::before, .auth-or::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+
+    /* ── Google button ── */
+    .google-btn {
+      width: 100%; padding: 12px;
+      background: transparent; border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text);
+      font-size: 14px; font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      transition: background 0.2s;
+    }
+    .google-btn:hover { background: rgba(255,255,255,0.04); }
+    .google-btn svg { width: 18px; height: 18px; }
+
+    /* ── Error/success toast ── */
+    .auth-msg {
+      padding: 10px 14px; border-radius: 8px;
+      font-size: 13px; font-weight: 500;
+      display: none;
+    }
+    .auth-msg.error { background: rgba(255,123,114,0.12); border: 1px solid rgba(255,123,114,0.3); color: var(--error); }
+    .auth-msg.success { background: rgba(86,211,100,0.12); border: 1px solid rgba(86,211,100,0.3); color: var(--success); }
+    .auth-msg.show { display: block; }
+
+    /* ── Quote ── */
+    .auth-quote {
+      text-align: center; margin-top: 24px;
+      font-size: 12px; font-style: italic;
+      color: var(--text-muted); line-height: 1.6;
+    }
+
+    /* ── Loading spinner ── */
+    .spinner {
+      display: inline-block; width: 16px; height: 16px;
+      border: 2px solid rgba(0,0,0,0.3); border-top-color: #0D1117;
+      border-radius: 50%; animation: spin 0.7s linear infinite;
+      vertical-align: middle; margin-right: 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Mobile ── */
+    @media (max-width: 480px) {
+      .auth-box { padding: 28px 20px; border-radius: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="bg-glow"></div>
+<div class="floating-cards">
+  <div class="fc fc-d">DEVOTION</div>
+  <div class="fc fc-e">EXCITEMENT</div>
+  <div class="fc fc-p">PRESENCE</div>
+  <div class="fc fc-d2">DEVOTION</div>
+  <div class="fc fc-e2">EXCITEMENT</div>
+</div>
+
+<div class="auth-wrap">
+  <div class="auth-box" id="authBox">
+
+    <!-- Logo -->
+    <div class="auth-logo">
+      <div class="auth-logo-icon">LC</div>
+      <div class="auth-logo-text">LOST CARD</div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tabSignin" onclick="switchTab('signin')">Sign In</button>
+      <button class="auth-tab" id="tabSignup" onclick="switchTab('signup')">Create Account</button>
+    </div>
+
+    <!-- Message -->
+    <div class="auth-msg" id="authMsg"></div>
+
+    <!-- Form -->
+    <form class="auth-form" id="authForm" onsubmit="handleAuth(event)">
+
+      <!-- Name (signup only) -->
+      <div class="field-name" id="fieldName">
+        <label class="field-label">Your Name</label>
+        <input type="text" class="field-input" id="inputName" placeholder="What should we call you?" autocomplete="name"/>
+      </div>
+
+      <!-- Email -->
+      <div>
+        <label class="field-label">Email</label>
+        <input type="email" class="field-input" id="inputEmail" placeholder="your@email.com" required autocomplete="email"/>
+      </div>
+
+      <!-- Password -->
+      <div>
+        <label class="field-label">Password</label>
+        <input type="password" class="field-input" id="inputPassword" placeholder="Minimum 6 characters" required autocomplete="current-password" minlength="6"/>
+      </div>
+
+      <!-- Submit -->
+      <button type="submit" class="auth-btn" id="authSubmitBtn">Sign In</button>
+
+    </form>
+
+    <!-- Quote -->
+    <div class="auth-quote">
+      "Every word we speak in a relationship is a card we play.<br>
+      We play without knowing we are in a game."
+    </div>
+
+  </div>
+</div>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+
+<script>
+'use strict';
+
+// ── Firebase init ──────────────────────────────────────────────────────
+let auth = null, db = null;
+
+function initFirebase() {
+  if (!FIREBASE_ENABLED) {
+    showAuthMsg('Firebase not configured yet. Contact the developer.', 'error');
+    document.getElementById('authSubmitBtn').disabled = true;
+    return false;
+  }
+  if (!firebase.apps.length) {
+    firebase.initializeApp(FIREBASE_CONFIG);
+  }
+  auth = firebase.auth();
+  db   = firebase.firestore();
+  return true;
+}
+
+// ── On load ────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  if (!initFirebase()) return;
+
+  // If already signed in, go straight to app
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      window.location.href = 'index.html';
+    }
+  });
+});
+
+// ── Tab switching ──────────────────────────────────────────────────────
+let currentTab = 'signin';
+
+function switchTab(tab) {
+  currentTab = tab;
+  const box = document.getElementById('authBox');
+  const signinTab = document.getElementById('tabSignin');
+  const signupTab = document.getElementById('tabSignup');
+  const btn       = document.getElementById('authSubmitBtn');
+  const nameField = document.getElementById('fieldName');
+  const pwdInput  = document.getElementById('inputPassword');
+
+  hideAuthMsg();
+
+  if (tab === 'signup') {
+    signinTab.classList.remove('active');
+    signupTab.classList.add('active');
+    box.classList.add('mode-signup');
+    btn.textContent = 'Create Account';
+    nameField.style.display = 'block';
+    pwdInput.placeholder = 'Minimum 6 characters';
+    pwdInput.setAttribute('autocomplete', 'new-password');
+  } else {
+    signupTab.classList.remove('active');
+    signinTab.classList.add('active');
+    box.classList.remove('mode-signup');
+    btn.textContent = 'Sign In';
+    nameField.style.display = 'none';
+    pwdInput.placeholder = 'Your password';
+    pwdInput.setAttribute('autocomplete', 'current-password');
+  }
+}
+
+// ── Handle form submit ─────────────────────────────────────────────────
+async function handleAuth(e) {
+  e.preventDefault();
+  if (!auth) return;
+
+  const email    = document.getElementById('inputEmail').value.trim();
+  const password = document.getElementById('inputPassword').value;
+  const name     = document.getElementById('inputName').value.trim();
+  const btn      = document.getElementById('authSubmitBtn');
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>' + (currentTab === 'signup' ? 'Creating account...' : 'Signing in...');
+  hideAuthMsg();
+
+  try {
+    if (currentTab === 'signup') {
+      // Create account
+      if (!name) { showAuthMsg('Please enter your name.', 'error'); resetBtn(btn); return; }
+      const cred = await auth.createUserWithEmailAndPassword(email, password);
+      await cred.user.updateProfile({ displayName: name });
+
+      // Save user to Firestore
+      await db.collection('users').doc(cred.user.uid).set({
+        email:         email,
+        displayName:   name,
+        createdAt:     firebase.firestore.FieldValue.serverTimestamp(),
+        lastLogin:     firebase.firestore.FieldValue.serverTimestamp(),
+        totalSessions: 0,
+        archetype:     null,
+        platform:      navigator.userAgent.includes('Mobile') ? 'mobile' : 'desktop'
+      });
+
+      showAuthMsg('Account created! Entering LOST CARD...', 'success');
+      setTimeout(() => { window.location.href = 'index.html'; }, 1200);
+
+    } else {
+      // Sign in
+      await auth.signInWithEmailAndPassword(email, password);
+
+      // Update last login
+      const user = auth.currentUser;
+      if (user) {
+        await db.collection('users').doc(user.uid).update({
+          lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+        }).catch(() => {});
+      }
+
+      window.location.href = 'index.html';
+    }
+
+  } catch (err) {
+    const msg = firebaseErrMsg(err.code);
+    showAuthMsg(msg, 'error');
+    resetBtn(btn);
+  }
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────
+function showAuthMsg(text, type) {
+  const el = document.getElementById('authMsg');
+  el.textContent = text;
+  el.className = 'auth-msg ' + type + ' show';
+}
+function hideAuthMsg() {
+  document.getElementById('authMsg').className = 'auth-msg';
+}
+function resetBtn(btn) {
+  btn.disabled = false;
+  btn.innerHTML = currentTab === 'signup' ? 'Create Account' : 'Sign In';
+}
+function firebaseErrMsg(code) {
+  const map = {
+    'auth/user-not-found':       'No account found with this email.',
+    'auth/wrong-password':       'Incorrect password. Try again.',
+    'auth/email-already-in-use': 'This email is already registered. Sign in instead.',
+    'auth/invalid-email':        'Please enter a valid email address.',
+    'auth/weak-password':        'Password must be at least 6 characters.',
+    'auth/too-many-requests':    'Too many attempts. Please wait a moment.',
+    'auth/network-request-failed': 'Network error. Check your connection.',
+    'auth/invalid-credential':   'Incorrect email or password.',
+  };
+  return map[code] || 'Something went wrong. Please try again.';
+}
+</script>
+</body>
+</html>

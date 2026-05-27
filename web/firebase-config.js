@@ -1,42 +1,40 @@
 // ══════════════════════════════════════════════════════════════════════
-// LOST CARD - Firebase Configuration (VeilKey Protocol)
+// LOST CARD - Firebase Configuration
+// S. M. Minhal Abbas Rizvi | 2026
 // ══════════════════════════════════════════════════════════════════════
 //
-//  SETUP - 5 minutes, completely free:
+//  ONE-TIME SETUP (5 minutes, completely free):
 //
-//  STEP 1 → firebase.google.com → Add project → name "lostcard" → Continue
-//            Disable Google Analytics → Create project → Continue
+//  STEP 1: firebase.google.com → Add project → name "lostcard-app"
+//          Disable Analytics → Create project
 //
-//  STEP 2 → Click "</>" (Web icon) → name "lostcard-web" → Register app
-//            COPY the firebaseConfig shown → paste below (replace placeholders)
+//  STEP 2: Click </> (Web) → nickname "lostcard-web" → Register app
+//          COPY the firebaseConfig object → paste below
 //
-//  STEP 3 → Authentication → Get started → Email/Password → Enable (first toggle) → Save
+//  STEP 3: Authentication → Get started → Email/Password → Enable → Save
 //
-//  STEP 4 → Firestore Database → Create database → Start in production mode
-//            Location: asia-south1 → Enable
+//  STEP 4: Firestore Database → Create database → Production mode
+//          Location: asia-south1 → Enable
 //
-//  STEP 5 → Firestore → Rules tab → PASTE these rules → Publish:
+//  STEP 5: Firestore → Rules → paste these rules → Publish:
 //
 //    rules_version = '2';
 //    service cloud.firestore {
 //      match /databases/{database}/documents {
-//        match /veilkeys/{uid} {
-//          allow read: if request.auth != null;
-//          allow write: if request.auth != null && request.auth.uid == uid;
-//          allow create: if request.auth != null;
-//        }
-//        match /lcid_map/{lcId} {
-//          allow read: if request.auth != null;
-//          allow create: if request.auth != null;
+//        match /users/{uid} {
+//          allow read, write: if request.auth != null && request.auth.uid == uid;
 //        }
 //        match /sessions/{id} {
 //          allow create: if request.auth != null;
 //          allow read: if request.auth != null && resource.data.uid == request.auth.uid;
 //        }
+//        match /admin_sessions/{id} {
+//          allow read, write: if false;
+//        }
 //      }
 //    }
 //
-//  STEP 6 → Paste your config below:
+//  STEP 6: Paste your config below:
 // ──────────────────────────────────────────────────────────────────────
 
 const FIREBASE_CONFIG = {
@@ -48,13 +46,16 @@ const FIREBASE_CONFIG = {
   appId:             "PASTE_YOUR_APP_ID_HERE"
 };
 
-// ══════════════════════════════════════════════════════════════════════
-// DO NOT EDIT BELOW THIS LINE
-// ══════════════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────────────────────────
+// ADMIN SETUP:
+//   1. Sign up in the app with your own email
+//   2. Firebase Console → Authentication → Users → copy YOUR uid
+//   3. Paste it below (keep quotes)
+// ──────────────────────────────────────────────────────────────────────
+const ADMIN_UID = 'PASTE_YOUR_UID_HERE';
 
-// Automatically detects if config has been filled in
+// ──────────────────────────────────────────────────────────────────────
+// DO NOT EDIT BELOW
+// ──────────────────────────────────────────────────────────────────────
 const FIREBASE_ENABLED = !FIREBASE_CONFIG.apiKey.includes('PASTE_YOUR');
-
-// Admin UID - after first sign-up go to:
-//   Firebase Console → Authentication → Users → copy your UID → paste here
-const ADMIN_UID = 'PASTE_YOUR_ADMIN_UID_HERE';
+const IS_ADMIN = (uid) => uid === ADMIN_UID && ADMIN_UID !== 'PASTE_YOUR_UID_HERE';

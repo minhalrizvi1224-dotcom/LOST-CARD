@@ -26,6 +26,11 @@
   <meta http-equiv="Expires" content="0"/>
 
   <link rel="stylesheet" href="style.css"/>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
   <!-- Kill ALL service workers immediately - dev mode, always load fresh -->
   <script>
     if ('serviceWorker' in navigator) {
@@ -1355,6 +1360,9 @@
   <button class="dd-item" onclick="openProfileModal()">✏️ Edit Profile</button>
   <button class="dd-item" onclick="showSection('history')">📜 Session History</button>
   <button class="dd-item" onclick="openApiSetup()">⚙ API Keys</button>
+  <div style="border-top:1px solid var(--border);margin:6px 0;padding-top:6px">
+    <button class="dd-item" onclick="signOut()" style="color:#FF7B72;width:100%;text-align:left">🚪 Sign Out</button>
+  </div>
 </div>
 
 <!-- ════════════════════ PROFILE EDIT MODAL ════════════════════ -->
