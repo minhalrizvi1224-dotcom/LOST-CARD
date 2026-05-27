@@ -2126,6 +2126,13 @@ select.form-input option { background: var(--bg3); }
 }
 
 /* ══════════════════════════════════════════════════════════
+   ELEMENTS HIDDEN ON MOBILE BY DEFAULT
+══════════════════════════════════════════════════════════ */
+.mobile-back-btn  { display: none; }
+.mobile-stats-bar { display: none; }
+.mobile-stats-drawer { display: none; }
+
+/* ══════════════════════════════════════════════════════════
    RESPONSIVE — MOBILE (≤ 768px)
    Full slide-in/out panel approach
 ══════════════════════════════════════════════════════════ */
@@ -2133,18 +2140,18 @@ select.form-input option { background: var(--bg3); }
   :root {
     --sidebar-w: 100vw;
     --topbar-h: 46px;
-    --nav-h: 58px;
+    --nav-h: 56px;
   }
 
-  /* ── Chat app layout: relative so panels can overlap ── */
+  /* ── Chat app layout: stacking context for sliding panels ── */
   .chat-app-layout {
     position: relative;
     height: calc(100vh - var(--topbar-h) - var(--nav-h));
     overflow: hidden;
-    flex-direction: row;
+    display: block;
   }
 
-  /* ── Chat list panel: fills screen, slides out when chat opens ── */
+  /* ── Chat list panel: fills full area, slides left when chat opens ── */
   .chat-list-panel {
     position: absolute;
     inset: 0;
@@ -2160,13 +2167,15 @@ select.form-input option { background: var(--bg3); }
     pointer-events: none;
   }
 
-  /* ── Chat right panel: starts off-screen, slides in ── */
+  /* ── Chat right panel: starts off-screen right, slides in ── */
   .chat-right-panel {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
     z-index: 11;
+    display: flex;
+    flex-direction: column;
     transition: transform .28s cubic-bezier(.4,0,.2,1);
     transform: translateX(100%);
   }
@@ -2174,32 +2183,79 @@ select.form-input option { background: var(--bg3); }
     transform: translateX(0);
   }
 
-  /* ── Hide desktop sidebars on mobile ── */
-  .conv-left-sidebar,
-  .conv-right-sidebar { display: none !important; }
-
-  /* ── Conversation takes full width ── */
-  .conv-inner-layout {
+  /* ── chat-conv fills the right panel ── */
+  .chat-conv {
+    flex: 1;
     display: flex;
     flex-direction: column;
-  }
-  .conv-messages-col {
-    flex: 1;
+    overflow: hidden;
     min-height: 0;
   }
 
-  /* ── Conv header: add back button space ── */
-  .cch-header {
-    padding: 10px 12px;
-    gap: 10px;
+  /* ── Hide desktop sidebars ── */
+  .conv-left-sidebar,
+  .conv-right-sidebar { display: none !important; }
+
+  /* ── Inner layout: row direction (sidebars hidden, messages-col fills width) ── */
+  .conv-inner-layout {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    overflow: hidden;
+    min-height: 0;
   }
 
-  /* ── Mobile back button (shown only on mobile) ── */
+  /* ── Messages column fills full width ── */
+  .conv-messages-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-width: 0;
+    min-height: 0;
+  }
+
+  /* ── Messages area scrollable ── */
+  .chat-messages {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 12px 10px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* ── Choices/input area always at bottom ── */
+  .choices-area {
+    flex-shrink: 0;
+    padding: 8px 10px 12px;
+    border-top: 1px solid var(--border2);
+    background: var(--bg);
+  }
+
+  /* ── CHAT HEADER: single-row compact ── */
+  .chat-conv-header {
+    padding: 8px 10px;
+    flex-shrink: 0;
+    min-height: 0;
+  }
+  .cch-left { gap: 8px; }
+  .cch-avatar { width: 30px; height: 30px; font-size: 9px; flex-shrink: 0; }
+  .cch-name  { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; }
+  .cch-sub   { font-size: 10px; display: none; }
+
+  /* Hide the desktop ← Back button on mobile (use mobile-back-btn instead) */
+  .back-btn { display: none !important; }
+
+  /* Hide verbose header badges on mobile */
+  .header-status-badge { display: none; }
+  .move-badge { font-size: 10px; padding: 3px 7px; white-space: nowrap; }
+
+  /* ── Mobile back button ── */
   .mobile-back-btn {
     display: flex !important;
     align-items: center;
     justify-content: center;
-    width: 34px; height: 34px;
+    width: 32px; height: 32px;
     border-radius: 8px;
     background: none;
     border: 1px solid var(--border);
@@ -2209,57 +2265,61 @@ select.form-input option { background: var(--bg3); }
     flex-shrink: 0;
     transition: .15s;
   }
-  .mobile-back-btn:hover { color: var(--text); border-color: var(--blue); }
+  .mobile-back-btn:active { background: var(--bg3); color: var(--text); }
 
-  /* ── Mobile stats bar (NLI + cards shown above messages) ── */
+  /* ── Mobile stats bar ── */
   .mobile-stats-bar {
     display: flex !important;
     align-items: center;
-    gap: 10px;
-    padding: 7px 12px;
+    gap: 8px;
+    padding: 6px 10px;
     background: var(--bg2);
     border-bottom: 1px solid var(--border);
     cursor: pointer;
     flex-shrink: 0;
-    flex-wrap: wrap;
     user-select: none;
+    min-height: 0;
   }
   .msb-nli {
-    display: flex; align-items: center; gap: 5px;
-    font-size: 12px; font-weight: 700;
+    display: flex; align-items: center; gap: 4px;
+    font-size: 12px; font-weight: 700; font-family: 'Consolas', monospace;
   }
   .msb-nli-dot {
-    width: 8px; height: 8px; border-radius: 50%;
+    width: 7px; height: 7px; border-radius: 50%;
     background: var(--green);
+    flex-shrink: 0;
   }
   .msb-cards {
-    display: flex; align-items: center; gap: 6px; flex: 1;
+    display: flex; align-items: center; gap: 5px;
   }
   .msb-card-dot {
-    width: 10px; height: 10px; border-radius: 3px;
-    transition: background .3s;
+    width: 9px; height: 9px; border-radius: 2px;
+    transition: background .3s, opacity .3s;
   }
   .msb-trust {
     font-size: 11px; color: var(--muted); margin-left: auto;
+    font-family: 'Consolas', monospace;
   }
   .msb-expand-hint {
-    font-size: 10px; color: var(--muted); letter-spacing: .5px;
+    font-size: 10px; color: var(--muted);
   }
 
-  /* ── Mobile stats drawer (slides up) ── */
+  /* ── Mobile stats drawer (slides up from bottom) ── */
   .mobile-stats-drawer {
+    display: block;
     position: fixed;
     bottom: var(--nav-h);
     left: 0; right: 0;
     background: var(--bg2);
-    border-top: 1px solid var(--border);
-    border-radius: 16px 16px 0 0;
+    border-top: 2px solid var(--border);
+    border-radius: 18px 18px 0 0;
     z-index: 500;
-    padding: 16px;
+    padding: 12px 16px 20px;
     transform: translateY(100%);
     transition: transform .3s cubic-bezier(.4,0,.2,1);
-    max-height: 70vh;
+    max-height: 72vh;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
   .mobile-stats-drawer.open {
     transform: translateY(0);
@@ -2268,37 +2328,79 @@ select.form-input option { background: var(--bg3); }
     width: 36px; height: 4px;
     background: var(--border);
     border-radius: 2px;
-    margin: 0 auto 16px;
+    margin: 0 auto 14px;
   }
   .msd-row {
     display: flex; justify-content: space-between; align-items: center;
-    padding: 8px 0;
-    border-bottom: 1px solid rgba(48,54,61,.5);
+    padding: 9px 0;
+    border-bottom: 1px solid rgba(48,54,61,.6);
     font-size: 13px;
   }
   .msd-row:last-child { border-bottom: none; }
   .msd-label { color: var(--muted); font-size: 12px; }
-  .msd-val { font-weight: 700; }
+  .msd-val   { font-weight: 700; font-family: 'Consolas', monospace; }
 
-  /* ── Choices area / input ── */
+  /* ── Choices area: override inline styles set by JS ── */
   .choices-area {
+    padding: 8px 10px 10px !important;
+    border-top: 1px solid var(--border2) !important;
+    background: var(--bg) !important;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  /* ── Choice buttons: compact on mobile ── */
+  .choice-btn {
+    padding: 9px 11px;
+    font-size: 13px;
+    gap: 8px;
+    border-radius: 10px;
+  }
+  .choices-label { font-size: 9px; }
+
+  /* ── AI Input row: single row, no wrap ── */
+  .ai-input-row {
+    padding: 4px 0 0 !important;
+    gap: 6px !important;
+    flex-wrap: nowrap !important;
+    align-items: center;
+  }
+
+  /* Hide emoji button on mobile (saves space) */
+  .emoji-btn { display: none !important; }
+
+  .ai-input {
+    font-size: 16px;
+    padding: 10px 12px;
+    min-height: 44px;
+    height: 44px;
+    max-height: 100px;
+  }
+  .ai-send-btn {
+    height: 44px;
+    min-width: 56px;
+    padding: 0 14px;
+    font-size: 13px;
     flex-shrink: 0;
   }
 
-  /* ── Messages col proper height ── */
-  .conv-conversation {
-    height: 100%;
-    display: flex !important;
-    flex-direction: column;
+  /* ── Repair window badge: compact on mobile ── */
+  #repairWindowBadge {
+    font-size: 10px !important;
+    padding: 3px 8px !important;
+    margin: 0 0 2px !important;
   }
 
-  /* ── Chat messages fill space ── */
-  .chat-messages {
-    flex: 1;
-    min-height: 0;
-  }
+  /* ── Pattern interrupt: hide helper text on mobile ── */
+  #patternInterruptBtn + span { display: none !important; }
+  #patternInterruptBtn { font-size: 10px !important; padding: 3px 8px !important; }
 
-  /* ── Modals: near full-screen on mobile ── */
+  /* ── Message bubbles: wider on mobile ── */
+  .msg { max-width: 88%; }
+
+  /* ── Modals: near full-screen ── */
   .modal-box {
     width: 96vw !important;
     max-width: 96vw !important;
@@ -2306,6 +2408,7 @@ select.form-input option { background: var(--bg3); }
     overflow-y: auto;
     margin: auto;
     border-radius: 16px;
+    padding: 20px 16px !important;
   }
   .report-modal-box {
     width: 98vw !important;
@@ -2314,24 +2417,21 @@ select.form-input option { background: var(--bg3); }
   }
 
   /* ── Hero section ── */
-  .hero-title { font-size: 44px; }
+  .hero-title    { font-size: 42px; }
   .hero-subtitle { font-size: 13px; }
-  .mode-btns { flex-direction: column; gap: 10px; align-items: center; }
-  .mode-btn { width: 80%; }
+  .mode-btns     { flex-direction: column; gap: 10px; align-items: center; }
+  .mode-btn      { width: 80%; }
+  .landing-about { padding: 20px 14px; }
 
-  /* ── Landing sections: proper padding ── */
-  .landing-about { padding: 20px 16px; }
-  section.section { padding: 0; }
-
-  /* ── Bottom nav: slightly bigger touch targets ── */
+  /* ── Bottom nav ── */
   #bottomNav {
     height: var(--nav-h);
-    padding-bottom: env(safe-area-inset-bottom);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
-  .bn-tab { padding: 6px 4px 4px; }
-  .bn-label { font-size: 10px; }
+  .bn-tab   { padding: 5px 4px 3px; }
+  .bn-label { font-size: 9px; }
 
-  /* ── Profile dropdown: full width on mobile ── */
+  /* ── Profile dropdown ── */
   #profileDropdown {
     left: 8px !important;
     right: 8px !important;
@@ -2341,23 +2441,16 @@ select.form-input option { background: var(--bg3); }
   /* ── Setup form ── */
   .setup-form { padding: 0; }
 
-  /* ── Chat welcome (before chat opens) ── */
+  /* ── Chat welcome hidden on mobile (list panel shows instead) ── */
   #chatWelcome { display: none; }
 }
 
-/* ── Elements hidden on mobile by default ── */
-.mobile-back-btn { display: none; }
-.mobile-stats-bar { display: none; }
-.mobile-stats-drawer { display: none; }
-
-@media (max-width: 768px) {
-  .mobile-stats-drawer { display: block; }
-}
-
 @media (max-width: 480px) {
-  .hero-title { font-size: 36px; }
+  .hero-title { font-size: 34px; }
   .world-globe-svg { width: 200px; height: 200px; }
   .hero-badge { font-size: 10px; }
+  .cch-name { max-width: 90px; }
+  .move-badge { display: none; }
 }
 
 /* ══════════════════════════════════════════════════════════

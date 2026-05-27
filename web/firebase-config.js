@@ -21,15 +21,17 @@
 //    rules_version = '2';
 //    service cloud.firestore {
 //      match /databases/{database}/documents {
+//        function isAdmin() {
+//          return request.auth != null && request.auth.uid == 'gHFlKHBDODOp1zXQ1T304skhITi1';
+//        }
 //        match /users/{uid} {
 //          allow read, write: if request.auth != null && request.auth.uid == uid;
+//          allow read, write: if isAdmin();
 //        }
 //        match /sessions/{id} {
 //          allow create: if request.auth != null;
 //          allow read: if request.auth != null && resource.data.uid == request.auth.uid;
-//        }
-//        match /admin_sessions/{id} {
-//          allow read, write: if false;
+//          allow read, write, delete: if isAdmin();
 //        }
 //      }
 //    }
