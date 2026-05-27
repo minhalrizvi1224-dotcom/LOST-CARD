@@ -144,6 +144,10 @@
     /* ── Count badge ── */
     .count-tag { font-size:11px; color:var(--muted); margin-left:6px; }
 
+    /* ── Clickable stat cards ── */
+    .stat-card { cursor:pointer; }
+    .stat-card:active { transform:scale(.98); }
+
     /* responsive */
     @media(max-width:640px) {
       .main { padding:16px; }
@@ -191,14 +195,14 @@
 
     <!-- Stats Row 1 -->
     <div class="stats-grid" id="statsGrid" style="margin-bottom:12px">
-      <div class="stat-card"><div class="stat-label">Total Users</div><div class="stat-value accent" id="statUsers">-</div><div class="stat-sub">registered accounts</div></div>
-      <div class="stat-card"><div class="stat-label">Total Sessions</div><div class="stat-value green" id="statSessions">-</div><div class="stat-sub">simulations run</div></div>
-      <div class="stat-card"><div class="stat-label">Avg Health Score</div><div class="stat-value orange" id="statAvgHealth">-</div><div class="stat-sub">out of 100</div></div>
-      <div class="stat-card"><div class="stat-label">Avg Cards Lost</div><div class="stat-value purple" id="statAvgCards">-</div><div class="stat-sub">per session</div></div>
-      <div class="stat-card"><div class="stat-label">Collapse Rate</div><div class="stat-value red-c" id="statCollapseRate">-</div><div class="stat-sub">sessions ended in collapse</div></div>
-      <div class="stat-card"><div class="stat-label">Avg NLI</div><div class="stat-value cyan-c" id="statAvgNLI">-</div><div class="stat-sub">neurological load</div></div>
-      <div class="stat-card"><div class="stat-label">Mobile Users</div><div class="stat-value accent" id="statMobile">-</div><div class="stat-sub">of total sessions</div></div>
-      <div class="stat-card"><div class="stat-label">Custom AI Mode</div><div class="stat-value green" id="statCustom">-</div><div class="stat-sub">sessions used AI chat</div></div>
+      <div class="stat-card" onclick="switchAdminTab('users')"><div class="stat-label">Total Users</div><div class="stat-value accent" id="statUsers">-</div><div class="stat-sub">registered accounts</div></div>
+      <div class="stat-card" onclick="switchAdminTab('sessions')"><div class="stat-label">Total Sessions</div><div class="stat-value green" id="statSessions">-</div><div class="stat-sub">simulations run</div></div>
+      <div class="stat-card" onclick="switchAdminTab('analytics')"><div class="stat-label">Avg Health Score</div><div class="stat-value orange" id="statAvgHealth">-</div><div class="stat-sub">out of 100</div></div>
+      <div class="stat-card" onclick="switchAdminTab('analytics')"><div class="stat-label">Avg Cards Lost</div><div class="stat-value purple" id="statAvgCards">-</div><div class="stat-sub">per session</div></div>
+      <div class="stat-card" onclick="switchAdminTab('analytics')"><div class="stat-label">Collapse Rate</div><div class="stat-value red-c" id="statCollapseRate">-</div><div class="stat-sub">sessions ended in collapse</div></div>
+      <div class="stat-card" onclick="switchAdminTab('analytics')"><div class="stat-label">Avg NLI</div><div class="stat-value cyan-c" id="statAvgNLI">-</div><div class="stat-sub">neurological load</div></div>
+      <div class="stat-card" onclick="switchAdminTab('sessions')"><div class="stat-label">Mobile Users</div><div class="stat-value accent" id="statMobile">-</div><div class="stat-sub">of total sessions</div></div>
+      <div class="stat-card" onclick="switchAdminTab('sessions')"><div class="stat-label">Custom AI Mode</div><div class="stat-value green" id="statCustom">-</div><div class="stat-sub">sessions used AI chat</div></div>
     </div>
 
     <!-- Tabs -->
@@ -448,15 +452,17 @@ function showUserDetail(idx) {
 // ── Sessions ───────────────────────────────────────────────────────────
 async function loadSessions() {
   const el = document.getElementById('sessionsTable');
-  el.innerHTML = '<div class="loading"><span class="spinner"></span>Loading...</div>';
+  if (el) el.innerHTML = '<div class="loading"><span class="spinner"></span>Loading...</div>';
   try {
     const snap = await adDB.collection('sessions').orderBy('timestamp','desc').limit(300).get();
     allSessions = [];
     snap.forEach(d => allSessions.push({ id: d.id, ...d.data() }));
-    document.getElementById('sessionsCount').textContent = '(' + allSessions.length + ')';
-    renderSessionsTable(allSessions);
-    if (document.getElementById('tabAnalytics').style.display !== 'none') renderAnalytics();
-  } catch(e) { el.innerHTML = `<div class="empty">Error: ${esc(e.message)}</div>`; }
+    const cntEl = document.getElementById('sessionsCount');
+    if (cntEl) cntEl.textContent = '(' + allSessions.length + ')';
+    if (el) renderSessionsTable(allSessions);
+  } catch(e) {
+    if (el) el.innerHTML = `<div class="empty">Error: ${esc(e.message)}<br><small style="color:var(--muted)">Check Firestore rules - admin needs read access to sessions collection.</small></div>`;
+  }
 }
 
 function renderSessionsTable(sessions) {
@@ -630,8 +636,17 @@ function switchAdminTab(tab) {
   document.getElementById('tabSessions').style.display  = tab==='sessions'  ? '' : 'none';
   document.getElementById('tabAnalytics').style.display = tab==='analytics' ? '' : 'none';
 
-  if (tab==='sessions'  && !allSessions.length) loadSessions();
-  if (tab==='analytics') { if (!allSessions.length) loadSessions().then(()=>renderAnalytics()); else renderAnalytics(); }
+  if (tab==='sessions') {
+    if (!allSessions.length) loadSessions(); else renderSessionsTable(allSessions);
+  }
+  if (tab==='analytics') {
+    if (!allSessions.length) {
+      document.getElementById('analyticsContent').innerHTML = '<div class="loading"><span class="spinner"></span>Loading data...</div>';
+      loadSessions().then(() => renderAnalytics());
+    } else {
+      renderAnalytics();
+    }
+  }
 }
 
 // ── CSV Export ─────────────────────────────────────────────────────────
