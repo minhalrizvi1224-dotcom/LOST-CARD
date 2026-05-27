@@ -384,7 +384,7 @@ function renderUsersTable(users) {
   let html = `<table class="data-table">
     <thead><tr>
       <th>#</th><th>Name</th><th>Email</th><th>Bio</th><th>Location</th>
-      <th>Sessions</th><th>Archetype</th><th>Platform</th><th>Joined</th><th>Last Active</th>
+      <th>Sessions</th><th>Status</th><th>Archetype</th><th>Platform</th><th>Joined</th><th>Last Active</th>
     </tr></thead><tbody>`;
 
   users.forEach((u, i) => {
@@ -394,6 +394,10 @@ function renderUsersTable(users) {
     const plat    = u.platform   || 'desktop';
     const bio     = u.bio        ? `<span style="font-size:11px;color:var(--muted)">${esc(u.bio.substring(0,40))}${u.bio.length>40?'...':''}</span>` : '<span style="color:var(--muted);font-size:11px">-</span>';
     const loc     = u.location   ? `<span style="font-size:12px">📍 ${esc(u.location)}</span>` : '<span style="color:var(--muted)">-</span>';
+    const warns   = u.warnings || 0;
+    const susp    = u.suspended ? true : false;
+    const warnBadge = warns===0?'badge-gray':warns===1?'badge-orange':warns>=2?'badge-red':'badge-red';
+    const statusBadge = susp ? '<span class="badge badge-red">SUSPENDED</span>' : (warns>0?`<span class="badge ${warnBadge}">⚠ ${warns}/3</span>`:'<span class="badge badge-green">Active</span>');
     html += `<tr onclick="showUserDetail(${i})">
       <td style="color:var(--muted);font-size:11px">${i+1}</td>
       <td><div style="font-weight:700">${esc(u.displayName||'-')}</div>${u.phone?`<div style="font-size:11px;color:var(--muted)">📱 ${esc(u.phone)}</div>`:''}</td>
@@ -401,6 +405,7 @@ function renderUsersTable(users) {
       <td>${bio}</td>
       <td>${loc}</td>
       <td><span class="badge badge-blue">${u.totalSessions||0}</span></td>
+      <td>${statusBadge}</td>
       <td style="font-size:11px;color:var(--purple)">${esc(arch)}</td>
       <td><span class="badge ${plat==='mobile'?'badge-green':'badge-blue'}">${esc(plat)}</span></td>
       <td style="color:var(--muted);font-size:11px">${joined}</td>
@@ -445,6 +450,18 @@ function showUserDetail(idx) {
     <div class="detail-row"><div class="detail-key">Archetype</div><div class="detail-val" style="color:var(--purple)">${esc(u.archetype||'Not determined')}</div></div>
     <div class="detail-row"><div class="detail-key">Joined</div><div class="detail-val">${joined}</div></div>
     <div class="detail-row"><div class="detail-key">Last Login</div><div class="detail-val">${lastAct}</div></div>
+    <div class="detail-row"><div class="detail-key">Warnings</div><div class="detail-val" style="color:${u.warnings>=3?'var(--red)':u.warnings>0?'var(--accent2)':'var(--green)'}">${u.warnings||0} / 3${u.suspended?' — SUSPENDED':''}</div></div>
+
+    <div class="detail-section">Admin Actions</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+      <button class="btn-sm" style="border-color:var(--accent2);color:var(--accent2)" onclick="warnUser('${u.id}','${esc(u.displayName||'User')}',${idx})">⚠ Issue Warning</button>
+      ${!u.suspended
+        ? `<button class="btn-sm" style="border-color:var(--red);color:var(--red)" onclick="suspendUser('${u.id}','${esc(u.displayName||'User')}',${idx})">🚫 Suspend Account</button>`
+        : `<button class="btn-sm" style="border-color:var(--green);color:var(--green)" onclick="unsuspendUser('${u.id}','${esc(u.displayName||'User')}',${idx})">✅ Restore Account</button>`
+      }
+      <button class="btn-sm" style="border-color:var(--red);color:var(--red);opacity:.7" onclick="deleteUser('${u.id}','${esc(u.displayName||'User')}',${idx})">🗑 Delete User</button>
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-top:8px">Warning 1-2: warning email logged. Warning 3: account suspended automatically.</div>
   `;
   document.getElementById('detailOverlay').style.display = 'flex';
 }
@@ -680,6 +697,80 @@ function exportCSV(type) {
   const url  = URL.createObjectURL(blob);
   const a    = Object.assign(document.createElement('a'), {href:url, download:filename});
   a.click(); URL.revokeObjectURL(url);
+}
+
+// ── User Actions ───────────────────────────────────────────────────────
+async function warnUser(uid, name, idx) {
+  const u = allUsers[idx];
+  if (!u) return;
+  const currentWarnings = u.warnings || 0;
+  const newWarnings = currentWarnings + 1;
+
+  if (!confirm(`Issue warning ${newWarnings}/3 to ${name}?\n\nAt 3 warnings the account is automatically suspended.`)) return;
+
+  try {
+    const update = { warnings: newWarnings, lastWarned: firebase.firestore.FieldValue.serverTimestamp() };
+    if (newWarnings >= 3) {
+      update.suspended = true;
+      update.suspendedAt = firebase.firestore.FieldValue.serverTimestamp();
+    }
+    await adDB.collection('users').doc(uid).update(update);
+    allUsers[idx].warnings = newWarnings;
+    if (newWarnings >= 3) allUsers[idx].suspended = true;
+    closeDetail();
+    renderUsersTable(allUsers);
+    alert(newWarnings >= 3
+      ? `${name} has received 3 warnings and is now SUSPENDED.`
+      : `Warning ${newWarnings}/3 issued to ${name}.`);
+  } catch(e) { alert('Error: ' + e.message); }
+}
+
+async function suspendUser(uid, name, idx) {
+  if (!confirm(`SUSPEND account of ${name}?\n\nThey will be locked out immediately and see a "suspended" message.`)) return;
+  try {
+    await adDB.collection('users').doc(uid).update({
+      suspended: true,
+      suspendedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    allUsers[idx].suspended = true;
+    closeDetail();
+    renderUsersTable(allUsers);
+    alert(`${name}'s account has been suspended.`);
+  } catch(e) { alert('Error: ' + e.message); }
+}
+
+async function unsuspendUser(uid, name, idx) {
+  if (!confirm(`Restore access for ${name}?`)) return;
+  try {
+    await adDB.collection('users').doc(uid).update({
+      suspended: false,
+      warnings: 0,
+      suspendedAt: null
+    });
+    allUsers[idx].suspended = false;
+    allUsers[idx].warnings = 0;
+    closeDetail();
+    renderUsersTable(allUsers);
+    alert(`${name}'s account has been restored.`);
+  } catch(e) { alert('Error: ' + e.message); }
+}
+
+async function deleteUser(uid, name, idx) {
+  if (!confirm(`DELETE all data for ${name}?\n\nThis removes their Firestore profile and sessions. They will not be able to use the app.\n\nThis cannot be undone.`)) return;
+  if (!confirm(`Are you absolutely sure? Type OK to confirm deletion of ${name}.`)) return;
+  try {
+    // Delete sessions
+    const sessSnap = await adDB.collection('sessions').where('uid','==',uid).get();
+    const batch = adDB.batch();
+    sessSnap.forEach(d => batch.delete(d.ref));
+    batch.delete(adDB.collection('users').doc(uid));
+    await batch.commit();
+    allUsers.splice(idx, 1);
+    closeDetail();
+    renderUsersTable(allUsers);
+    loadStats();
+    alert(`${name}'s account and all session data have been deleted.`);
+  } catch(e) { alert('Error: ' + e.message); }
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────

@@ -299,6 +299,12 @@ function initFirebase() {
 
 // ── On load ────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
+  // Check if suspended
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('suspended') === '1') {
+    showAuthMsg('Your account has been suspended. Contact the administrator for details.', 'error');
+  }
+
   if (!initFirebase()) return;
 
   // If already signed in, go straight to app

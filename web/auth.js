@@ -37,6 +37,14 @@ function initAuth() {
       return;
     }
 
+    // Check suspended status
+    const userDoc = await firebaseDB.collection('users').doc(user.uid).get().catch(() => null);
+    if (userDoc && userDoc.exists && userDoc.data().suspended) {
+      await firebaseAuth.signOut();
+      window.location.href = 'login.html?suspended=1';
+      return;
+    }
+
     // Signed in
     currentUser = {
       uid:         user.uid,
