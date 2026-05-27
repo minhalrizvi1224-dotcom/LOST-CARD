@@ -374,8 +374,15 @@ async function handleAuth(e) {
         platform:      navigator.userAgent.includes('Mobile') ? 'mobile' : 'desktop'
       });
 
-      showAuthMsg('Account created! Entering LOST CARD...', 'success');
-      setTimeout(() => { window.location.href = 'index.html'; }, 1200);
+      // Sign out so user manually signs in
+      await auth.signOut();
+      showAuthMsg('Account created! Now sign in to continue.', 'success');
+      setTimeout(() => {
+        switchTab('signin');
+        document.getElementById('authEmail').value = email;
+        document.getElementById('authPassword').value = '';
+        hideAuthMsg();
+      }, 1800);
 
     } else {
       // Sign in

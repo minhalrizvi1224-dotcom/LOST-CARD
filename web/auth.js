@@ -121,9 +121,17 @@ function applyTheme(theme) {
 function renderUserBadge() {
   const badge = document.getElementById('userBadge');
   if (!badge) return;
-  const emoji = (currentUser && currentUser.avatarEmoji) || '🎭';
-  const name  = (currentUser && currentUser.displayName)  || 'User';
-  badge.innerHTML = `<div class="user-badge-btn" onclick="toggleProfileDropdown()" title="${name}"><span style="font-size:18px;line-height:1">${emoji}</span></div>`;
+  const emoji   = (currentUser && currentUser.avatarEmoji) || '🎭';
+  const name    = (currentUser && currentUser.displayName) || 'User';
+  const picData = currentUser && currentUser.uid ? localStorage.getItem('lc_pic_' + currentUser.uid) : null;
+
+  let inner;
+  if (picData) {
+    inner = `<img src="${picData}" alt="${name}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;display:block"/>`;
+  } else {
+    inner = `<span style="font-size:18px;line-height:1">${emoji}</span>`;
+  }
+  badge.innerHTML = `<div class="user-badge-btn" onclick="toggleProfileDropdown()" title="${name}" style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;overflow:hidden">${inner}</div>`;
 }
 
 function toggleProfileDropdown() {
@@ -157,32 +165,72 @@ document.addEventListener('click', (e) => {
 function openProfileModal() {
   document.getElementById('profileDropdown').style.display = 'none';
   const p = currentUser || {};
-  document.getElementById('profileName').value  = p.displayName || '';
-  document.getElementById('profileAbout').value = p.email || '';
+
+  // Basic fields
+  document.getElementById('profileName').value     = p.displayName || '';
+  document.getElementById('profileEmail').value    = p.email || '';
   document.getElementById('profileEmojiPrev').textContent = p.avatarEmoji || '🎭';
+
+  // Extended fields from localStorage
+  const uid = p.uid || '';
+  document.getElementById('profileBio').value      = localStorage.getItem('lc_bio_' + uid) || '';
+  document.getElementById('profilePhone').value    = localStorage.getItem('lc_phone_' + uid) || '';
+  document.getElementById('profileLocation').value = localStorage.getItem('lc_location_' + uid) || '';
+
+  // Profile pic
+  const picData = uid ? localStorage.getItem('lc_pic_' + uid) : null;
+  const imgEl   = document.getElementById('profilePicImg');
+  const emojiEl = document.getElementById('profileEmojiPrev');
+  if (picData) {
+    imgEl.src = picData;
+    imgEl.style.display = 'block';
+    emojiEl.style.display = 'none';
+  } else {
+    imgEl.style.display = 'none';
+    emojiEl.style.display = 'block';
+  }
+
   document.getElementById('profileModal').style.display = 'flex';
 }
 
 async function saveProfile() {
-  const name  = document.getElementById('profileName').value.trim();
-  const emoji = document.getElementById('profileEmojiPrev').textContent;
+  const name     = document.getElementById('profileName').value.trim();
+  const emoji    = document.getElementById('profileEmojiPrev').textContent;
+  const bio      = document.getElementById('profileBio').value.trim();
+  const phone    = document.getElementById('profilePhone').value.trim();
+  const location = document.getElementById('profileLocation').value.trim();
   if (!name) { showToast('Enter a display name.', 'error'); return; }
 
   const btn = document.getElementById('profileSaveBtn');
   btn.disabled = true; btn.textContent = 'Saving...';
 
-  currentUser.displayName  = name;
-  currentUser.avatarEmoji  = emoji;
+  currentUser.displayName = name;
+  currentUser.avatarEmoji = emoji;
 
-  // Save emoji to local storage (per uid)
-  if (currentUser.uid) {
-    localStorage.setItem('lc_emoji_' + currentUser.uid, emoji);
+  const uid = currentUser.uid || '';
+
+  // Save to localStorage
+  if (uid) {
+    localStorage.setItem('lc_emoji_' + uid,    emoji);
+    localStorage.setItem('lc_bio_' + uid,      bio);
+    localStorage.setItem('lc_phone_' + uid,    phone);
+    localStorage.setItem('lc_location_' + uid, location);
   }
 
-  // Update Firebase display name
+  // Get profile pic (base64) if any
+  const picData = uid ? localStorage.getItem('lc_pic_' + uid) : null;
+
+  // Update Firebase + Firestore
   if (firebaseAuth && firebaseAuth.currentUser) {
     await firebaseAuth.currentUser.updateProfile({ displayName: name }).catch(() => {});
-    await firebaseDB.collection('users').doc(currentUser.uid).update({ displayName: name }).catch(() => {});
+    await firebaseDB.collection('users').doc(uid).update({
+      displayName: name,
+      bio:         bio      || null,
+      phone:       phone    || null,
+      location:    location || null,
+      profilePic:  picData  || null,
+      updatedAt:   firebase.firestore.FieldValue.serverTimestamp()
+    }).catch(() => {});
   }
 
   renderUserBadge();
@@ -195,6 +243,53 @@ async function saveProfile() {
 function pickProfileEmoji(emoji) {
   document.getElementById('profileEmojiPrev').textContent = emoji;
   document.querySelectorAll('.ep-emoji-profile').forEach(b => b.classList.remove('selected-emoji'));
+  // Hide profile pic, show emoji
+  const imgEl = document.getElementById('profilePicImg');
+  if (imgEl) { imgEl.style.display = 'none'; document.getElementById('profileEmojiPrev').style.display = 'block'; }
+  // Clear stored pic
+  if (currentUser && currentUser.uid) localStorage.removeItem('lc_pic_' + currentUser.uid);
+}
+
+// ── Profile Picture ───────────────────────────────────────────────────
+function handleProfilePicChange(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => {
+      // Resize to 120x120 via canvas
+      const canvas = document.createElement('canvas');
+      canvas.width = 120; canvas.height = 120;
+      const ctx = canvas.getContext('2d');
+      // Crop center square
+      const size = Math.min(img.width, img.height);
+      const sx   = (img.width  - size) / 2;
+      const sy   = (img.height - size) / 2;
+      ctx.drawImage(img, sx, sy, size, size, 0, 0, 120, 120);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+      // Store in localStorage
+      if (currentUser && currentUser.uid) {
+        localStorage.setItem('lc_pic_' + currentUser.uid, dataUrl);
+      }
+      // Show preview
+      const imgEl   = document.getElementById('profilePicImg');
+      const emojiEl = document.getElementById('profileEmojiPrev');
+      imgEl.src = dataUrl;
+      imgEl.style.display = 'block';
+      emojiEl.style.display = 'none';
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearProfilePic() {
+  if (currentUser && currentUser.uid) localStorage.removeItem('lc_pic_' + currentUser.uid);
+  const imgEl   = document.getElementById('profilePicImg');
+  const emojiEl = document.getElementById('profileEmojiPrev');
+  if (imgEl)   { imgEl.src = ''; imgEl.style.display = 'none'; }
+  if (emojiEl) emojiEl.style.display = 'block';
 }
 
 // ── Save session to Firestore ─────────────────────────────────────────
