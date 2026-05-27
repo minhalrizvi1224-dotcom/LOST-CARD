@@ -1,0 +1,36 @@
+{
+  "name": "LOST CARD — Relational Belief Decay",
+  "short_name": "LOST CARD",
+  "description": "A computational model of relational belief decay. 7 DSA structures. 3 cards. The Bet of Belief.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0D1117",
+  "theme_color": "#0D1117",
+  "lang": "en",
+  "scope": "/",
+  "categories": ["education", "productivity", "lifestyle"],
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Open Chats",
+      "short_name": "Chats",
+      "url": "/?section=chatApp",
+      "description": "Start a relationship simulation"
+    }
+  ]
+}
