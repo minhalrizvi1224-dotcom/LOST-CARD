@@ -38,12 +38,12 @@
 // ──────────────────────────────────────────────────────────────────────
 
 const FIREBASE_CONFIG = {
-  apiKey:            "PASTE_YOUR_API_KEY_HERE",
-  authDomain:        "PASTE_YOUR_AUTH_DOMAIN_HERE",
-  projectId:         "PASTE_YOUR_PROJECT_ID_HERE",
-  storageBucket:     "PASTE_YOUR_STORAGE_BUCKET_HERE",
-  messagingSenderId: "PASTE_YOUR_SENDER_ID_HERE",
-  appId:             "PASTE_YOUR_APP_ID_HERE"
+  apiKey:            "AIzaSyCDfbF_p6rcFjF5gD1tO9h96xdq9AIroRw",
+  authDomain:        "lostcard-app.firebaseapp.com",
+  projectId:         "lostcard-app",
+  storageBucket:     "lostcard-app.firebasestorage.app",
+  messagingSenderId: "507110606867",
+  appId:             "1:507110606867:web:2eadc8d669d538d9f7d7e6"
 };
 
 // ──────────────────────────────────────────────────────────────────────
