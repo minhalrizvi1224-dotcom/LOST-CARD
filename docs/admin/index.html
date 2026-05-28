@@ -695,6 +695,7 @@ let adAuth=null, adDB=null, adUser=null;
 let allUsers=[], allSessions=[], allQueries=[];
 let hbContext=null, hbHistory=[], isHBTyping=false;
 let queriesUnsubscribe=null; // real-time listener handle
+let adPoolKey=null; // pool Groq key — used as fallback for admin Hair Band
 
 // ── Init ───────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
@@ -746,6 +747,10 @@ function showDashboard() {
   document.getElementById('tbAdminEmail').textContent = adUser.email;
   // Load saved admin profile into modal fields
   _loadAdminProfile();
+  // Pre-load pool key so admin Hair Band works immediately
+  adDB.collection('adminSettings').doc('config').get().then(cfg => {
+    if (cfg.exists) adPoolKey = cfg.data().poolKey || null;
+  }).catch(()=>{});
   refreshAll();
 }
 
@@ -1315,8 +1320,12 @@ async function sendHBMessage() {
   if(isHBTyping) return;
   const input=document.getElementById('hbInput');
   const text=input.value.trim(); if(!text) return;
-  const apiKey=localStorage.getItem('lc_admin_api_key');
-  if(!apiKey){alert('Add your Groq API key in the Admin Profile (top right).'); return;}
+  // Use admin's own key first, fallback to pool key
+  const apiKey = localStorage.getItem('lc_admin_api_key') || adPoolKey || '';
+  if(!apiKey){
+    alert('No API key found. Go to Settings → Admin Hair Band Key and add your Groq key, or set a Pool API Key.');
+    return;
+  }
 
   input.value='';
   addHBMsg('admin','You',text);
@@ -1336,6 +1345,18 @@ async function sendHBMessage() {
       })
     });
     const data=await resp.json();
+    if(!resp.ok) {
+      const errMsg = data?.error?.message || ('HTTP ' + resp.status);
+      if(/rate.?limit|TPM/i.test(errMsg))
+        typingEl.querySelector('.hb-bubble').textContent = '⏳ Rate limit hit — wait a few seconds and try again.';
+      else if(/invalid.api.key|invalid_api_key/i.test(errMsg))
+        typingEl.querySelector('.hb-bubble').textContent = '❌ Invalid API key — go to Settings and update your Groq key.';
+      else
+        typingEl.querySelector('.hb-bubble').textContent = '⚠️ Error: ' + errMsg;
+      isHBTyping=false;
+      document.getElementById('hbSendBtn').disabled=false;
+      return;
+    }
     const reply=data.choices?.[0]?.message?.content?.trim()||'[No response]';
     typingEl.querySelector('.hb-bubble').innerHTML=esc(reply).replace(/\n/g,'<br>');
     hbHistory.push({role:'user',content:text},{role:'assistant',content:reply});
@@ -1572,6 +1593,7 @@ async function loadAdminSettings() {
     const cfg = await adDB.collection('adminSettings').doc('config').get();
     if (cfg.exists) {
       const c = cfg.data();
+      adPoolKey = c.poolKey || null;
       const kd = document.getElementById('poolKeyDisplay');
       if (kd) kd.textContent = c.poolKey ? c.poolKey.substring(0,8)+'••••••••••••••••' : 'Not set';
       const pn = document.getElementById('paymentNum');
