@@ -33,6 +33,14 @@
 //          allow read: if request.auth != null && resource.data.uid == request.auth.uid;
 //          allow read, write, delete: if isAdmin();
 //        }
+//        match /hairBandLogs/{id} {
+//          allow create: if request.auth != null;
+//          allow read, write, delete: if isAdmin();
+//        }
+//        match /adminSettings/{doc} {
+//          allow read: if request.auth != null;
+//          allow write: if isAdmin();
+//        }
 //      }
 //    }
 //

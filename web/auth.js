@@ -11,6 +11,11 @@ let firebaseAuth  = null;
 let firebaseDB    = null;
 let authReady     = false;
 
+// ── Admin-side config (fetched from Firestore adminSettings/config) ────
+let poolGroqKey  = null;   // admin's Groq key — used for all Hair Band calls
+let adminPayNum  = '';     // Easypaisa / JazzCash number shown in upgrade modal
+let adminWANum   = '';     // WhatsApp number shown in upgrade modal
+
 // ── Initialize ────────────────────────────────────────────────────────
 function initAuth() {
   applyTheme(localStorage.getItem('lc_theme') || 'dark');
@@ -47,6 +52,9 @@ function initAuth() {
 
     // Signed in
     const docData = (userDoc && userDoc.exists) ? userDoc.data() : {};
+    const nowSec  = Date.now() / 1000;
+    const expSec  = docData.planExpiry?.seconds || 0;
+    const planActive = docData.hbPlan === 'upgraded' && expSec > nowSec;
     currentUser = {
       uid:              user.uid,
       email:            user.email,
@@ -54,9 +62,23 @@ function initAuth() {
       avatarEmoji:      localStorage.getItem('lc_emoji_' + user.uid) || '🎭',
       isAdmin:          IS_ADMIN(user.uid),
       hbCount:          docData.hbCount          || 0,
-      geminiKey:        docData.geminiKey         || null,
-      upgradeRequested: docData.upgradeRequested  || false
+      hbPlan:           planActive ? 'upgraded' : 'free',
+      planExpiry:       docData.planExpiry        || null,
+      upgradePlan:      docData.upgradePlan       || null,
+      upgradeRequested: docData.upgradeRequested  || false,
+      upgradeRequestedPlan: docData.upgradeRequestedPlan || null,
+      geminiKey:        docData.geminiKey         || null  // legacy compat
     };
+
+    // Fetch admin config (pool key, payment info) — any logged-in user can read
+    firebaseDB.collection('adminSettings').doc('config').get().then(cfg => {
+      if (cfg.exists) {
+        const c = cfg.data();
+        poolGroqKey = c.poolKey      || null;
+        adminPayNum = c.paymentNumber || '';
+        adminWANum  = c.whatsappNumber|| '';
+      }
+    }).catch(() => {});
 
     // Update last login in background
     firebaseDB.collection('users').doc(user.uid).update({
@@ -95,31 +117,28 @@ async function signOut() {
 
 // ── Theme ─────────────────────────────────────────────────────────────
 function toggleTheme() {
-  const btn     = document.getElementById('themeToggleBtn');
   const current = document.documentElement.getAttribute('data-theme') || 'dark';
   const next    = current === 'dark' ? 'light' : 'dark';
 
-  if (btn) {
-    const rect = btn.getBoundingClientRect();
-    const cx   = rect.left + rect.width  / 2;
-    const cy   = rect.top  + rect.height / 2;
-    const size  = Math.hypot(window.innerWidth, window.innerHeight) * 2.2;
-    const ripple = document.createElement('div');
-    ripple.className = 'theme-ripple';
-    ripple.style.left   = cx + 'px';
-    ripple.style.top    = cy + 'px';
-    ripple.style.width  = size + 'px';
-    ripple.style.height = size + 'px';
-    ripple.style.background = next === 'light'
-      ? 'radial-gradient(circle, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0) 70%)'
-      : 'radial-gradient(circle, rgba(13,17,23,0.70) 0%, rgba(8,12,18,0) 70%)';
-    document.body.appendChild(ripple);
-    setTimeout(() => ripple.remove(), 580);
-  }
+  // Clean flash overlay — no expanding bubble
+  const overlay = document.createElement('div');
+  overlay.style.cssText = `position:fixed;inset:0;z-index:9999;pointer-events:none;
+    background:${next === 'light' ? '#ffffff' : '#0D1117'};
+    opacity:0;transition:opacity 0.1s ease;`;
+  document.body.appendChild(overlay);
 
-  document.documentElement.classList.add('theme-anim');
-  applyTheme(next);
-  setTimeout(() => document.documentElement.classList.remove('theme-anim'), 450);
+  requestAnimationFrame(() => {
+    overlay.style.opacity = '0.45';
+    setTimeout(() => {
+      applyTheme(next);
+      document.documentElement.classList.add('theme-anim');
+      overlay.style.opacity = '0';
+      setTimeout(() => {
+        overlay.remove();
+        document.documentElement.classList.remove('theme-anim');
+      }, 280);
+    }, 110);
+  });
 }
 
 function applyTheme(theme) {

@@ -341,7 +341,7 @@
     <aside class="chat-list-panel">
       <div class="cl-header">
         <span class="cl-title">Conversations</span>
-        <button class="cl-settings-btn" onclick="openApiSetup()" title="API Settings">⚙</button>
+        <button class="cl-settings-btn" onclick="openSettingsModal()" title="Settings">⚙</button>
       </div>
       <div class="cl-search">
         <input type="text" placeholder="Search chats..." oninput="filterChats(this.value)"/>
@@ -1290,27 +1290,97 @@
 </div>
 
 <!-- ════════════════════ API SETUP MODAL ════════════════════ -->
-<div id="apiModal" class="modal-overlay" style="display:none">
-  <div class="modal-box">
-    <div class="modal-title">API Keys Setup</div>
-    <div class="modal-sub" id="apiModalSub">Enter your AI provider keys. Saved locally - never sent anywhere except directly to the API.</div>
-    <div class="setup-form">
-      <div class="form-field">
-        <label>Groq API Key <span style="color:var(--muted);font-weight:400">(groq.com - free)</span></label>
-        <input id="api_groq" type="password" class="form-input" placeholder="gsk_..."/>
-      </div>
-      <div class="form-field">
-        <label>DeepSeek API Key <span style="color:var(--muted);font-weight:400">(deepseek.com)</span></label>
-        <input id="api_deepseek" type="password" class="form-input" placeholder="sk-..."/>
-      </div>
-      <div style="font-size:12px;color:var(--muted);padding:8px 0">
-        Keys are stored only in your browser's localStorage. Custom mode requires at least one key.
+<!-- ════════════════════ SETTINGS MODAL ════════════════════ -->
+<div id="settingsModal" class="modal-overlay" style="display:none">
+  <div class="modal-box set-modal-box">
+    <div class="modal-title">Settings</div>
+
+    <!-- Plan / Usage -->
+    <div class="set-section-label">Hair Band Plan</div>
+    <div class="set-plan-box" id="set_planStatus">Loading…</div>
+    <button class="set-upgrade-link" onclick="closeSettingsModal();showHBUpgradeWall()">⬆ View Upgrade Plans</button>
+
+    <!-- Chat Preferences -->
+    <div class="set-section-label" style="margin-top:18px">Chat Preferences</div>
+    <div class="set-pref-list">
+      <label class="set-toggle-row">
+        <span>Auto-scroll to latest message</span>
+        <input type="checkbox" id="set_autoScroll" class="set-toggle"/>
+      </label>
+      <label class="set-toggle-row">
+        <span>Show move type hints (Soft / Aggressive / Silent)</span>
+        <input type="checkbox" id="set_showHints" class="set-toggle"/>
+      </label>
+      <label class="set-toggle-row">
+        <span>Show psychological analysis after each move</span>
+        <input type="checkbox" id="set_showPsych" class="set-toggle"/>
+      </label>
+      <label class="set-toggle-row">
+        <span>Show NLI status bar</span>
+        <input type="checkbox" id="set_showNLIBar" class="set-toggle"/>
+      </label>
+    </div>
+
+    <!-- Theme -->
+    <div class="set-section-label" style="margin-top:18px">Display</div>
+    <div class="set-pref-list">
+      <div class="set-toggle-row" style="cursor:default">
+        <span>Theme</span>
+        <button onclick="toggleTheme()" style="padding:5px 14px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text1);font-size:12px;cursor:pointer" id="set_themeBtn">Switch Theme</button>
       </div>
     </div>
-    <div class="modal-btns">
-      <button class="modal-btn ghost" onclick="closeApiModal()">Close</button>
-      <button class="modal-btn primary" onclick="saveApiKeys()">Save Keys</button>
+
+    <div class="modal-btns" style="margin-top:22px">
+      <button class="modal-btn ghost" onclick="closeSettingsModal()">Cancel</button>
+      <button class="modal-btn primary" onclick="saveSettings()">Save</button>
     </div>
+  </div>
+</div>
+
+<!-- ════════════════════ UPGRADE MODAL ════════════════════ -->
+<div id="upgradeModal" class="modal-overlay" style="display:none">
+  <div class="modal-box up-modal-box">
+    <button onclick="closeUpgradeModal()" style="position:absolute;top:16px;right:18px;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1">✕</button>
+
+    <div class="up-header">
+      <div class="up-icon">⬆</div>
+      <div class="up-title">Upgrade Hair Band</div>
+      <div class="up-sub">Unlimited AI conversations. No interruptions.</div>
+    </div>
+
+    <!-- Plan cards -->
+    <div class="up-plans-grid">
+      <div class="up-plan-card" id="upPlan_15d" onclick="selectPlan('15d')">
+        <div class="up-plan-name">Starter</div>
+        <div class="up-plan-dur">15 Days</div>
+        <div class="up-plan-price">Rs 250</div>
+        <div class="up-plan-sub">~Rs 17/day</div>
+      </div>
+      <div class="up-plan-card up-plan-featured" id="upPlan_monthly" onclick="selectPlan('monthly')">
+        <div class="up-plan-badge">POPULAR</div>
+        <div class="up-plan-name">Monthly</div>
+        <div class="up-plan-dur">30 Days</div>
+        <div class="up-plan-price">Rs 600</div>
+        <div class="up-plan-sub">~Rs 20/day</div>
+      </div>
+      <div class="up-plan-card" id="upPlan_annual" onclick="selectPlan('annual')">
+        <div class="up-plan-name">Annual</div>
+        <div class="up-plan-dur">365 Days</div>
+        <div class="up-plan-price">$35</div>
+        <div class="up-plan-sub">Best value</div>
+      </div>
+    </div>
+
+    <!-- Features list -->
+    <div class="up-features">
+      <div class="up-feat">✓ Unlimited Hair Band messages</div>
+      <div class="up-feat">✓ No daily interruptions</div>
+      <div class="up-feat">✓ Priority AI access</div>
+      <div class="up-feat">✓ Support the project ❤</div>
+    </div>
+
+    <!-- Payment instructions (shown after plan selected) -->
+    <div id="upPaymentSection" style="display:none"></div>
   </div>
 </div>
 

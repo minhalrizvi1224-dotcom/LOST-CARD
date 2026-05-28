@@ -21,9 +21,8 @@ let lastThresholdAlert   = 0;     // NLI band last alerted (0=none, 1=fracture, 
 let gottmanLogCurrent    = null;  // Gottman tone for current move
 
 // ── Hair Band limit tracking ───────────────────────────────────────────
-let hbCountLocal    = 0;      // synced from Firestore on login
-let hbLimitBypassed = false;  // true when user clicks "Use My API Key"
-const HB_LIMIT      = 1000;
+let hbCountLocal  = 0;   // synced from Firestore on login
+const HB_FREE_LIMIT = 50; // free messages per account (lifetime)
 
 document.addEventListener('authReady', (e) => {
   if (e && e.detail) {
@@ -1048,17 +1047,13 @@ function confirmSetup() {
     return;
   }
 
-  // Check API key
-  const key = getAPIKey(selectedProvider);
-  if (!key) {
-    showToast(`No ${selectedProvider === 'groq' ? 'Groq' : 'DeepSeek'} API key saved. Please add one in Settings (⚙).`, 'error');
-    // Open api modal to let them add key
-    document.getElementById('setupModal').style.display = 'none';
-    openApiSetup();
+  // Check pool key is available
+  if (!getPoolOrUserKey()) {
+    showToast('AI is not set up yet. Please try again shortly.', 'error');
     return;
   }
 
-  const setup = { yourName, theirName, yourGender, theirGender, scenario, provider: selectedProvider };
+  const setup = { yourName, theirName, yourGender, theirGender, scenario, provider: 'groq' };
   saveSetup(pendingChatId, setup);
 
   // Update sidebar preview
@@ -1079,50 +1074,178 @@ function saveSetup(chatId, setup) {
 }
 
 // ══════════════════════════════════════════════════════════════════════
-// API KEY MODAL
+// SETTINGS MODAL
 // ══════════════════════════════════════════════════════════════════════
-function openApiSetup() {
-  prefillApiModal();
-  document.getElementById('apiModal').style.display = 'flex';
+function openSettingsModal() {
+  const modal = document.getElementById('settingsModal');
+  if (!modal) return;
+  _populateSettings();
+  modal.style.display = 'flex';
 }
-const openSettingsModal = openApiSetup;
+// Legacy alias — old onclick="openApiSetup()" buttons still work
+const openApiSetup = openSettingsModal;
 
-function closeApiModal() {
-  document.getElementById('apiModal').style.display = 'none';
-  // If we were mid-setup, re-open setup modal
-  if (pendingChatId) {
-    document.getElementById('setupModal').style.display = 'flex';
-  }
-}
-
-function saveApiKeys() {
-  const groqKey  = document.getElementById('api_groq').value.trim();
-  const deepKey  = document.getElementById('api_deepseek').value.trim();
-  if (groqKey)  localStorage.setItem('lc_groq_key', groqKey);
-  if (deepKey)  localStorage.setItem('lc_deepseek_key', deepKey);
-  if (!groqKey && !deepKey) {
-    showToast('Enter at least one API key.', 'error');
-    return;
-  }
-  showToast('API keys saved.', 'success');
-  document.getElementById('apiModal').style.display = 'none';
-  // Re-open setup modal if pending
-  if (pendingChatId) {
-    document.getElementById('setupModal').style.display = 'flex';
-  }
+function closeSettingsModal() {
+  const modal = document.getElementById('settingsModal');
+  if (modal) modal.style.display = 'none';
 }
 
-function prefillApiModal() {
-  const groqEl = document.getElementById('api_groq');
-  const deepEl = document.getElementById('api_deepseek');
-  if (groqEl) groqEl.value = localStorage.getItem('lc_groq_key') || '';
-  if (deepEl) deepEl.value = localStorage.getItem('lc_deepseek_key') || '';
+function _populateSettings() {
+  // Plan status
+  const planEl = document.getElementById('set_planStatus');
+  if (planEl) {
+    const upgraded = isUpgraded();
+    if (upgraded) {
+      const expiry = currentUser.planExpiry?.seconds
+        ? new Date(currentUser.planExpiry.seconds * 1000).toLocaleDateString()
+        : '—';
+      planEl.innerHTML = `<span style="color:var(--c-green)">✨ Upgraded</span> &nbsp;·&nbsp; <span style="color:var(--muted);font-size:12px">Renews ${expiry}</span>`;
+    } else {
+      const used = hbCountLocal || 0;
+      const pct  = Math.min(100, (used / HB_LIMIT) * 100);
+      planEl.innerHTML = `
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px">
+          <span>Free Plan</span>
+          <span style="color:${used>=HB_FREE_LIMIT?'var(--c-red)':used>=40?'var(--c-orange)':'var(--muted)'}">${used} / ${HB_FREE_LIMIT} messages</span>
+        </div>
+        <div style="height:4px;background:var(--bg3);border-radius:2px;overflow:hidden">
+          <div style="height:100%;width:${pct}%;background:${pct>=100?'var(--c-red)':pct>=80?'var(--c-orange)':'var(--accent)'};border-radius:2px;transition:width 0.4s"></div>
+        </div>
+        ${used>=HB_FREE_LIMIT?'<div style="margin-top:8px;font-size:11px;color:var(--c-red)">Limit reached — <button onclick="closeSettingsModal();showHBUpgradeWall()" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:11px;text-decoration:underline">Upgrade to continue</button></div>':''}`;
+    }
+  }
+
+  // Chat preferences
+  document.getElementById('set_autoScroll') && (document.getElementById('set_autoScroll').checked   = localStorage.getItem('lc_set_autoscroll')   !== 'false');
+  document.getElementById('set_showHints')  && (document.getElementById('set_showHints').checked    = localStorage.getItem('lc_set_showhints')    !== 'false');
+  document.getElementById('set_showPsych')  && (document.getElementById('set_showPsych').checked    = localStorage.getItem('lc_set_showpsych')    !== 'false');
+  document.getElementById('set_showNLIBar') && (document.getElementById('set_showNLIBar').checked   = localStorage.getItem('lc_set_shownlibar')   !== 'false');
+}
+
+function saveSettings() {
+  const autoScroll = document.getElementById('set_autoScroll')?.checked ?? true;
+  const showHints  = document.getElementById('set_showHints')?.checked  ?? true;
+  const showPsych  = document.getElementById('set_showPsych')?.checked  ?? true;
+  const showNLIBar = document.getElementById('set_showNLIBar')?.checked ?? true;
+  localStorage.setItem('lc_set_autoscroll', autoScroll);
+  localStorage.setItem('lc_set_showhints',  showHints);
+  localStorage.setItem('lc_set_showpsych',  showPsych);
+  localStorage.setItem('lc_set_shownlibar', showNLIBar);
+  showToast('Settings saved.', 'success');
+  closeSettingsModal();
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// UPGRADE MODAL
+// ══════════════════════════════════════════════════════════════════════
+let _selectedPlan = null;
+
+function showUpgradeModal() {
+  const modal = document.getElementById('upgradeModal');
+  if (!modal) return;
+  _selectedPlan = null;
+  _renderUpgradePlans();
+  document.getElementById('upPaymentSection').style.display = 'none';
+  modal.style.display = 'flex';
+}
+
+function closeUpgradeModal() {
+  const modal = document.getElementById('upgradeModal');
+  if (modal) modal.style.display = 'none';
+}
+
+function _renderUpgradePlans() {
+  document.querySelectorAll('.up-plan-card').forEach(c => c.classList.remove('selected'));
+}
+
+function selectPlan(plan) {
+  _selectedPlan = plan;
+  document.querySelectorAll('.up-plan-card').forEach(c => c.classList.remove('selected'));
+  const card = document.getElementById('upPlan_' + plan);
+  if (card) card.classList.add('selected');
+
+  const names  = { '15d': '15 Days', 'monthly': 'Monthly', 'annual': 'Annual' };
+  const prices = { '15d': 'Rs 250', 'monthly': 'Rs 600', 'annual': '$35 / year' };
+
+  // Build payment info from admin config
+  const payNum = (typeof adminPayNum !== 'undefined' && adminPayNum) ? adminPayNum : null;
+  const waNum  = (typeof adminWANum  !== 'undefined' && adminWANum)  ? adminWANum  : null;
+
+  const sec = document.getElementById('upPaymentSection');
+  sec.style.display = 'block';
+  sec.innerHTML = `
+    <div class="up-pay-title">Pay for ${names[plan]} — <strong>${prices[plan]}</strong></div>
+    ${payNum ? `
+    <div class="up-pay-methods">
+      <div class="up-pay-row">
+        <span class="up-pay-label">💚 Easypaisa / JazzCash</span>
+        <span class="up-pay-num">${payNum}</span>
+      </div>
+      ${waNum ? `<div class="up-pay-row">
+        <span class="up-pay-label">📱 WhatsApp</span>
+        <a href="https://wa.me/${waNum.replace(/[^0-9]/g,'')}" target="_blank" class="up-pay-num">${waNum}</a>
+      </div>` : ''}
+    </div>
+    <div class="up-pay-steps">
+      <div>1. Send <strong>${prices[plan]}</strong> to the number above</div>
+      <div>2. Take a screenshot of the payment</div>
+      <div>3. Click the WhatsApp button below and send the screenshot</div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+      ${waNum ? `<a href="https://wa.me/${waNum.replace(/[^0-9]/g,'')}" target="_blank" class="up-wa-btn">📱 WhatsApp Us</a>` : ''}
+      <button class="up-confirm-btn" onclick="confirmUpgradeRequest()">✓ I've Sent Payment</button>
+    </div>` : `
+    <div class="up-pay-methods" style="text-align:center;padding:20px 0;color:var(--muted)">
+      Payment info not set up yet.<br>Contact the app owner to upgrade.
+    </div>`}`;
+}
+
+async function confirmUpgradeRequest() {
+  if (!_selectedPlan) { showToast('Select a plan first.', 'error'); return; }
+  if (!firebaseDB || !currentUser || !currentUser.uid) {
+    showToast('Sign in to request upgrade.', 'error'); return;
+  }
+  const btn = document.querySelector('.up-confirm-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+  try {
+    await firebaseDB.collection('users').doc(currentUser.uid).update({
+      upgradeRequested:     true,
+      upgradeRequestedPlan: _selectedPlan,
+      upgradeRequestedAt:   firebase.firestore.FieldValue.serverTimestamp()
+    });
+    currentUser.upgradeRequested     = true;
+    currentUser.upgradeRequestedPlan = _selectedPlan;
+    const sec = document.getElementById('upPaymentSection');
+    sec.innerHTML = `
+      <div style="text-align:center;padding:20px 0">
+        <div style="font-size:36px;margin-bottom:10px">✅</div>
+        <div style="font-size:15px;font-weight:700;margin-bottom:6px">Request Sent!</div>
+        <div style="font-size:13px;color:var(--muted)">Once we confirm your payment, your plan will be activated.
+          We'll notify you at <strong>${currentUser.email}</strong>.</div>
+      </div>`;
+    showToast('Upgrade request sent!', 'success');
+  } catch(e) {
+    showToast('Could not send request. Try again.', 'error');
+    if (btn) { btn.disabled = false; btn.textContent = '✓ I\'ve Sent Payment'; }
+  }
 }
 
 function getAPIKey(provider) {
   if (provider === 'groq')     return localStorage.getItem('lc_groq_key') || '';
   if (provider === 'deepseek') return localStorage.getItem('lc_deepseek_key') || '';
   return '';
+}
+
+// ── Pool key (admin's key) — used for all AI calls ────────────────────
+// Falls back to user's own localStorage key if pool key not set yet
+function getPoolOrUserKey() {
+  if (typeof poolGroqKey !== 'undefined' && poolGroqKey) return poolGroqKey;
+  // Fallback: user's own key (backward compat / no-pool fallback)
+  return localStorage.getItem('lc_groq_key') || localStorage.getItem('lc_deepseek_key') || '';
+}
+
+function isUpgraded() {
+  return currentUser && currentUser.hbPlan === 'upgraded';
 }
 
 // ══════════════════════════════════════════════════════════════════════
@@ -1341,9 +1464,9 @@ async function generateCustomReply(chatId, setup, userText) {
       ? `You are ${setup.theirName}. ${character} You're texting ${setup.yourName}. Situation: ${setup.scenario}. ${langHint} Context for this moment: ${openingSeed} Open with something short, cautious, and not fully warm - you're not sure why they're here or what you want. 1 sentence, max. Real. No labels. Do NOT start with "Hey" or generic greetings.${charLock}`
       : `You are ${setup.theirName}. ${character} You're texting ${setup.yourName}. Situation: ${setup.scenario}. ${langHint} Context for this moment: ${openingSeed} Send your opening message - natural, real, no labels, no generic "Hey" greetings. Start with something that reflects the actual situation. 1-2 sentences max.${charLock}`;
 
-  const key = getAPIKey(setup.provider);
+  const key = getPoolOrUserKey();
   if (!key) {
-    addMessage('them', setup.theirName, '[No API key - add one in Settings ⚙]');
+    addMessage('them', setup.theirName, '[AI is not available right now — try again shortly]');
     setInputEnabled(true);
     return;
   }
@@ -1792,8 +1915,8 @@ async function generateFinalLetter(setup, summary) {
   const outcome   = summary.outcome   || 'session ended';
   const nli       = parseFloat(summary.finalNLI) || 0;
 
-  const key = getAPIKey(setup.provider);
-  if (!key) return; // silently skip - don't break anything if no key
+  const key = getPoolOrUserKey();
+  if (!key) return; // silently skip if no pool key configured yet
 
   const character = getRelCharacter(CHAT_META[currentChatId]?.relType || 'Friend');
   const sysPrompt = `You are ${setup.theirName}. ${character} The conversation with ${setup.yourName} just ended - outcome: ${outcome}. ${cardsLost}/3 relational cards were lost. NLI at end: ${nli.toFixed(2)}.
@@ -2089,11 +2212,7 @@ function startAIAssistant() {
   avatarEl.textContent = meta.avatarText;
   avatarEl.style.background = meta.avatarGrad;
   document.getElementById('cchName').textContent = meta.name;
-  const hasGemini = currentUser && currentUser.geminiKey;
-  const subLabel  = hasGemini
-    ? 'Unlimited · Upgraded ✨'
-    : `${hbCountLocal.toLocaleString()} / ${HB_LIMIT.toLocaleString()} messages`;
-  document.getElementById('cchSub').textContent  = subLabel;
+  document.getElementById('cchSub').textContent  = _hbSubLabel();
   document.getElementById('moveBadge').textContent = 'AI Mode';
 
   const badge = document.getElementById('headerStatusBadge');
@@ -2109,11 +2228,9 @@ function startAIAssistant() {
   const leftSidebar = document.querySelector('.conv-left-sidebar');
   if (leftSidebar) leftSidebar.style.display = 'none';
 
-  // Build AI input — check limit first
-  const choicesArea = document.getElementById('choicesArea');
-  const _hasGeminiNow = currentUser && currentUser.geminiKey;
-  if (!_hasGeminiNow && !hbLimitBypassed && hbCountLocal >= HB_LIMIT) {
-    showHBLimitWall();
+  // Build AI input — check premium / limit
+  if (!checkHBPremium() && hbCountLocal >= HB_FREE_LIMIT) {
+    showHBUpgradeWall();
   } else {
     _buildHBInput();
   }
@@ -2131,38 +2248,39 @@ async function sendAIMessage() {
   const text = input.value.trim();
   if (!text) return;
 
-  // Check for admin-allocated Gemini key first (unlimited tier)
-  const geminiKey = currentUser && currentUser.geminiKey;
-  let provider = 'groq', key = null, useGemini = false;
+  // Determine which key to use
+  const isPremium = checkHBPremium();
+  const geminiKey = currentUser && currentUser.geminiKey; // legacy allocated key
 
+  // Resolve API key: Gemini (legacy) > Pool Groq key
+  let useGemini = false, apiKey = null, apiProvider = 'groq';
   if (geminiKey) {
     useGemini = true;
+    apiKey    = geminiKey;
+  } else if (poolGroqKey) {
+    apiKey = poolGroqKey;
   } else {
-    key = getAPIKey('groq'); provider = 'groq';
-    if (!key) { key = getAPIKey('deepseek'); provider = 'deepseek'; }
-    if (!key) {
-      showToast('Add an API key in Settings (⚙) to use Hair Band.', 'error');
-      return;
-    }
-    // Enforce limit unless user bypassed with their own key
-    if (!hbLimitBypassed && hbCountLocal >= HB_LIMIT) {
-      showHBLimitWall();
-      return;
-    }
+    addMessage('them', 'Hair Band', 'Hair Band is setting up — check back in a moment.');
+    return;
+  }
+
+  // Enforce free limit for non-premium users
+  if (!isPremium && !geminiKey && hbCountLocal >= HB_FREE_LIMIT) {
+    showHBUpgradeWall();
+    return;
   }
 
   input.value = '';
   addMessage('you', 'You', text);
-
   const typingEl = addTypingIndicator('Hair Band');
   isAITyping = true;
 
   try {
     let reply;
     if (useGemini) {
-      reply = await callGemini(geminiKey, aiAssistantHistory, AI_SYSTEM_PROMPT, text, 700);
+      reply = await callGemini(apiKey, aiAssistantHistory, AI_SYSTEM_PROMPT, text, 700);
     } else {
-      reply = await callAI(provider, key, aiAssistantHistory, AI_SYSTEM_PROMPT, text, 700);
+      reply = await callAI(apiProvider, apiKey, aiAssistantHistory, AI_SYSTEM_PROMPT, text, 700);
     }
     typingEl.remove();
     isAITyping = false;
@@ -2170,14 +2288,33 @@ async function sendAIMessage() {
     aiAssistantHistory.push({ role: 'assistant', content: reply });
     addMessage('them', 'Hair Band', reply);
     scrollMessages();
-    // Increment usage counter (Gemini users are unlimited — no counting)
-    if (!useGemini) incrementHBCount();
+    // Only count free-tier usage
+    if (!isPremium && !geminiKey) incrementHBCount();
     logHairBandQuery(text, reply);
   } catch(err) {
     typingEl.remove();
     isAITyping = false;
-    addMessage('them', 'Hair Band', `Sorry, I couldn't reach the API. ${err.message || 'Check your key and connection.'}`);
+    addMessage('them', 'Hair Band', `Sorry, couldn't reach the AI. ${err.message || 'Please try again.'}`);
   }
+}
+
+// ── Hair Band: premium check ──────────────────────────────────────────
+// auth.js already validates expiry and sets hbPlan to 'free' if expired
+function checkHBPremium() {
+  return !!(currentUser && (currentUser.hbPlan === 'upgraded' || currentUser.hbPlan === 'premium'));
+}
+
+// ── Hair Band: sub-header label ───────────────────────────────────────
+function _hbSubLabel() {
+  if (checkHBPremium()) {
+    const exp = currentUser.planExpiry;
+    if (exp && exp.seconds) {
+      const days = Math.ceil((exp.seconds * 1000 - Date.now()) / 86400000);
+      return `✨ Upgraded · ${days}d remaining`;
+    }
+    return '✨ Upgraded · Unlimited';
+  }
+  return `${hbCountLocal} / ${HB_FREE_LIMIT} free messages`;
 }
 
 // ── Hair Band: build input UI ─────────────────────────────────────────
@@ -2194,99 +2331,118 @@ function _buildHBInput() {
   buildEmojiPicker('emojiPickerAI', 'aiChatInput');
 }
 
-// ── Hair Band: limit wall ─────────────────────────────────────────────
-function showHBLimitWall() {
-  const choicesArea = document.getElementById('choicesArea');
-  const hasOwnKey = !!(getAPIKey('groq') || getAPIKey('deepseek'));
-  const alreadyRequested = currentUser && currentUser.upgradeRequested;
+// ── Hair Band: upgrade wall (plan selection) ──────────────────────────
+function showHBUpgradeWall() {
+  const choicesArea  = document.getElementById('choicesArea');
+  const alreadySent  = currentUser && currentUser.upgradeRequested;
+  if (alreadySent) {
+    choicesArea.innerHTML = `
+      <div class="hb-limit-wall">
+        <div class="hb-limit-icon">⏳</div>
+        <div class="hb-limit-title">Upgrade Pending</div>
+        <div class="hb-limit-msg">Your upgrade request has been sent. We'll activate your plan shortly at <strong>${currentUser.email||'your email'}</strong>.</div>
+      </div>`;
+    return;
+  }
   choicesArea.innerHTML = `
     <div class="hb-limit-wall">
       <div class="hb-limit-icon">🔒</div>
-      <div class="hb-limit-title">Hair Band Limit Reached</div>
-      <div class="hb-limit-msg">You've used all ${HB_LIMIT.toLocaleString()} free messages.<br>
-        Use your own API key to continue, or upgrade for unlimited access.</div>
-      <div class="hb-limit-btns">
-        ${hasOwnKey
-          ? `<button class="hb-key-btn" onclick="bypassHBLimit()">Continue with My Key</button>`
-          : `<button class="hb-key-btn" onclick="openApiSetup()">Add API Key</button>`
-        }
-        ${alreadyRequested
-          ? `<button class="hb-upgrade-btn" disabled>Request Sent ✓</button>`
-          : `<button class="hb-upgrade-btn" onclick="requestHBUpgrade()">⬆ Upgrade</button>`
-        }
+      <div class="hb-limit-title">50 Free Messages Used</div>
+      <div class="hb-limit-msg">Choose a plan to unlock unlimited Hair Band access.</div>
+      <div class="hb-plans-row">
+        <div class="hb-plan-card" onclick="selectHBPlan('15d','Rs 250')">
+          <div class="hb-plan-icon">⚡</div>
+          <div class="hb-plan-name">Starter</div>
+          <div class="hb-plan-duration">15 Days</div>
+          <div class="hb-plan-price">Rs 250</div>
+        </div>
+        <div class="hb-plan-card hb-plan-popular" onclick="selectHBPlan('monthly','Rs 600')">
+          <div class="hb-plan-popular-tag">POPULAR</div>
+          <div class="hb-plan-icon">💎</div>
+          <div class="hb-plan-name">Monthly</div>
+          <div class="hb-plan-duration">30 Days</div>
+          <div class="hb-plan-price">Rs 600</div>
+        </div>
+        <div class="hb-plan-card" onclick="selectHBPlan('annual','$35')">
+          <div class="hb-plan-icon">🏆</div>
+          <div class="hb-plan-name">Annual</div>
+          <div class="hb-plan-duration">365 Days</div>
+          <div class="hb-plan-price">$35 / yr</div>
+        </div>
       </div>
     </div>`;
 }
 
-function bypassHBLimit() {
-  hbLimitBypassed = true;
-  _buildHBInput();
-  showToast('Continuing with your own API key.', 'success');
-}
-
-async function requestHBUpgrade() {
+async function selectHBPlan(planKey, priceLabel) {
   if (!firebaseDB || !currentUser || !currentUser.uid) {
-    showToast('Sign in to request an upgrade.', 'error');
-    return;
+    showToast('Sign in to upgrade.', 'error'); return;
   }
+  const planNames = { '15d': '15 Days', 'monthly': 'Monthly (30 Days)', 'annual': 'Annual (365 Days)' };
+  const planLabel = `${planNames[planKey] || planKey} — ${priceLabel}`;
+
   try {
     await firebaseDB.collection('users').doc(currentUser.uid).update({
-      upgradeRequested:   true,
-      upgradeRequestedAt: firebase.firestore.FieldValue.serverTimestamp()
+      upgradeRequested:     true,
+      upgradeRequestedPlan: planKey,
+      upgradeRequestedAt:   firebase.firestore.FieldValue.serverTimestamp()
     });
-    currentUser.upgradeRequested = true;
-    // Show confirmation in wall
+    currentUser.upgradeRequested     = true;
+    currentUser.upgradeRequestedPlan = planKey;
+
+    const payNum = (typeof adminPayNum !== 'undefined' && adminPayNum) ? adminPayNum : null;
+    const waNum  = (typeof adminWANum  !== 'undefined' && adminWANum)  ? adminWANum  : null;
+    const waLink = waNum ? `https://wa.me/${waNum.replace(/[^0-9]/g,'')}` : null;
+
     const choicesArea = document.getElementById('choicesArea');
     choicesArea.innerHTML = `
       <div class="hb-limit-wall">
         <div class="hb-limit-icon">✅</div>
-        <div class="hb-limit-title">Upgrade Requested!</div>
-        <div class="hb-limit-msg">Your request has been sent. We'll reach out to you at
-          <strong>${currentUser.email || 'your email'}</strong> soon with unlimited access.</div>
+        <div class="hb-limit-title">Plan Selected: ${planLabel}</div>
+        <div class="hb-payment-box">
+          ${payNum ? `
+          <div class="hb-payment-step">① Send <strong>${priceLabel}</strong> via Easypaisa or JazzCash:</div>
+          <div class="hb-payment-num">📱 ${payNum}</div>` : ''}
+          ${waLink ? `
+          <div class="hb-payment-step">② WhatsApp us your email + payment screenshot:</div>
+          <a href="${waLink}" target="_blank" class="hb-wa-link">💬 WhatsApp Us →</a>` : `
+          <div class="hb-payment-step" style="color:var(--muted)">Contact the app owner to complete payment.</div>`}
+          <div class="hb-payment-note">⏰ We'll activate your plan within a few hours.</div>
+        </div>
       </div>`;
-    showToast('Upgrade request sent!', 'success');
+    showToast('Plan selected! Follow the payment steps.', 'success');
   } catch(e) {
-    showToast('Could not send request. Try again.', 'error');
+    showToast('Could not submit. Please try again.', 'error');
   }
 }
 
 // ── Increment Firestore HB count ──────────────────────────────────────
 function incrementHBCount() {
   hbCountLocal++;
-  // Update sub-header live
   const subEl = document.getElementById('cchSub');
-  if (subEl && currentChatId === 'ai_assistant') {
-    subEl.textContent = `${hbCountLocal.toLocaleString()} / ${HB_LIMIT.toLocaleString()} messages`;
-  }
+  if (subEl && currentChatId === 'ai_assistant') subEl.textContent = _hbSubLabel();
   if (!firebaseDB || !currentUser || !currentUser.uid) return;
   firebaseDB.collection('users').doc(currentUser.uid).update({
     hbCount: firebase.firestore.FieldValue.increment(1)
   }).catch(() => {});
 }
 
-// ── Gemini API call (for upgraded users) ──────────────────────────────
+// ── Gemini API call (legacy — admin-allocated key) ────────────────────
 async function callGemini(apiKey, history, systemPrompt, userMsg, maxTokens = 700) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
   const contents = [];
-  const trimmed  = history.slice(-10);
-  for (const m of trimmed) {
+  for (const m of history.slice(-10)) {
     contents.push({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] });
   }
   if (userMsg) contents.push({ role: 'user', parts: [{ text: userMsg }] });
-
   const resp = await fetch(url, {
-    method:  'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body:    JSON.stringify({
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
       contents,
       systemInstruction: { parts: [{ text: systemPrompt }] },
       generationConfig:  { maxOutputTokens: maxTokens, temperature: 0.9 }
     })
   });
-  if (!resp.ok) {
-    const errData = await resp.json().catch(() => ({}));
-    throw new Error(errData?.error?.message || `HTTP ${resp.status}`);
-  }
+  if (!resp.ok) { const e = await resp.json().catch(()=>({})); throw new Error(e?.error?.message || `HTTP ${resp.status}`); }
   const data = await resp.json();
   return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '[No response]';
 }
