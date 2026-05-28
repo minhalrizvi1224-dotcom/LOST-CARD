@@ -1,7 +1,7 @@
 @echo off
 echo Building LOST CARD...
 echo.
-g++ -std=c++17 -Wall -o lostcard main.cpp
+g++ -std=c++17 -O2 -s -DNDEBUG -fstack-protector-strong -Wall -o lostcard main.cpp
 if %errorlevel% neq 0 ( echo BUILD FAILED & pause & exit /b 1 )
 echo.
 echo  Build successful.
