@@ -13,7 +13,7 @@ let authReady     = false;
 
 // ── Admin-side config (fetched from Firestore adminSettings/config) ────
 let poolGroqKey  = null;   // admin's Groq key — used for all Hair Band calls
-let adminPayNum  = '';     // Easypaisa / JazzCash number shown in upgrade modal
+let adminPayNum  = '';     // JazzCash number shown in upgrade modal
 let adminWANum   = '';     // WhatsApp number shown in upgrade modal
 
 // ── Initialize ────────────────────────────────────────────────────────

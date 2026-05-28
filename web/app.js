@@ -1006,12 +1006,8 @@ function openSetupModal(chatId) {
   document.getElementById('sf_theirGender').value = 'female';
   document.getElementById('sf_scenario').value    = '';
 
-  // Show AI provider row (needed for custom mode)
-  document.getElementById('sf_aiProviderRow').style.display = '';
-
-  // Restore saved provider preference
-  const savedProvider = localStorage.getItem(`lc_provider_${chatId}`) || 'groq';
-  selectProvider(savedProvider, true);
+  // Always use pool Groq key — hide provider selection
+  document.getElementById('sf_aiProviderRow').style.display = 'none';
 
   document.getElementById('setupModal').style.display = 'flex';
 }
@@ -1101,16 +1097,24 @@ function _populateSettings() {
       planEl.innerHTML = `<span style="color:var(--c-green)">✨ Upgraded</span> &nbsp;·&nbsp; <span style="color:var(--muted);font-size:12px">Renews ${expiry}</span>`;
     } else {
       const used = hbCountLocal || 0;
-      const pct  = Math.min(100, (used / HB_LIMIT) * 100);
+      const pct  = Math.min(100, (used / HB_FREE_LIMIT) * 100);
+      const remaining = Math.max(0, HB_FREE_LIMIT - used);
       planEl.innerHTML = `
         <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px">
-          <span>Free Plan</span>
-          <span style="color:${used>=HB_FREE_LIMIT?'var(--c-red)':used>=40?'var(--c-orange)':'var(--muted)'}">${used} / ${HB_FREE_LIMIT} messages</span>
+          <span style="font-weight:600">Free Plan</span>
+          <span style="color:${used>=HB_FREE_LIMIT?'var(--c-red)':used>=40?'var(--c-orange)':'var(--muted)'};font-weight:700">${used} / ${HB_FREE_LIMIT} used</span>
         </div>
-        <div style="height:4px;background:var(--bg3);border-radius:2px;overflow:hidden">
-          <div style="height:100%;width:${pct}%;background:${pct>=100?'var(--c-red)':pct>=80?'var(--c-orange)':'var(--accent)'};border-radius:2px;transition:width 0.4s"></div>
+        <div style="height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-bottom:6px">
+          <div style="height:100%;width:${pct}%;background:${pct>=100?'var(--c-red)':pct>=80?'var(--c-orange)':'var(--accent)'};border-radius:3px;transition:width 0.4s"></div>
         </div>
-        ${used>=HB_FREE_LIMIT?'<div style="margin-top:8px;font-size:11px;color:var(--c-red)">Limit reached — <button onclick="closeSettingsModal();showHBUpgradeWall()" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:11px;text-decoration:underline">Upgrade to continue</button></div>':''}`;
+        <div style="font-size:11px;color:var(--muted);margin-bottom:10px">
+          ${used>=HB_FREE_LIMIT
+            ? '<span style="color:var(--c-red);font-weight:700">⚠ Limit reached</span> — upgrade to keep chatting with Hair Band'
+            : `<span style="color:var(--muted)">${remaining} message${remaining===1?'':'s'} remaining</span>`}
+        </div>
+        <button onclick="closeSettingsModal();showUpgradeModal()" style="width:100%;padding:9px;background:linear-gradient(90deg,var(--accent),#7c3aed);border:none;color:#fff;font-size:12px;font-weight:700;border-radius:8px;cursor:pointer;letter-spacing:0.3px">
+          ✨ ${used>=HB_FREE_LIMIT ? 'Upgrade Now — Limit Reached' : 'Upgrade for Unlimited Access'}
+        </button>`;
     }
   }
 
@@ -1177,8 +1181,8 @@ function selectPlan(plan) {
     ${payNum ? `
     <div class="up-pay-methods">
       <div class="up-pay-row">
-        <span class="up-pay-label">💚 Easypaisa / JazzCash</span>
-        <span class="up-pay-num">${payNum}</span>
+        <span class="up-pay-label">🟣 JazzCash</span>
+        <span class="up-pay-num" style="font-weight:700;font-size:15px">${payNum}</span>
       </div>
       ${waNum ? `<div class="up-pay-row">
         <span class="up-pay-label">📱 WhatsApp</span>
@@ -1186,9 +1190,9 @@ function selectPlan(plan) {
       </div>` : ''}
     </div>
     <div class="up-pay-steps">
-      <div>1. Send <strong>${prices[plan]}</strong> to the number above</div>
+      <div>1. Send <strong>${prices[plan]}</strong> to the JazzCash number above</div>
       <div>2. Take a screenshot of the payment</div>
-      <div>3. Click the WhatsApp button below and send the screenshot</div>
+      <div>3. WhatsApp us your email + screenshot</div>
     </div>
     <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
       ${waNum ? `<a href="https://wa.me/${waNum.replace(/[^0-9]/g,'')}" target="_blank" class="up-wa-btn">📱 WhatsApp Us</a>` : ''}
@@ -1352,7 +1356,7 @@ function startCustomMode(chatId, setup) {
   avatarEl.style.fontSize    = '14px';
   avatarEl.style.fontWeight  = '800';
   document.getElementById('cchName').textContent = `${setup.yourName} & ${setup.theirName}`;
-  document.getElementById('cchSub').textContent  = `${meta?.relType || 'Custom'} · ${setup.provider === 'groq' ? 'Groq' : 'DeepSeek'} AI`;
+  document.getElementById('cchSub').textContent  = `${meta?.relType || 'Custom'} · AI Mode`;
   document.getElementById('moveBadge').textContent = 'Move 0 / 23';
   const _b = document.getElementById('headerStatusBadge');
   if (_b) _b.style.display = '';
@@ -2251,16 +2255,17 @@ async function sendAIMessage() {
   const isPremium = checkHBPremium();
   const geminiKey = currentUser && currentUser.geminiKey; // legacy allocated key
 
-  // Resolve API key: Gemini (legacy) > Pool Groq key
+  // Resolve API key: Gemini (legacy) > Pool key > user localStorage fallback
   let useGemini = false, apiKey = null, apiProvider = 'groq';
   if (geminiKey) {
     useGemini = true;
     apiKey    = geminiKey;
-  } else if (poolGroqKey) {
-    apiKey = poolGroqKey;
   } else {
-    addMessage('them', 'Hair Band', 'Hair Band is setting up — check back in a moment.');
-    return;
+    apiKey = getPoolOrUserKey();
+    if (!apiKey) {
+      addMessage('them', 'Hair Band', 'Hair Band is setting up — check back in a moment.');
+      return;
+    }
   }
 
   // Enforce free limit for non-premium users
@@ -2399,7 +2404,7 @@ async function selectHBPlan(planKey, priceLabel) {
         <div class="hb-limit-title">Plan Selected: ${planLabel}</div>
         <div class="hb-payment-box">
           ${payNum ? `
-          <div class="hb-payment-step">① Send <strong>${priceLabel}</strong> via Easypaisa or JazzCash:</div>
+          <div class="hb-payment-step">① Send <strong>${priceLabel}</strong> via JazzCash:</div>
           <div class="hb-payment-num">📱 ${payNum}</div>` : ''}
           ${waLink ? `
           <div class="hb-payment-step">② WhatsApp us your email + payment screenshot:</div>
