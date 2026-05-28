@@ -1196,6 +1196,10 @@ function _populateSettings() {
   // Plan status
   const planEl = document.getElementById('set_planStatus');
   if (planEl) {
+    // Hide upgrade button for admin and upgraded users
+    const upgBtn = document.getElementById('set_upgradeLinkBtn');
+    if (upgBtn) upgBtn.style.display = (currentUser && (currentUser.isAdmin || isUpgraded())) ? 'none' : '';
+
     const upgraded = isUpgraded();
     if (currentUser && currentUser.isAdmin) {
       planEl.innerHTML = `<span style="color:var(--c-green)">⚡ Admin</span> &nbsp;·&nbsp; <span style="color:var(--muted);font-size:12px">Unlimited access</span>`;
@@ -1244,6 +1248,12 @@ function saveSettings() {
   localStorage.setItem('lc_set_showhints',  showHints);
   localStorage.setItem('lc_set_showpsych',  showPsych);
   localStorage.setItem('lc_set_shownlibar', showNLIBar);
+  // Also save to Firestore so settings persist across devices and sign-outs
+  if (typeof firebaseDB !== 'undefined' && firebaseDB && currentUser?.uid) {
+    firebaseDB.collection('users').doc(currentUser.uid).update({
+      preferences: { autoScroll, showHints, showPsych, showNLIBar }
+    }).catch(() => {});
+  }
   showToast('Settings saved.', 'success');
   closeSettingsModal();
 }

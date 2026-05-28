@@ -79,6 +79,15 @@ function initAuth() {
       geminiKey:        docData.geminiKey         || null  // legacy compat
     };
 
+    // ── Load saved preferences from Firestore into localStorage ──────────
+    if (docData.preferences) {
+      const p = docData.preferences;
+      if (p.autoScroll !== undefined) localStorage.setItem('lc_set_autoscroll', p.autoScroll);
+      if (p.showHints  !== undefined) localStorage.setItem('lc_set_showhints',  p.showHints);
+      if (p.showPsych  !== undefined) localStorage.setItem('lc_set_showpsych',  p.showPsych);
+      if (p.showNLIBar !== undefined) localStorage.setItem('lc_set_shownlibar', p.showNLIBar);
+    }
+
     // ── Helper: apply admin config fields from a Firestore doc ──────────
     function _applyAdminConfig(c) {
       poolGroqKeys    = Array.isArray(c.poolKeys) && c.poolKeys.length
