@@ -94,10 +94,30 @@ function initAuth() {
       }
     }).catch(() => {});
 
-    // Update last login in background
+    // Update last login + mark online
     firebaseDB.collection('users').doc(user.uid).update({
-      lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+      lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
+      isOnline:  true,
+      lastSeen:  firebase.firestore.FieldValue.serverTimestamp()
     }).catch(() => {});
+
+    // Heartbeat — keep lastSeen fresh every 90 seconds while page is open
+    const _heartbeatInterval = setInterval(() => {
+      if (firebaseDB && currentUser && currentUser.uid) {
+        firebaseDB.collection('users').doc(currentUser.uid).update({
+          lastSeen: firebase.firestore.FieldValue.serverTimestamp()
+        }).catch(() => {});
+      }
+    }, 90 * 1000);
+
+    // Mark offline on tab close / navigate away (best-effort)
+    window.addEventListener('beforeunload', () => {
+      if (firebaseDB && currentUser && currentUser.uid) {
+        firebaseDB.collection('users').doc(currentUser.uid).update({
+          isOnline: false
+        }).catch(() => {});
+      }
+    }, { once: true });
 
     authReady = true;
     renderUserBadge();
@@ -122,6 +142,12 @@ function _loadGuestProfile() {
 
 // ── Sign out ──────────────────────────────────────────────────────────
 async function signOut() {
+  // Mark offline before signing out
+  if (firebaseDB && currentUser && currentUser.uid) {
+    await firebaseDB.collection('users').doc(currentUser.uid).update({
+      isOnline: false
+    }).catch(() => {});
+  }
   if (firebaseAuth) {
     await firebaseAuth.signOut();
   }

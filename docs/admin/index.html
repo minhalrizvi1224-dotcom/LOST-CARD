@@ -952,9 +952,13 @@ function renderUsersTable(users) {
     const lastAct=u.lastSession? fmtDate(u.lastSession.seconds): u.lastLogin?fmtDate(u.lastLogin.seconds):'-';
     const warns=u.warningCount||0;
     const susp=u.suspended?true:false;
+    const nowMs=Date.now();
+    const lastSeenMs=u.lastSeen?(u.lastSeen.seconds*1000):0;
+    const isOnline=u.isOnline===true&&(nowMs-lastSeenMs<5*60*1000);
     const statusBadge=susp?'<span class="badge badge-red">SUSPENDED</span>':
       warns>0?`<span class="badge badge-orange">⚠ ${warns}/3</span>`:
-      '<span class="badge badge-green">Active</span>';
+      isOnline?'<span class="badge badge-green">● Online</span>':
+      '<span class="badge badge-gray">Inactive</span>';
     const hbCnt=u.hbCount||0;
     const hasGemini=!!u.geminiKey;
     const wantsUpgrade=u.upgradeRequested&&!hasGemini;
