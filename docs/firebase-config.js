@@ -59,13 +59,13 @@ const FIREBASE_CONFIG = {
 // ──────────────────────────────────────────────────────────────────────
 // ADMIN SETUP:
 //   1. Sign up in the app with your own email
-//   2. Firebase Console → Authentication → Users → copy YOUR uid
-//   3. Paste it below (keep quotes)
+//   2. Firebase Console → Firestore → users → your UID doc
+//   3. Add field: isAdmin = true (boolean)
 // ──────────────────────────────────────────────────────────────────────
-const ADMIN_UID = 'gHFlKHBDODOp1zXQ1T304skhITi1';
 
 // ──────────────────────────────────────────────────────────────────────
 // DO NOT EDIT BELOW
 // ──────────────────────────────────────────────────────────────────────
 const FIREBASE_ENABLED = !FIREBASE_CONFIG.apiKey.includes('PASTE_YOUR');
-const IS_ADMIN = (uid) => uid === ADMIN_UID && ADMIN_UID !== 'PASTE_YOUR_UID_HERE';
+// Admin check uses Firestore isAdmin field — no UID hardcoded here
+const IS_ADMIN = () => false;

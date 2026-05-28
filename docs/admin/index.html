@@ -724,7 +724,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
   adAuth.onAuthStateChanged(async user => {
     if (!user) { showAuthScreen(); return; }
-    if (!IS_ADMIN(user.uid)) {
+    // Check isAdmin flag from Firestore — no hardcoded UID in client code
+    const adminDoc = await adDB.collection('users').doc(user.uid).get().catch(() => null);
+    if (!adminDoc || !adminDoc.exists || adminDoc.data().isAdmin !== true) {
       await adAuth.signOut();
       showErr('Access denied.');
       return;
