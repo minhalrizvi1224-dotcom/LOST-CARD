@@ -88,6 +88,13 @@ function initAuth() {
       if (p.showNLIBar !== undefined) localStorage.setItem('lc_set_shownlibar', p.showNLIBar);
     }
 
+    // ── Load saved chat setups from Firestore into localStorage ──────────
+    if (docData.chatSetups && typeof docData.chatSetups === 'object') {
+      Object.entries(docData.chatSetups).forEach(([chatId, setup]) => {
+        if (setup) localStorage.setItem(`lc_setup_${chatId}`, JSON.stringify(setup));
+      });
+    }
+
     // ── Helper: apply admin config fields from a Firestore doc ──────────
     function _applyAdminConfig(c) {
       poolGroqKeys    = Array.isArray(c.poolKeys) && c.poolKeys.length

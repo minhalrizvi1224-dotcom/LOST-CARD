@@ -1165,6 +1165,12 @@ function getSavedSetup(chatId) {
 }
 function saveSetup(chatId, setup) {
   localStorage.setItem(`lc_setup_${chatId}`, JSON.stringify(setup));
+  // Also persist to Firestore so setup survives sign-out / browser clear
+  if (typeof firebaseDB !== 'undefined' && firebaseDB && currentUser?.uid) {
+    const patch = {};
+    patch[`chatSetups.${chatId}`] = setup;
+    firebaseDB.collection('users').doc(currentUser.uid).update(patch).catch(() => {});
+  }
 }
 // Called by "⚙ Setup" button in chat header — clears saved setup and re-opens modal
 function resetAndSetup() {
@@ -1954,9 +1960,19 @@ function classifyMessageHeuristic(text) {
   // Aggressive single words
   const aggrWords = ['stupid','idiot','dumb','fool','pathetic','useless','worthless',
     'hate','disgusting','annoying','ridiculous','worst','terrible','horrible',
-    'liar','cheat','hypocrite','selfish','arrogant','toxic','manipulative'];
+    'liar','cheat','hypocrite','selfish','arrogant','toxic','manipulative',
+    // Profanity & explicit — strong aggression signals
+    'fuck','shit','bitch','asshole','bastard','damn you','screw you','piss off',
+    'go to hell','get out','get away from','get lost','get the hell',
+    'shut the','what the hell','what the fuck','are you kidding me'];
   for (const w of aggrWords) {
     if (t.includes(w)) { aggrScore += 2; break; }
+  }
+
+  // Explicit / inappropriate content — treat as aggressive boundary violation
+  const explicitWords = ['sex','porn','naked','nudes','dick','cock','pussy','boobs'];
+  for (const w of explicitWords) {
+    if (t.split(/\s+/).some(word => word.replace(/[^a-z]/g,'') === w)) { aggrScore += 2; break; }
   }
 
   // ALL-CAPS words (shouting) - strong aggression signal
