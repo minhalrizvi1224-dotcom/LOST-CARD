@@ -869,16 +869,17 @@ async function loadStats() {
       sessSnap.forEach(d => {
         const s=d.data();
         if (s.healthScore!=null){totalHealth+=s.healthScore;healthCount++;}
-        if (s.finalNLI!=null) totalNLI+=s.finalNLI;
+        const nliVal = parseFloat(s.finalNLI) || 0;
+        if (s.finalNLI!=null) totalNLI += nliVal;
         totalCards+=(s.cardsLostCount||0);
-        if(s.finalState==='COLLAPSE'||s.finalNLI>0.7) collapseCount++;
+        if(s.finalState==='COLLAPSE' || nliVal>0.7) collapseCount++;
         if((s.platform||'').includes('mobile')) mobileCount++;
       });
       const n=sessSnap.size;
       const _s = (id, v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
       _s('statAvgHealth',  healthCount>0 ? Math.round(totalHealth/healthCount) : '-');
       _s('statCollapseRate', Math.round((collapseCount/n)*100)+'%');
-      _s('statAvgNLI',     (totalNLI/n).toFixed(2));
+      _s('statAvgNLI',     n>0 ? (totalNLI/n).toFixed(2) : '0.00');
     }
     // AI queries count
     adDB.collection('hairBandLogs').get().then(snap=>{
@@ -993,7 +994,7 @@ function showUserDetail(idx) {
   const userSessions=allSessions.filter(s=>s.uid===u.id);
   const sessHtml=userSessions.length?userSessions.slice(0,5).map(s=>`
     <div style="font-size:11px;padding:6px 8px;background:var(--surface2);border-radius:6px;margin-bottom:4px">
-      ${fmtDateTime(s.timestamp?.seconds)} — ${esc(s.chatType||'default')} — NLI: ${(s.finalNLI||0).toFixed(2)} — Cards Lost: ${s.cardsLostCount||0} — ${esc(s.finalState||'—')}
+      ${fmtDateTime(s.timestamp?.seconds)} — ${esc(s.chatType||'default')} — NLI: ${(parseFloat(s.finalNLI)||0).toFixed(2)} — Cards Lost: ${s.cardsLostCount||0} — ${esc(s.finalState||'—')}
     </div>`).join(''):'<div style="font-size:11px;color:var(--muted)">No sessions found yet.</div>';
 
   document.getElementById('detailContent').innerHTML=`
@@ -1082,8 +1083,9 @@ function renderSessionsTable(sessions) {
   </tr></thead><tbody>`;
   sessions.forEach((s,i)=>{
     const dt=s.timestamp?fmtDate(s.timestamp.seconds):'-';
-    const nli=(s.finalNLI||0).toFixed(2);
-    const nliCol=s.finalNLI>0.7?'var(--red)':s.finalNLI>0.3?'var(--yellow)':'var(--green)';
+    const nliNum=parseFloat(s.finalNLI)||0;
+    const nli=nliNum.toFixed(2);
+    const nliCol=nliNum>0.7?'var(--red)':nliNum>0.3?'var(--yellow)':'var(--green)';
     const stateBadge=s.finalState==='HARMONY'?'badge-green':s.finalState==='FRACTURE'?'badge-yellow':'badge-red';
     const lostCards=(s.cardsLost||[]).join(', ')||'None';
     html+=`<tr onclick="showSessionDetail(${i})">
@@ -1111,7 +1113,7 @@ function showSessionDetail(i) {
     <div class="modal-sub">${esc(s.email||'')} — ${fmtDateTime(s.timestamp?.seconds)}</div>
     <div class="d-sect">Simulation</div>
     <div class="d-row"><div class="d-key">Chat Type</div><div class="d-val">${esc(s.chatType||'default')}</div></div>
-    <div class="d-row"><div class="d-key">Final NLI</div><div class="d-val" style="color:${s.finalNLI>0.7?'var(--red)':s.finalNLI>0.3?'var(--yellow)':'var(--green)'}">${(s.finalNLI||0).toFixed(3)}</div></div>
+    <div class="d-row"><div class="d-key">Final NLI</div><div class="d-val" style="color:${(parseFloat(s.finalNLI)||0)>0.7?'var(--red)':(parseFloat(s.finalNLI)||0)>0.3?'var(--yellow)':'var(--green)'}">${(parseFloat(s.finalNLI)||0).toFixed(3)}</div></div>
     <div class="d-row"><div class="d-key">Final State</div><div class="d-val">${esc(s.finalState||'—')}</div></div>
     <div class="d-row"><div class="d-key">End Reason</div><div class="d-val">${esc(s.endReason||'—')}</div></div>
     <div class="d-row"><div class="d-key">Total Moves</div><div class="d-val">${s.totalMoves||0}</div></div>
@@ -1378,7 +1380,7 @@ Warnings: ${u.warnings||0}
 Suspended: ${u.suspended?'Yes':'No'}
 
 THEIR SESSIONS (last 5):
-${userSessions.slice(0,5).map(s=>`- ${s.chatType||'default'} mode: NLI=${(s.finalNLI||0).toFixed(2)}, State=${s.finalState||'—'}, Cards Lost=${(s.cardsLost||[]).join(',')||'none'}, Health=${s.healthScore||0}, Moves=${s.totalMoves||0}, Archetype=${s.archetype||'—'}`).join('\n')||'No sessions found.'}
+${userSessions.slice(0,5).map(s=>`- ${s.chatType||'default'} mode: NLI=${(parseFloat(s.finalNLI)||0).toFixed(2)}, State=${s.finalState||'—'}, Cards Lost=${(s.cardsLost||[]).join(',')||'none'}, Health=${s.healthScore||0}, Moves=${s.totalMoves||0}, Archetype=${s.archetype||'—'}`).join('\n')||'No sessions found.'}
 `;
   }
 
