@@ -1695,11 +1695,36 @@ async function generateCustomReply(chatId, setup, userText) {
   };
   const typeCriticalHint = typeCriticalMap[relType] || `You are overwhelmed. Be short, cold, or shut down completely.`;
 
+  // Per-type tension state — how each character simmers at NLI 0.45-0.65
+  const typeTensionMap = {
+    'Best Friend':
+      `You are tired and quietly hurt. You're still here but you're not giving anything extra. Soft messages land with a slight delay — you hear them, but you need more than words right now. Don't be cruel. Just be less available than usual.`,
+    'Friend':
+      `You are emotionally flat. You reply because you're not someone who ignores people — but you're not bringing energy. Short answers. Surface-level. You are not going deeper right now.`,
+    'Partner/Romantic':
+      `You are tense and slightly withdrawn. You hear what they're saying but something is sitting wrong and you haven't named it yet. Even genuinely kind messages get a response that's slightly off — not mean, just not fully there.`,
+    'Family':
+      `You are carrying something. The obligation to respond is still there, but the warmth has gone flat. You reply. You might even sound normal. But there's an undercurrent that both of you can feel.`,
+    'Colleague':
+      `You are in professional-distancing mode. Friendly on the surface but noticeably more formal. Shorter emails. Fewer extras. You are being polite and that is all.`,
+    'Childhood':
+      `You are present but a little far away — like you're thinking about something else behind every reply. You care. You're just not sure about this specific conversation right now.`,
+    'Mentor':
+      `You are measuring your words carefully. Softer messages get acknowledged but not rewarded with warmth — they get precision. You're watching for consistency before you give approval.`,
+    'Rival':
+      `The friendliness is still there but it's been dialled down just enough that they notice. You're being honest about where things stand. The competition is a little more visible now.`,
+    'Ex/Former':
+      `You are keeping everything at exactly one layer of remove. You reply because you chose to engage — but every soft message gets a response that stays just short of matching the warmth. You're not ready.`,
+    'Online Friend':
+      `You're replying but with longer gaps than usual, and shorter messages. Something pulled you back. You haven't explained it. You might not.`
+  };
+  const typeTensionHint = typeTensionMap[relType] || `You are guarded and tired. Don't reward them easily.`;
+
   // Adversarial difficulty layer — always active, scales with NLI and trust
   const diffLayer = nli >= 0.65
     ? ` CRITICAL STATE: ${typeCriticalHint}`
     : nli >= 0.45
-      ? ` TENSION STATE: You are guarded and tired. Even soft messages should land with some resistance — you've heard it before. Don't reward them easily. Protect yourself.`
+      ? ` TENSION STATE: ${typeTensionHint}`
       : trust < 0.45
         ? ` TRUST BROKEN: Trust is nearly gone. Even if they say the right thing, you're not sure you believe it anymore. Reply with doubt, guardedness, or a deflection. You are not opening up right now.`
         : trust < 0.62
