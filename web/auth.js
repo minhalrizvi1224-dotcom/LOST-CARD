@@ -70,8 +70,8 @@ function initAuth() {
       geminiKey:        docData.geminiKey         || null  // legacy compat
     };
 
-    // Fetch admin config (pool key, payment info) — any logged-in user can read
-    firebaseDB.collection('adminSettings').doc('config').get().then(cfg => {
+    // Fetch admin config (pool key, payment info) — AWAIT so it's ready before authReady fires
+    await firebaseDB.collection('adminSettings').doc('config').get().then(cfg => {
       if (cfg.exists) {
         const c = cfg.data();
         poolGroqKey = c.poolKey      || null;

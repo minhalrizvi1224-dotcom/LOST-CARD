@@ -1540,6 +1540,15 @@ function sendCustomMessage() {
   if (!input) return;
   const text = input.value.trim();
   if (!text) return;
+
+  // Content moderation check
+  if (_isViolation(text)) {
+    input.value = '';
+    input.style.height = '40px';
+    _handleViolation(text);
+    return;
+  }
+
   input.value = '';
   input.style.height = '40px';  // reset auto-resize after send
 
@@ -2474,6 +2483,85 @@ async function callGemini(apiKey, history, systemPrompt, userMsg, maxTokens = 70
   if (!resp.ok) { const e = await resp.json().catch(()=>({})); throw new Error(e?.error?.message || `HTTP ${resp.status}`); }
   const data = await resp.json();
   return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '[No response]';
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// CONTENT MODERATION — 3-STRIKE WARNING SYSTEM
+// ══════════════════════════════════════════════════════════════════════
+
+// Patterns that violate community rules — hate speech, explicit sexual, severe harassment
+const _VIOLATION_PATTERNS = [
+  /\b(porn|pornography|nude|naked photo|send nudes|dick pic|sex tape)\b/i,
+  /\b(nigger|nigga|faggot|kike|spic|chink|towelhead|raghead|wetback|tranny)\b/i,
+  /\bkill\s+yourself\b|\bkys\b|\byou\s+should\s+die\b|\bgo\s+die\b/i,
+  /\b(rape|molest|child porn|cp\b|pedo|pedophile)\b/i,
+  /\b(bomb|terrorism|jihad.*kill|blow up)\b/i,
+];
+
+function _isViolation(text) {
+  return _VIOLATION_PATTERNS.some(p => p.test(text));
+}
+
+async function _handleViolation(reason) {
+  if (!firebaseDB || !currentUser || !currentUser.uid) return;
+  const uid = currentUser.uid;
+  try {
+    // Increment warning count in Firestore
+    const userRef = firebaseDB.collection('users').doc(uid);
+    await userRef.update({
+      warningCount: firebase.firestore.FieldValue.increment(1),
+      warnings: firebase.firestore.FieldValue.arrayUnion({
+        reason:    reason.substring(0, 200),
+        chatId:    currentChatId || 'unknown',
+        timestamp: new Date().toISOString()
+      }),
+      lastWarningAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    // Read updated count
+    const snap = await userRef.get();
+    const count = snap.exists ? (snap.data().warningCount || 1) : 1;
+
+    if (count >= 3) {
+      // 3rd strike — suspend
+      await userRef.update({ suspended: true });
+      showToast('Your account has been suspended due to repeated violations.', 'error');
+      setTimeout(() => {
+        if (typeof firebaseAuth !== 'undefined' && firebaseAuth) {
+          firebaseAuth.signOut().catch(() => {});
+        }
+        window.location.href = 'login.html?suspended=1';
+      }, 2500);
+    } else {
+      const remaining = 3 - count;
+      _showWarningModal(count, remaining);
+    }
+  } catch(e) {
+    console.warn('Warning log failed:', e);
+  }
+}
+
+function _showWarningModal(strikeNum, remaining) {
+  let modal = document.getElementById('contentWarningModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'contentWarningModal';
+    modal.style.cssText = 'position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;padding:20px';
+    modal.innerHTML = `
+      <div style="background:var(--bg2,#161B22);border:2px solid var(--c-red,#FF7B72);border-radius:16px;padding:32px;max-width:400px;width:100%;text-align:center">
+        <div style="font-size:40px;margin-bottom:12px">⚠️</div>
+        <div style="font-size:18px;font-weight:900;color:var(--c-red,#FF7B72);margin-bottom:10px">Community Warning</div>
+        <div id="cwmText" style="font-size:13px;color:var(--text,#E6EDF3);margin-bottom:20px;line-height:1.6"></div>
+        <button onclick="document.getElementById('contentWarningModal').remove()" style="padding:11px 28px;background:var(--c-red,#FF7B72);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer">I Understand</button>
+      </div>`;
+    document.body.appendChild(modal);
+  }
+  document.getElementById('cwmText').innerHTML =
+    `This is <strong>Warning ${strikeNum} of 3</strong>.<br><br>`
+    + `Your message violated community rules.<br>`
+    + (remaining > 0
+      ? `<span style="color:var(--c-orange,#F0883E)">${remaining} warning${remaining>1?'s':''} remaining before your account is suspended.</span>`
+      : `<span style="color:var(--c-red,#FF7B72)">Your account will be suspended on the next violation.</span>`);
 }
 
 // ── Log Hair Band queries for admin visibility ─────────────────────────

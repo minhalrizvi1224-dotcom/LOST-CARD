@@ -199,7 +199,7 @@
     .query-time { font-size:10px; color:var(--muted); }
 
     /* ── HAIR BAND ADMIN CHAT ── */
-    .hb-layout { display:flex; gap:0; height:calc(100vh - 220px); min-height:400px; }
+    .hb-layout { display:flex; gap:0; height:calc(100vh - 370px); min-height:400px; }
     .hb-sidebar { width:260px; flex-shrink:0; border-right:1px solid var(--border); display:flex; flex-direction:column; gap:0; padding:14px; overflow-y:auto; }
     .hb-sidebar-title { font-size:10px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.7px; margin-bottom:10px; }
     .hb-user-chip {
@@ -266,7 +266,7 @@
     /* ── RESPONSIVE ── */
     @media(max-width:900px) {
       .hb-sidebar { display:none; }
-      .hb-layout { height:calc(100vh - 200px); }
+      .hb-layout { height:calc(100vh - 320px); }
     }
     @media(max-width:640px) {
       .main { padding:14px; }
@@ -508,10 +508,11 @@
         <div class="sec-actions">
           <input class="search-input" id="queriesSearch" placeholder="Search queries..." oninput="filterQueries()"/>
           <button class="btn-sm" onclick="loadQueries()">Refresh</button>
+          <button class="btn-sm btn-danger" onclick="clearAllQueries()">🗑 Clear All</button>
         </div>
       </div>
       <div style="font-size:12px;color:var(--muted);margin-bottom:14px;padding:10px 12px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">
-        📋 App-related questions users asked Hair Band. Personal/irrelevant queries are filtered automatically. Use these to improve Hair Band's training.
+        📋 All questions users asked Hair Band — logged in real-time. Use these to understand what users care about.
       </div>
       <div id="queriesList"><div class="loading"><span class="spinner"></span>Loading queries...</div></div>
 
@@ -829,11 +830,10 @@ async function loadStats() {
         if((s.platform||'').includes('mobile')) mobileCount++;
       });
       const n=sessSnap.size;
-      document.getElementById('statAvgHealth').textContent  = healthCount>0?Math.round(totalHealth/healthCount):'-';
-      document.getElementById('statAvgCards').textContent   = (totalCards/n).toFixed(1);
-      document.getElementById('statCollapseRate').textContent = Math.round((collapseCount/n)*100)+'%';
-      document.getElementById('statAvgNLI').textContent     = (totalNLI/n).toFixed(2);
-      document.getElementById('statMobile').textContent     = Math.round((mobileCount/n)*100)+'%';
+      const _s = (id, v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
+      _s('statAvgHealth',  healthCount>0 ? Math.round(totalHealth/healthCount) : '-');
+      _s('statCollapseRate', Math.round((collapseCount/n)*100)+'%');
+      _s('statAvgNLI',     (totalNLI/n).toFixed(2));
     }
     // AI queries count
     adDB.collection('hairBandLogs').get().then(snap=>{
@@ -899,7 +899,7 @@ function renderUsersTable(users) {
   users.forEach((u,i)=>{
     const joined =u.createdAt  ? fmtDate(u.createdAt.seconds)  : '-';
     const lastAct=u.lastSession? fmtDate(u.lastSession.seconds): u.lastLogin?fmtDate(u.lastLogin.seconds):'-';
-    const warns=u.warnings||0;
+    const warns=u.warningCount||0;
     const susp=u.suspended?true:false;
     const statusBadge=susp?'<span class="badge badge-red">SUSPENDED</span>':
       warns>0?`<span class="badge badge-orange">⚠ ${warns}/3</span>`:
@@ -907,11 +907,12 @@ function renderUsersTable(users) {
     const hbCnt=u.hbCount||0;
     const hasGemini=!!u.geminiKey;
     const wantsUpgrade=u.upgradeRequested&&!hasGemini;
-    const hbBadge=hasGemini
-      ?'<span class="badge badge-purple" title="Using admin Gemini key">∞ Upgraded</span>'
+    const hbLimit=50;
+    const hbBadge=u.hbPlan==='upgraded'
+      ?'<span class="badge badge-purple">✨ Upgraded</span>'
       :wantsUpgrade
-        ?`<span class="badge badge-orange" title="Upgrade requested">🔔 ${hbCnt}/1000</span>`
-        :`<span class="badge ${hbCnt>=1000?'badge-red':hbCnt>=750?'badge-orange':'badge-gray'}">${hbCnt}/1000</span>`;
+        ?`<span class="badge badge-orange" title="Upgrade requested">🔔 ${hbCnt}/${hbLimit}</span>`
+        :`<span class="badge ${hbCnt>=hbLimit?'badge-red':hbCnt>=40?'badge-orange':'badge-gray'}">${hbCnt}/${hbLimit}</span>`;
     html+=`<tr onclick="showUserDetail(${i})">
       <td style="color:var(--muted);font-size:11px">${i+1}</td>
       <td><div style="font-weight:700">${esc(u.displayName||'—')}</div>
@@ -963,13 +964,14 @@ function showUserDetail(idx) {
     <div class="d-row"><div class="d-key">Archetype</div><div class="d-val" style="color:var(--purple)">${esc(u.archetype||'Not determined')}</div></div>
     <div class="d-row"><div class="d-key">Joined</div><div class="d-val">${u.createdAt?fmtDateTime(u.createdAt.seconds):'—'}</div></div>
     <div class="d-row"><div class="d-key">Last Login</div><div class="d-val">${u.lastLogin?fmtDateTime(u.lastLogin.seconds):'—'}</div></div>
-    <div class="d-row"><div class="d-key">Warnings</div><div class="d-val" style="color:${u.warnings>=3?'var(--red)':u.warnings>0?'var(--accent2)':'var(--green)'}">${u.warnings||0} / 3${u.suspended?' — SUSPENDED':''}</div></div>
+    <div class="d-row"><div class="d-key">Warnings</div><div class="d-val" style="color:${(u.warningCount||0)>=3?'var(--red)':(u.warningCount||0)>0?'var(--accent2)':'var(--green)'}">${u.warningCount||0} / 3${u.suspended?' — SUSPENDED':''}</div></div>
+    ${(u.warnings&&u.warnings.length)?'<div class="d-sect">Violation Log</div>'+u.warnings.slice(-5).reverse().map(w=>`<div style="font-size:11px;padding:5px 8px;background:rgba(255,123,114,.07);border:1px solid rgba(255,123,114,.2);border-radius:6px;margin-bottom:4px"><span style="color:var(--red);font-weight:700">⚠</span> ${esc(w.reason||'—')}<br><span style="color:var(--muted);font-size:10px">${esc(w.chatId||'—')} — ${w.timestamp||'—'}</span></div>`).join(''):''}
     <div class="d-sect">Recent Sessions</div>
     ${sessHtml}
     <div class="d-sect">Hair Band Usage</div>
     <div class="d-row"><div class="d-key">Messages Used</div>
-      <div class="d-val" style="color:${(u.hbCount||0)>=1000?'var(--red)':(u.hbCount||0)>=750?'var(--accent2)':'var(--accent)'}">
-        ${(u.hbCount||0).toLocaleString()} / 1,000</div></div>
+      <div class="d-val" style="color:${(u.hbCount||0)>=50?'var(--red)':(u.hbCount||0)>=40?'var(--accent2)':'var(--accent)'}">
+        ${(u.hbCount||0).toLocaleString()} / 50</div></div>
     <div class="d-row"><div class="d-key">Upgrade Request</div>
       <div class="d-val">${u.upgradeRequested
         ?`<span style="color:var(--accent2)">🔔 Requested${u.upgradeRequestedAt?' — '+fmtDateTime(u.upgradeRequestedAt.seconds):''}</span>`
@@ -1200,6 +1202,24 @@ function filterQueries() {
     (x.query||'').toLowerCase().includes(q)||
     (x.name||'').toLowerCase().includes(q)
   ));
+}
+
+async function clearAllQueries() {
+  if (!confirm('Delete ALL Hair Band query logs? This cannot be undone.')) return;
+  try {
+    const snap = await adDB.collection('hairBandLogs').get();
+    if (snap.empty) { showAdminToast('No queries to delete.'); return; }
+    const batch = adDB.batch();
+    snap.forEach(d => batch.delete(d.ref));
+    await batch.commit();
+    allQueries = [];
+    document.getElementById('queriesCount').textContent = '(0)';
+    document.getElementById('queriesList').innerHTML = '<div class="empty"><div class="empty-icon">💬</div>No queries yet.</div>';
+    const sq = document.getElementById('statAIQueries'); if (sq) sq.textContent = '0';
+    showAdminToast('All queries cleared.');
+  } catch(e) {
+    showAdminToast('Error: ' + e.message);
+  }
 }
 
 // Training notes
