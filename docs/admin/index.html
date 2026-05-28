@@ -948,6 +948,18 @@ async function loadUsers() {
     allUsers=[];
     snap.forEach(d=>{ if(!d.data().isAdmin) allUsers.push({id:d.id,...d.data()}); });
     document.getElementById('usersCount').textContent='('+allUsers.length+')';
+
+    // Count sessions per user from sessions collection (reliable, not from user doc field)
+    const sessSnap = await adDB.collection('sessions').get().catch(()=>null);
+    const sessionCountMap = {};
+    if (sessSnap) {
+      sessSnap.forEach(d => {
+        const uid = d.data().uid;
+        if (uid) sessionCountMap[uid] = (sessionCountMap[uid] || 0) + 1;
+      });
+    }
+    allUsers = allUsers.map(u => ({ ...u, _sessionCount: sessionCountMap[u.id] || 0 }));
+
     renderUsersTable(allUsers);
   } catch(e) {
     el.innerHTML=`<div class="empty">
@@ -994,7 +1006,7 @@ function renderUsersTable(users) {
           ${u.bio?`<div style="font-size:10px;color:var(--muted)">${esc(u.bio.substring(0,30))}…</div>`:''}</td>
       <td style="color:var(--muted);font-size:11px">${esc(u.email||'—')}</td>
       <td style="font-size:11px">${u.location?'📍 '+esc(u.location):'<span style="color:var(--muted)">—</span>'}</td>
-      <td><span class="badge badge-blue">${u.totalSessions||0}</span></td>
+      <td><span class="badge badge-blue">${u._sessionCount ?? u.totalSessions ?? 0}</span></td>
       <td>${hbBadge}</td>
       <td>${statusBadge}</td>
       <td style="color:var(--purple);font-size:11px">${esc(u.archetype||'—')}</td>
