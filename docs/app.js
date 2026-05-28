@@ -1392,23 +1392,46 @@ function getAPIKey(provider) {
   return '';
 }
 
-// ── Pool key rotation ─────────────────────────────────────────────────
-let _poolKeyIdx = 0;  // round-robin pointer; advances on every successful or rotated call
+// ── Unified pool rotation (Groq + DeepSeek interleaved) ──────────────
+let _poolKeyIdx = 0;  // round-robin pointer across the unified pool
 
-function _getKeyPool() {
-  // Use the full pool loaded from Firestore (auth.js populates poolGroqKeys)
-  if (typeof poolGroqKeys !== 'undefined' && poolGroqKeys.length) return poolGroqKeys;
-  // Backward compat: single key
-  if (typeof poolGroqKey !== 'undefined' && poolGroqKey) return [poolGroqKey];
-  // Last resort: user's own saved key
-  const local = localStorage.getItem('lc_groq_key') || localStorage.getItem('lc_deepseek_key') || '';
-  return local ? [local] : [];
+// Returns [{key, provider}, ...] interleaving Groq and DeepSeek keys
+function _getUnifiedPool() {
+  const groqList = (typeof poolGroqKeys !== 'undefined' && poolGroqKeys.length)
+    ? poolGroqKeys
+    : (typeof poolGroqKey !== 'undefined' && poolGroqKey ? [poolGroqKey] : []);
+
+  const dsList = (typeof poolDeepSeekKeys !== 'undefined' && poolDeepSeekKeys.length)
+    ? poolDeepSeekKeys : [];
+
+  // Interleave: groq[0], ds[0], groq[1], ds[1], ... for balanced distribution
+  const unified = [];
+  const maxLen = Math.max(groqList.length, dsList.length);
+  for (let i = 0; i < maxLen; i++) {
+    if (i < groqList.length) unified.push({ key: groqList[i], provider: 'groq' });
+    if (i < dsList.length)   unified.push({ key: dsList[i],   provider: 'deepseek' });
+  }
+  if (unified.length) return unified;
+
+  // localStorage fallback
+  const localGroq = localStorage.getItem('lc_groq_key');
+  const localDS   = localStorage.getItem('lc_deepseek_key');
+  const fallback  = [];
+  if (localGroq) fallback.push({ key: localGroq, provider: 'groq' });
+  if (localDS)   fallback.push({ key: localDS,   provider: 'deepseek' });
+  return fallback;
 }
 
+// Kept for backward compat — returns just the key string of the current entry
 function getPoolOrUserKey() {
-  const pool = _getKeyPool();
+  const pool = _getUnifiedPool();
   if (!pool.length) return '';
-  return pool[_poolKeyIdx % pool.length];
+  return pool[_poolKeyIdx % pool.length].key;
+}
+
+// Legacy — kept so old references don't break
+function _getKeyPool() {
+  return _getUnifiedPool().map(e => e.key);
 }
 
 function isUpgraded() {
@@ -2975,61 +2998,63 @@ function _friendlyAPIError(err) {
 }
 
 async function callAI(provider, key, history, systemPrompt, userMsg, maxTokens = 180) {
-  const url   = provider === 'groq'
-    ? 'https://api.groq.com/openai/v1/chat/completions'
-    : 'https://api.deepseek.com/v1/chat/completions';
-  const model = provider === 'groq' ? 'llama-3.3-70b-versatile' : 'deepseek-chat';
-
+  // Build message array (shared across all pool entries)
   const messages = [{ role: 'system', content: systemPrompt }];
-  // Add history (last 10 turns max)
-  const trimmed = history.slice(-10);
+  const trimmed  = history.slice(-10);
   for (const m of trimmed) messages.push(m);
   if (userMsg) messages.push({ role: 'user', content: userMsg });
 
-  const _doFetch = (useKey) => fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${useKey}` },
-    body: JSON.stringify({ model, messages, max_tokens: maxTokens, temperature: 0.9 })
-  });
+  // Unified pool: [{key, provider}, ...] — Groq + DeepSeek interleaved
+  // Falls back to the passed key/provider if pool is empty
+  const pool    = _getUnifiedPool();
+  const entries = pool.length ? pool : [{ key, provider }];
+  const startIdx = _poolKeyIdx % entries.length;
 
-  // Build key rotation order: start from current pool index, try each key once
-  const pool = _getKeyPool();
-  const keys = pool.length ? pool : [key];  // fallback to passed key if pool empty
-  const startIdx = _poolKeyIdx % keys.length;
+  // Fetch helper — uses each entry's own provider URL and model
+  const _fetchEntry = (entry) => {
+    const eUrl   = entry.provider === 'groq'
+      ? 'https://api.groq.com/openai/v1/chat/completions'
+      : 'https://api.deepseek.com/v1/chat/completions';
+    const eModel = entry.provider === 'groq' ? 'llama-3.3-70b-versatile' : 'deepseek-chat';
+    return fetch(eUrl, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${entry.key}` },
+      body:    JSON.stringify({ model: eModel, messages, max_tokens: maxTokens, temperature: 0.9 })
+    });
+  };
 
-  let resp        = null;
-  let lastErrMsg  = `HTTP error`;
-  let allWere429  = true;  // track if EVERY key returned 429 (vs other errors)
+  let resp       = null;
+  let lastErrMsg = 'HTTP error';
+  let allWere429 = true;
 
-  for (let i = 0; i < keys.length; i++) {
-    const tryKey = keys[(startIdx + i) % keys.length];
-    resp = await _doFetch(tryKey);
+  // First pass — try every entry once, skip on 429, stop on other errors
+  for (let i = 0; i < entries.length; i++) {
+    const entry = entries[(startIdx + i) % entries.length];
+    resp = await _fetchEntry(entry);
     if (resp.ok) {
-      _poolKeyIdx = (startIdx + i + 1) % keys.length;
+      _poolKeyIdx = (startIdx + i + 1) % entries.length;
       allWere429  = false;
       break;
     }
     if (resp.status === 429) {
-      // Rate limited — try next key immediately
       const ed = await resp.json().catch(() => ({}));
-      lastErrMsg = ed?.error?.message || `HTTP 429`;
+      lastErrMsg = ed?.error?.message || 'HTTP 429';
       resp = null;
       continue;
     }
-    // Non-429 error — stop rotating
     allWere429 = false;
     break;
   }
 
-  // All keys hit 429 → wait 5 seconds then give the pool one final pass
-  // (Groq per-minute window partially resets; this rescues brief spikes)
-  if (!resp && allWere429 && keys.length > 0) {
+  // All entries were 429 → wait 5 s (rate-limit window starts resetting)
+  // then do a second full pass — rescues brief spikes without showing error
+  if (!resp && allWere429 && entries.length > 0) {
     await new Promise(r => setTimeout(r, 5000));
-    for (let i = 0; i < keys.length; i++) {
-      const tryKey = keys[(_poolKeyIdx + i) % keys.length];
-      resp = await _doFetch(tryKey);
+    for (let i = 0; i < entries.length; i++) {
+      const entry = entries[(_poolKeyIdx + i) % entries.length];
+      resp = await _fetchEntry(entry);
       if (resp.ok) {
-        _poolKeyIdx = (_poolKeyIdx + i + 1) % keys.length;
+        _poolKeyIdx = (_poolKeyIdx + i + 1) % entries.length;
         break;
       }
       if (resp.status === 429) { resp = null; continue; }
@@ -3040,8 +3065,7 @@ async function callAI(provider, key, history, systemPrompt, userMsg, maxTokens =
   if (!resp || !resp.ok) {
     if (!resp) throw new Error(lastErrMsg);
     const errData = await resp.json().catch(() => ({}));
-    const errMsg = errData?.error?.message || `HTTP ${resp.status}`;
-    throw new Error(errMsg);
+    throw new Error(errData?.error?.message || `HTTP ${resp.status}`);
   }
 
   const data = await resp.json();

@@ -566,23 +566,34 @@
     <div id="tabSettings" style="display:none">
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:20px;max-width:900px">
 
-        <!-- Pool API Key -->
+        <!-- Pool API Key — Groq -->
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-            <div style="font-size:14px;font-weight:800">🔑 API Key Pool (Groq)</div>
+            <div style="font-size:14px;font-weight:800">🔑 API Key Pool — Groq</div>
             <span id="poolKeyCounter" style="font-size:11px;font-weight:700;color:var(--muted);background:var(--bg);padding:3px 10px;border-radius:20px;border:1px solid var(--border)">0 / 10</span>
           </div>
-          <div style="font-size:12px;color:var(--muted);margin-bottom:16px">Up to 10 keys — app rotates automatically when one is rate-limited. Never shown to users.</div>
-
-          <!-- Current keys list -->
+          <div style="font-size:12px;color:var(--muted);margin-bottom:16px">Up to 10 Groq keys — rotates with DeepSeek pool when rate-limited. Keys start with <code style="color:var(--accent)">gsk_</code></div>
           <div id="poolKeysList" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px"></div>
-
-          <!-- Add new key -->
           <div style="display:flex;gap:8px;align-items:center">
-            <input id="newPoolKey" type="password" placeholder="gsk_… paste new key here" style="flex:1;padding:9px 11px;background:var(--bg);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:12px;font-family:monospace;outline:none"/>
-            <button id="addPoolKeyBtn" class="btn-sm" style="border-color:var(--green);color:var(--green);white-space:nowrap" onclick="addPoolKey()">+ Add Key</button>
+            <input id="newPoolKey" type="password" placeholder="gsk_… paste Groq key here" style="flex:1;padding:9px 11px;background:var(--bg);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:12px;font-family:monospace;outline:none"/>
+            <button id="addPoolKeyBtn" class="btn-sm" style="border-color:var(--green);color:var(--green);white-space:nowrap" onclick="addPoolKey()">+ Add</button>
           </div>
           <div id="poolKeySaveStatus" style="font-size:11px;margin-top:8px;color:var(--muted)"></div>
+        </div>
+
+        <!-- Pool API Key — DeepSeek -->
+        <div style="background:var(--surface);border:1px solid rgba(88,166,255,.3);border-radius:12px;padding:22px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+            <div style="font-size:14px;font-weight:800">🔷 API Key Pool — DeepSeek</div>
+            <span id="dsPoolKeyCounter" style="font-size:11px;font-weight:700;color:var(--muted);background:var(--bg);padding:3px 10px;border-radius:20px;border:1px solid var(--border)">0 / 10</span>
+          </div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:16px">Up to 10 DeepSeek keys — interleaved with Groq pool for maximum throughput. Keys start with <code style="color:#58A6FF">sk-</code></div>
+          <div id="dsPoolKeysList" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px"></div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input id="newDSPoolKey" type="password" placeholder="sk-… paste DeepSeek key here" style="flex:1;padding:9px 11px;background:var(--bg);border:1px solid rgba(88,166,255,.3);border-radius:7px;color:var(--text);font-size:12px;font-family:monospace;outline:none"/>
+            <button id="addDSPoolKeyBtn" class="btn-sm" style="border-color:#58A6FF;color:#58A6FF;white-space:nowrap" onclick="addDSPoolKey()">+ Add</button>
+          </div>
+          <div id="dsPoolKeySaveStatus" style="font-size:11px;margin-top:8px;color:var(--muted)"></div>
         </div>
 
         <!-- Stripe Payment Links -->
@@ -747,22 +758,15 @@ function showDashboard() {
   document.getElementById('tbAdminEmail').textContent = adUser.email;
   // Load saved admin profile into modal fields
   _loadAdminProfile();
-  // Pre-load pool keys so admin Hair Band works immediately
+  // Pre-load both pools so admin Hair Band works immediately
   adDB.collection('adminSettings').doc('config').get().then(cfg => {
     if (cfg.exists) {
       const c = cfg.data();
-      _poolKeys = Array.isArray(c.poolKeys) && c.poolKeys.length ? c.poolKeys : (c.poolKey ? [c.poolKey] : []);
-      adPoolKey = _poolKeys[0] || null;
-      // Update Settings tab counter
+      _poolKeys   = Array.isArray(c.poolKeys) && c.poolKeys.length ? c.poolKeys : (c.poolKey ? [c.poolKey] : []);
+      adPoolKey   = _poolKeys[0] || null;
+      _poolDSKeys = Array.isArray(c.deepseekPoolKeys) && c.deepseekPoolKeys.length ? c.deepseekPoolKeys : [];
       _renderPoolKeys();
-      // Update dashboard key status (fix race condition — refreshAll ran before this resolved)
-      const keyEl = document.getElementById('apmKeyStatus');
-      if (keyEl) {
-        keyEl.textContent = _poolKeys.length > 0
-          ? `✓ ${_poolKeys.length} key${_poolKeys.length > 1 ? 's' : ''} active`
-          : 'Not set';
-        keyEl.style.color = _poolKeys.length > 0 ? 'var(--green)' : 'var(--red)';
-      }
+      _renderDSPoolKeys();        // renders DeepSeek list + calls _updateCombinedKeyStatus
     }
   }).catch(()=>{});
   refreshAll();
@@ -1610,12 +1614,16 @@ async function loadAdminSettings() {
     const cfg = await adDB.collection('adminSettings').doc('config').get();
     if (cfg.exists) {
       const c = cfg.data();
-      // Load pool keys (new array format, fallback to old single key)
+      // Load Groq pool keys
       _poolKeys = Array.isArray(c.poolKeys) && c.poolKeys.length
                     ? c.poolKeys
                     : (c.poolKey ? [c.poolKey] : []);
       adPoolKey = _poolKeys[0] || null;
       _renderPoolKeys();
+      // Load DeepSeek pool keys
+      _poolDSKeys = Array.isArray(c.deepseekPoolKeys) && c.deepseekPoolKeys.length
+                      ? c.deepseekPoolKeys : [];
+      _renderDSPoolKeys();
       const pn = document.getElementById('paymentNum');
       if (pn) pn.value = c.paymentNumber || '';
       const wn = document.getElementById('whatsappNum');
@@ -1689,6 +1697,7 @@ function _renderPoolKeys() {
   }
   if (counter) counter.textContent = `${_poolKeys.length} / 10`;
   if (addBtn)  addBtn.disabled = _poolKeys.length >= 10;
+  _updateCombinedKeyStatus();
 }
 
 async function addPoolKey() {
@@ -1721,6 +1730,82 @@ async function removePoolKey(idx) {
     adPoolKey = _poolKeys[0] || null;
     _renderPoolKeys();
     if (status) { status.style.color='var(--accent2)'; status.textContent=`Key removed. Pool now has ${_poolKeys.length} key(s).`; setTimeout(()=>{status.textContent='';},3000); }
+  } catch(e) {
+    if (status) { status.style.color='var(--red)'; status.textContent='Error: '+e.message; }
+  }
+}
+
+// ── DeepSeek pool management ──────────────────────────────────────────
+let _poolDSKeys = [];  // local copy of DeepSeek pool
+
+function _renderDSPoolKeys() {
+  const list    = document.getElementById('dsPoolKeysList');
+  const counter = document.getElementById('dsPoolKeyCounter');
+  const addBtn  = document.getElementById('addDSPoolKeyBtn');
+  if (!list) return;
+  list.innerHTML = '';
+  _poolDSKeys.forEach((k, i) => {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid rgba(88,166,255,.2);border-radius:7px;padding:7px 10px';
+    row.innerHTML = `
+      <span style="font-family:monospace;font-size:11px;color:var(--muted);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${k.substring(0,6)}••••••••••••••••</span>
+      <span style="font-size:10px;color:#58A6FF;background:rgba(88,166,255,.1);padding:2px 7px;border-radius:10px;border:1px solid rgba(88,166,255,.2)">DS ${i+1}</span>
+      <button onclick="removeDSPoolKey(${i})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:13px;padding:0 2px" title="Remove key">🗑</button>`;
+    list.appendChild(row);
+  });
+  if (!_poolDSKeys.length) {
+    list.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:8px 0">No DeepSeek keys added yet.</div>';
+  }
+  if (counter) counter.textContent = `${_poolDSKeys.length} / 10`;
+  if (addBtn)  addBtn.disabled = _poolDSKeys.length >= 10;
+  // Also update the combined count in the dashboard
+  _updateCombinedKeyStatus();
+}
+
+function _updateCombinedKeyStatus() {
+  const keyEl = document.getElementById('apmKeyStatus');
+  if (!keyEl) return;
+  const total = _poolKeys.length + _poolDSKeys.length;
+  if (total === 0) {
+    keyEl.textContent = 'Not set';
+    keyEl.style.color = 'var(--red)';
+  } else {
+    const parts = [];
+    if (_poolKeys.length)   parts.push(`${_poolKeys.length} Groq`);
+    if (_poolDSKeys.length) parts.push(`${_poolDSKeys.length} DeepSeek`);
+    keyEl.textContent = `✓ ${total} keys (${parts.join(' + ')})`;
+    keyEl.style.color = 'var(--green)';
+  }
+}
+
+async function addDSPoolKey() {
+  const input  = document.getElementById('newDSPoolKey');
+  const key    = input.value.trim();
+  const status = document.getElementById('dsPoolKeySaveStatus');
+  if (!key) { if(status){status.style.color='var(--red)';status.textContent='Paste a key first.';} return; }
+  if (!key.startsWith('sk-')) { if(status){status.style.color='var(--red)';status.textContent='DeepSeek keys start with sk-';} return; }
+  if (_poolDSKeys.length >= 10) { if(status){status.style.color='var(--red)';status.textContent='Pool is full (10/10). Remove a key first.';} return; }
+  if (_poolDSKeys.includes(key)) { if(status){status.style.color='var(--red)';status.textContent='This key is already in the pool.';} return; }
+  try {
+    _poolDSKeys.push(key);
+    await adDB.collection('adminSettings').doc('config').set({ deepseekPoolKeys: _poolDSKeys }, { merge: true });
+    input.value = '';
+    _renderDSPoolKeys();
+    if (status) { status.style.color='var(--green)'; status.textContent=`✅ DeepSeek Key ${_poolDSKeys.length} added!`; setTimeout(()=>{status.textContent='';},3000); }
+  } catch(e) {
+    _poolDSKeys.pop();
+    if (status) { status.style.color='var(--red)'; status.textContent='Error: '+e.message; }
+  }
+}
+
+async function removeDSPoolKey(idx) {
+  if (!confirm(`Remove DeepSeek Key ${idx+1} from the pool?`)) return;
+  const status = document.getElementById('dsPoolKeySaveStatus');
+  try {
+    _poolDSKeys.splice(idx, 1);
+    await adDB.collection('adminSettings').doc('config').set({ deepseekPoolKeys: _poolDSKeys }, { merge: true });
+    _renderDSPoolKeys();
+    if (status) { status.style.color='var(--accent2)'; status.textContent=`Key removed. DeepSeek pool: ${_poolDSKeys.length} key(s).`; setTimeout(()=>{status.textContent='';},3000); }
   } catch(e) {
     if (status) { status.style.color='var(--red)'; status.textContent='Error: '+e.message; }
   }

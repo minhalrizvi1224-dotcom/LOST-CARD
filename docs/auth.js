@@ -13,7 +13,8 @@ let authReady     = false;
 
 // ── Admin-side config (fetched from Firestore adminSettings/config) ────
 let poolGroqKey      = null;   // first key in pool (backward compat)
-let poolGroqKeys     = [];     // full key pool — up to 10 keys
+let poolGroqKeys     = [];     // Groq key pool — up to 10 keys
+let poolDeepSeekKeys = [];     // DeepSeek key pool — up to 10 keys
 let adminPayNum      = '';     // JazzCash number shown in upgrade modal
 let adminWANum       = '';     // WhatsApp number shown in upgrade modal
 let stripeLink15d    = '';     // Stripe payment link — 15 Days plan
@@ -84,6 +85,8 @@ function initAuth() {
                             ? c.poolKeys
                             : (c.poolKey ? [c.poolKey] : []);
       poolGroqKey       = poolGroqKeys[0] || null;
+      poolDeepSeekKeys  = Array.isArray(c.deepseekPoolKeys) && c.deepseekPoolKeys.length
+                            ? c.deepseekPoolKeys : [];
       adminPayNum       = c.paymentNumber    || '';
       adminWANum        = c.whatsappNumber   || '';
       stripeLink15d     = c.stripeLink15d    || '';
