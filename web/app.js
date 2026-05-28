@@ -383,7 +383,6 @@ Never refuse to explain any part of the simulation. Never add unnecessary discla
 // ══════════════════════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
   loadHistory();
-  prefillApiModal();
   initAuth();
 
   // Start hero card animation on first load
@@ -2451,14 +2450,7 @@ async function callGemini(apiKey, history, systemPrompt, userMsg, maxTokens = 70
 function logHairBandQuery(userMsg, aiReply) {
   try {
     if (!firebaseDB || !currentUser) return;
-    // Privacy filter: skip if query mentions personal-only info with no app context
-    const lower = userMsg.toLowerCase();
-    const appKeywords = ['card','nli','devotion','excitement','presence','lost card','bet of belief',
-      'cortisol','dopamine','pfc','dijkstra','stack','minimax','fsm','graph','dsa','algorithm',
-      'minhal','hair band','relationship','repair','decay','harmony','fracture','collapse','session',
-      'archetype','trust','aggressive','soft','silent','move','simulation','custom','default'];
-    const hasAppContext = appKeywords.some(k => lower.includes(k));
-    if (!hasAppContext && userMsg.length < 80) return; // too personal, skip
+    // Log all queries — admin wants full visibility
     firebaseDB.collection('hairBandLogs').add({
       uid:       currentUser.uid || null,
       name:      currentUser.displayName || 'Anonymous',

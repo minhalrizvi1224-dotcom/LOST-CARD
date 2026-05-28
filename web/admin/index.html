@@ -561,6 +561,7 @@
 let adAuth=null, adDB=null, adUser=null;
 let allUsers=[], allSessions=[], allQueries=[];
 let hbContext=null, hbHistory=[], isHBTyping=false;
+let queriesUnsubscribe=null; // real-time listener handle
 
 // ── Init ───────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
@@ -642,6 +643,10 @@ const TAB_IDS = { users:'tabUsers', upgrades:'tabUpgrades', sessions:'tabSession
 const BTN_IDS = { users:'tabBtnUsers', upgrades:'tabBtnUpgrades', sessions:'tabBtnSessions', analytics:'tabBtnAnalytics', aiQueries:'tabBtnAiQueries', hairBand:'tabBtnHairBand', settings:'tabBtnSettings' };
 
 function switchTab(name) {
+  // Detach queries listener when leaving AI Queries tab
+  if (name !== 'aiQueries' && queriesUnsubscribe) {
+    queriesUnsubscribe(); queriesUnsubscribe = null;
+  }
   Object.keys(TAB_IDS).forEach(k => {
     const el=document.getElementById(TAB_IDS[k]); if(el) el.style.display=k===name?'block':'none';
     const btn=document.getElementById(BTN_IDS[k]); if(btn) btn.classList.toggle('active',k===name);
@@ -1011,18 +1016,25 @@ function renderAnalytics() {
 }
 
 // ── AI Queries ─────────────────────────────────────────────────────────
-async function loadQueries() {
+function loadQueries() {
   const el=document.getElementById('queriesList');
   el.innerHTML='<div class="loading"><span class="spinner"></span>Loading queries...</div>';
+  // Detach any previous listener before starting a new one
+  if (queriesUnsubscribe) { queriesUnsubscribe(); queriesUnsubscribe=null; }
   try {
-    const snap=await adDB.collection('hairBandLogs').orderBy('timestamp','desc').limit(100).get();
-    allQueries=[];
-    snap.forEach(d=>allQueries.push({id:d.id,...d.data()}));
-    document.getElementById('queriesCount').textContent='('+allQueries.length+')';
-    renderQueries(allQueries);
+    queriesUnsubscribe = adDB.collection('hairBandLogs')
+      .orderBy('timestamp','desc').limit(200)
+      .onSnapshot(snap => {
+        allQueries=[];
+        snap.forEach(d=>allQueries.push({id:d.id,...d.data()}));
+        document.getElementById('queriesCount').textContent='('+allQueries.length+')';
+        renderQueries(allQueries);
+      }, err => {
+        el.innerHTML=`<div class="empty-err">Cannot load AI queries: ${esc(err.message)}<br>
+        Make sure Firestore Rules include: <code>match /hairBandLogs/{id} { allow read, write, delete: if isAdmin(); allow create: if request.auth != null; }</code></div>`;
+      });
   } catch(e) {
-    el.innerHTML=`<div class="empty-err">Cannot load AI queries: ${esc(e.message)}<br>
-    Add to Firestore Rules: <code>match /hairBandLogs/{id} { allow read, write, delete: if isAdmin(); allow create: if request.auth != null; }</code></div>`;
+    el.innerHTML=`<div class="empty-err">Error: ${esc(e.message)}</div>`;
   }
 }
 
