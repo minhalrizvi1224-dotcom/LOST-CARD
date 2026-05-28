@@ -12,7 +12,8 @@ let firebaseDB    = null;
 let authReady     = false;
 
 // ── Admin-side config (fetched from Firestore adminSettings/config) ────
-let poolGroqKey      = null;   // admin's Groq key — used for all Hair Band calls
+let poolGroqKey      = null;   // first key in pool (backward compat)
+let poolGroqKeys     = [];     // full key pool — up to 10 keys
 let adminPayNum      = '';     // JazzCash number shown in upgrade modal
 let adminWANum       = '';     // WhatsApp number shown in upgrade modal
 let stripeLink15d    = '';     // Stripe payment link — 15 Days plan
@@ -77,22 +78,33 @@ function initAuth() {
       geminiKey:        docData.geminiKey         || null  // legacy compat
     };
 
-    // Fetch admin config (pool key, payment info) — AWAIT so it's ready before authReady fires
+    // ── Helper: apply admin config fields from a Firestore doc ──────────
+    function _applyAdminConfig(c) {
+      poolGroqKeys      = Array.isArray(c.poolKeys) && c.poolKeys.length
+                            ? c.poolKeys
+                            : (c.poolKey ? [c.poolKey] : []);
+      poolGroqKey       = poolGroqKeys[0] || null;
+      adminPayNum       = c.paymentNumber    || '';
+      adminWANum        = c.whatsappNumber   || '';
+      stripeLink15d     = c.stripeLink15d    || '';
+      stripeLinkMonthly = c.stripeLinkMonthly|| '';
+      stripeLinkAnnual  = c.stripeLinkAnnual || '';
+      jazzCashTitle     = c.jazzCashTitle    || '';
+      pkrPrice15d       = c.pkrPrice15d      || 560;
+      pkrPriceMonthly   = c.pkrPriceMonthly  || 1400;
+      pkrPriceAnnual    = c.pkrPriceAnnual   || 9800;
+    }
+
+    // Initial load — AWAIT so keys are ready before authReady fires
     await firebaseDB.collection('adminSettings').doc('config').get().then(cfg => {
-      if (cfg.exists) {
-        const c = cfg.data();
-        poolGroqKey       = c.poolKey          || null;
-        adminPayNum       = c.paymentNumber    || '';
-        adminWANum        = c.whatsappNumber   || '';
-        stripeLink15d     = c.stripeLink15d    || '';
-        stripeLinkMonthly = c.stripeLinkMonthly|| '';
-        stripeLinkAnnual  = c.stripeLinkAnnual || '';
-        jazzCashTitle     = c.jazzCashTitle    || '';
-        pkrPrice15d       = c.pkrPrice15d      || 560;
-        pkrPriceMonthly   = c.pkrPriceMonthly  || 1400;
-        pkrPriceAnnual    = c.pkrPriceAnnual   || 9800;
-      }
+      if (cfg.exists) _applyAdminConfig(cfg.data());
     }).catch(() => {});
+
+    // Real-time listener — whenever admin adds/removes keys, app updates immediately
+    // No page reload needed after admin changes the pool
+    firebaseDB.collection('adminSettings').doc('config').onSnapshot(cfg => {
+      if (cfg.exists) _applyAdminConfig(cfg.data());
+    }, () => {}); // silent error handler
 
     // Update last login + mark online
     firebaseDB.collection('users').doc(user.uid).update({

@@ -568,19 +568,19 @@
 
         <!-- Pool API Key -->
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px">
-          <div style="font-size:14px;font-weight:800;margin-bottom:4px">🔑 Pool API Key (Groq)</div>
-          <div style="font-size:12px;color:var(--muted);margin-bottom:16px">Used by all free users for Hair Band &amp; simulations. Never shown to users.</div>
-          <div style="margin-bottom:10px">
-            <label style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Current Key</label>
-            <div id="poolKeyDisplay" style="font-family:monospace;font-size:12px;color:var(--muted);background:var(--bg);padding:8px 10px;border-radius:6px;border:1px solid var(--border)">Loading…</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+            <div style="font-size:14px;font-weight:800">🔑 API Key Pool (Groq)</div>
+            <span id="poolKeyCounter" style="font-size:11px;font-weight:700;color:var(--muted);background:var(--bg);padding:3px 10px;border-radius:20px;border:1px solid var(--border)">0 / 10</span>
           </div>
-          <div style="margin-bottom:12px">
-            <label style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">New Key (gsk_…)</label>
-            <input id="newPoolKey" type="password" placeholder="gsk_..." style="width:100%;padding:9px 11px;background:var(--bg);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:12px;font-family:monospace;outline:none"/>
-          </div>
-          <div style="display:flex;gap:8px">
-            <button class="btn-sm" style="border-color:var(--green);color:var(--green)" onclick="savePoolKey()">💾 Save Key</button>
-            <button class="btn-sm btn-danger" onclick="clearPoolKey()">Clear</button>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:16px">Up to 10 keys — app rotates automatically when one is rate-limited. Never shown to users.</div>
+
+          <!-- Current keys list -->
+          <div id="poolKeysList" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px"></div>
+
+          <!-- Add new key -->
+          <div style="display:flex;gap:8px;align-items:center">
+            <input id="newPoolKey" type="password" placeholder="gsk_… paste new key here" style="flex:1;padding:9px 11px;background:var(--bg);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:12px;font-family:monospace;outline:none"/>
+            <button id="addPoolKeyBtn" class="btn-sm" style="border-color:var(--green);color:var(--green);white-space:nowrap" onclick="addPoolKey()">+ Add Key</button>
           </div>
           <div id="poolKeySaveStatus" style="font-size:11px;margin-top:8px;color:var(--muted)"></div>
         </div>
@@ -747,9 +747,23 @@ function showDashboard() {
   document.getElementById('tbAdminEmail').textContent = adUser.email;
   // Load saved admin profile into modal fields
   _loadAdminProfile();
-  // Pre-load pool key so admin Hair Band works immediately
+  // Pre-load pool keys so admin Hair Band works immediately
   adDB.collection('adminSettings').doc('config').get().then(cfg => {
-    if (cfg.exists) adPoolKey = cfg.data().poolKey || null;
+    if (cfg.exists) {
+      const c = cfg.data();
+      _poolKeys = Array.isArray(c.poolKeys) && c.poolKeys.length ? c.poolKeys : (c.poolKey ? [c.poolKey] : []);
+      adPoolKey = _poolKeys[0] || null;
+      // Update Settings tab counter
+      _renderPoolKeys();
+      // Update dashboard key status (fix race condition — refreshAll ran before this resolved)
+      const keyEl = document.getElementById('apmKeyStatus');
+      if (keyEl) {
+        keyEl.textContent = _poolKeys.length > 0
+          ? `✓ ${_poolKeys.length} key${_poolKeys.length > 1 ? 's' : ''} active`
+          : 'Not set';
+        keyEl.style.color = _poolKeys.length > 0 ? 'var(--green)' : 'var(--red)';
+      }
+    }
   }).catch(()=>{});
   refreshAll();
 }
@@ -791,12 +805,11 @@ function _loadAdminProfile() {
   // Update display name in modal header
   document.getElementById('apmDisplayName').textContent = p.name || authName;
 
-  // Pool key status — check Firestore loaded key
+  // Pool key status
   const keyEl = document.getElementById('apmKeyStatus');
   if (keyEl) {
-    const display = document.getElementById('poolKeyDisplay')?.textContent || '';
-    const hasKey = display && display !== 'Not set' && display !== 'Loading…' && display !== '(none)';
-    keyEl.textContent = hasKey ? '✓ Set' : 'Not set';
+    const hasKey = _poolKeys && _poolKeys.length > 0;
+    keyEl.textContent = hasKey ? `✓ ${_poolKeys.length} key${_poolKeys.length>1?'s':''}` : 'Not set';
     keyEl.style.color = hasKey ? 'var(--green)' : 'var(--red)';
   }
 }
@@ -1597,9 +1610,12 @@ async function loadAdminSettings() {
     const cfg = await adDB.collection('adminSettings').doc('config').get();
     if (cfg.exists) {
       const c = cfg.data();
-      adPoolKey = c.poolKey || null;
-      const kd = document.getElementById('poolKeyDisplay');
-      if (kd) kd.textContent = c.poolKey ? c.poolKey.substring(0,8)+'••••••••••••••••' : 'Not set';
+      // Load pool keys (new array format, fallback to old single key)
+      _poolKeys = Array.isArray(c.poolKeys) && c.poolKeys.length
+                    ? c.poolKeys
+                    : (c.poolKey ? [c.poolKey] : []);
+      adPoolKey = _poolKeys[0] || null;
+      _renderPoolKeys();
       const pn = document.getElementById('paymentNum');
       if (pn) pn.value = c.paymentNumber || '';
       const wn = document.getElementById('whatsappNum');
@@ -1621,8 +1637,8 @@ async function loadAdminSettings() {
       if (slAnn) slAnn.value = c.stripeLinkAnnual  || '';
     }
   } catch(e) {
-    const kd = document.getElementById('poolKeyDisplay');
-    if (kd) kd.textContent = 'Error loading — check Firestore rules';
+    const status = document.getElementById('poolKeySaveStatus');
+    if (status) { status.style.color='var(--red)'; status.textContent = 'Error loading settings — check Firestore rules'; }
   }
 }
 
@@ -1650,30 +1666,64 @@ async function saveStripeLinks() {
   }
 }
 
-async function savePoolKey() {
-  const key = document.getElementById('newPoolKey').value.trim();
-  if (!key) { alert('Enter the Groq API key.'); return; }
+// ── Pool key management (multi-key pool, up to 10) ────────────────────
+let _poolKeys = [];  // local copy of current pool
+
+function _renderPoolKeys() {
+  const list    = document.getElementById('poolKeysList');
+  const counter = document.getElementById('poolKeyCounter');
+  const addBtn  = document.getElementById('addPoolKeyBtn');
+  if (!list) return;
+  list.innerHTML = '';
+  _poolKeys.forEach((k, i) => {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:7px 10px';
+    row.innerHTML = `
+      <span style="font-family:monospace;font-size:11px;color:var(--muted);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${k.substring(0,8)}••••••••••••••••</span>
+      <span style="font-size:10px;color:var(--muted);background:rgba(88,166,255,.12);padding:2px 7px;border-radius:10px;border:1px solid rgba(88,166,255,.2)">Key ${i+1}</span>
+      <button onclick="removePoolKey(${i})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:13px;padding:0 2px" title="Remove key">🗑</button>`;
+    list.appendChild(row);
+  });
+  if (!_poolKeys.length) {
+    list.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:8px 0">No keys added yet.</div>';
+  }
+  if (counter) counter.textContent = `${_poolKeys.length} / 10`;
+  if (addBtn)  addBtn.disabled = _poolKeys.length >= 10;
+}
+
+async function addPoolKey() {
+  const input  = document.getElementById('newPoolKey');
+  const key    = input.value.trim();
   const status = document.getElementById('poolKeySaveStatus');
+  if (!key) { if(status){status.style.color='var(--red)';status.textContent='Paste a key first.';} return; }
+  if (!key.startsWith('gsk_')) { if(status){status.style.color='var(--red)';status.textContent='Groq keys start with gsk_';} return; }
+  if (_poolKeys.length >= 10) { if(status){status.style.color='var(--red)';status.textContent='Pool is full (10/10). Remove a key first.';} return; }
+  if (_poolKeys.includes(key)) { if(status){status.style.color='var(--red)';status.textContent='This key is already in the pool.';} return; }
   try {
-    await adDB.collection('adminSettings').doc('config').set({ poolKey: key }, { merge: true });
-    document.getElementById('poolKeyDisplay').textContent = key.substring(0,8)+'••••••••••••••••';
-    document.getElementById('newPoolKey').value = '';
-    if (status) { status.style.color='var(--green)'; status.textContent = '✅ Pool key saved successfully!'; }
-    setTimeout(()=>{ if(status) status.textContent=''; }, 3000);
+    _poolKeys.push(key);
+    await adDB.collection('adminSettings').doc('config').set({ poolKeys: _poolKeys, poolKey: _poolKeys[0] }, { merge: true });
+    adPoolKey = _poolKeys[0];
+    input.value = '';
+    _renderPoolKeys();
+    if (status) { status.style.color='var(--green)'; status.textContent=`✅ Key ${_poolKeys.length} added to pool!`; setTimeout(()=>{status.textContent='';},3000); }
   } catch(e) {
-    if (status) { status.style.color='var(--red)'; status.textContent = 'Error: '+e.message; }
+    _poolKeys.pop();
+    if (status) { status.style.color='var(--red)'; status.textContent='Error: '+e.message; }
   }
 }
 
-async function clearPoolKey() {
-  if (!confirm('Clear the pool key? Users will not be able to use Hair Band until a new key is set.')) return;
+async function removePoolKey(idx) {
+  if (!confirm(`Remove Key ${idx+1} from the pool?`)) return;
+  const status = document.getElementById('poolKeySaveStatus');
   try {
-    await adDB.collection('adminSettings').doc('config').set({ poolKey: null }, { merge: true });
-    document.getElementById('poolKeyDisplay').textContent = 'Not set';
-    document.getElementById('newPoolKey').value = '';
-    const status = document.getElementById('poolKeySaveStatus');
-    if (status) { status.style.color='var(--accent2)'; status.textContent='Pool key cleared.'; }
-  } catch(e) { alert('Error: '+e.message); }
+    _poolKeys.splice(idx, 1);
+    await adDB.collection('adminSettings').doc('config').set({ poolKeys: _poolKeys, poolKey: _poolKeys[0] || null }, { merge: true });
+    adPoolKey = _poolKeys[0] || null;
+    _renderPoolKeys();
+    if (status) { status.style.color='var(--accent2)'; status.textContent=`Key removed. Pool now has ${_poolKeys.length} key(s).`; setTimeout(()=>{status.textContent='';},3000); }
+  } catch(e) {
+    if (status) { status.style.color='var(--red)'; status.textContent='Error: '+e.message; }
+  }
 }
 
 async function savePaymentInfo() {
