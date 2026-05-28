@@ -665,6 +665,8 @@ function showSection(name) {
     // Strip any lingering animation classes, then make visible
     Object.values(SECTION_ANIM).forEach(cls => sec.classList.remove(cls));
     sec.classList.add('active');
+    // Always scroll to top when switching sections
+    window.scrollTo({ top: 0, behavior: 'instant' });
     // Force reflow so browser sees the class before animation starts
     void sec.offsetWidth;
     const animClass = SECTION_ANIM[name];
@@ -897,8 +899,13 @@ function openChat(id) {
   } else if (id === 'ai_assistant') {
     startAIAssistant();
   } else {
-    // Custom chats ALWAYS ask fresh - names, gender, scenario every time
-    openSetupModal(id);
+    // If setup already saved for this chat, go straight in — no re-filling every time
+    const saved = getSavedSetup(id);
+    if (saved && saved.yourName && saved.theirName && saved.scenario) {
+      startCustomMode(id, saved);
+    } else {
+      openSetupModal(id);
+    }
   }
 }
 
@@ -996,15 +1003,17 @@ function updateMobileStats(nli, trust, cards, stackSize, pfc, cor, dop, state) {
 // ══════════════════════════════════════════════════════════════════════
 function openSetupModal(chatId) {
   pendingChatId = chatId;
-  const meta = CHAT_META[chatId];
+  const meta    = CHAT_META[chatId];
+  const saved   = getSavedSetup(chatId);
+
   document.getElementById('setupTitle').textContent = `Setup - ${meta ? meta.name : chatId}`;
 
-  // Clear fields
-  document.getElementById('sf_yourName').value    = '';
-  document.getElementById('sf_theirName').value   = '';
-  document.getElementById('sf_yourGender').value  = 'male';
-  document.getElementById('sf_theirGender').value = 'female';
-  document.getElementById('sf_scenario').value    = '';
+  // Pre-fill with saved values if they exist, else clear
+  document.getElementById('sf_yourName').value    = saved?.yourName   || '';
+  document.getElementById('sf_theirName').value   = saved?.theirName  || '';
+  document.getElementById('sf_yourGender').value  = saved?.yourGender  || 'male';
+  document.getElementById('sf_theirGender').value = saved?.theirGender || 'female';
+  document.getElementById('sf_scenario').value    = saved?.scenario   || '';
 
   // Always use pool Groq key — hide provider selection
   document.getElementById('sf_aiProviderRow').style.display = 'none';
@@ -1066,6 +1075,14 @@ function getSavedSetup(chatId) {
 }
 function saveSetup(chatId, setup) {
   localStorage.setItem(`lc_setup_${chatId}`, JSON.stringify(setup));
+}
+// Called by "⚙ Setup" button in chat header — clears saved setup and re-opens modal
+function resetAndSetup() {
+  if (!currentChatId) return;
+  localStorage.removeItem(`lc_setup_${currentChatId}`);
+  document.getElementById('chatConv').style.display    = 'none';
+  document.getElementById('chatWelcome').style.display = '';
+  openSetupModal(currentChatId);
 }
 
 // ══════════════════════════════════════════════════════════════════════
@@ -1283,6 +1300,8 @@ function showConv(chatId) {
 // DEFAULT MODE
 // ══════════════════════════════════════════════════════════════════════
 function startDefaultMode() {
+  const csb = document.getElementById('changeSetupBtn');
+  if (csb) csb.style.display = 'none';
   showConv('default');
   sim = new LostCardSim();
   updateSimUI({ nli: sim.ns.nli, trust: sim.trust, state: sim.ns.getStateLabel(),
@@ -1361,6 +1380,9 @@ function startCustomMode(chatId, setup) {
   const _b = document.getElementById('headerStatusBadge');
   if (_b) _b.style.display = '';
   updateHeaderBadge('HARMONY');
+  // Show "Change Setup" button for custom chats
+  const csb = document.getElementById('changeSetupBtn');
+  if (csb) csb.style.display = '';
 
   document.getElementById('chatMessages').innerHTML = '';
 
@@ -2205,6 +2227,8 @@ function autoResizeInput(el) {
 // ══════════════════════════════════════════════════════════════════════
 function startAIAssistant() {
   isCustomMode = false;
+  const csb = document.getElementById('changeSetupBtn');
+  if (csb) csb.style.display = 'none';
   document.getElementById('chatWelcome').style.display = 'none';
   const conv = document.getElementById('chatConv');
   conv.style.display = 'flex';

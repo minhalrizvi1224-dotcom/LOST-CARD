@@ -48,23 +48,42 @@
     .admin-name { font-size:12px; font-weight:700; color:var(--text); }
     .admin-email { font-size:10px; color:var(--muted); }
 
-    /* Admin Profile Dropdown */
-    #adminProfileCard {
-      position:fixed; top:62px; right:24px; width:280px;
-      background:var(--surface); border:1px solid var(--border); border-radius:14px;
-      padding:20px; z-index:300; box-shadow:0 12px 40px rgba(0,0,0,.5); display:none;
+    /* Admin Profile Modal */
+    #adminProfileModal {
+      position:fixed; inset:0; z-index:500;
+      background:rgba(0,0,0,.75); backdrop-filter:blur(10px);
+      display:none; align-items:center; justify-content:center; padding:20px;
     }
-    #adminProfileCard.open { display:block; }
-    .apc-avatar { width:56px; height:56px; border-radius:50%; background:linear-gradient(135deg,var(--accent),var(--purple)); display:flex; align-items:center; justify-content:center; font-size:24px; font-weight:900; color:#fff; margin:0 auto 12px; }
-    .apc-name { text-align:center; font-size:16px; font-weight:800; margin-bottom:4px; }
-    .apc-email { text-align:center; font-size:12px; color:var(--muted); margin-bottom:4px; }
-    .apc-uid { text-align:center; font-size:10px; color:var(--muted); font-family:monospace; word-break:break-all; margin-bottom:16px; padding:4px 8px; background:var(--bg); border-radius:6px; }
-    .apc-row { display:flex; justify-content:space-between; font-size:12px; padding:6px 0; border-bottom:1px solid var(--border); }
-    .apc-row:last-child { border-bottom:none; }
-    .apc-row span:first-child { color:var(--muted); }
-    .apc-row span:last-child { font-weight:700; color:var(--accent); }
-    .apc-signout { width:100%; margin-top:14px; padding:9px; background:rgba(255,123,114,.1); border:1px solid rgba(255,123,114,.3); color:var(--red); border-radius:8px; cursor:pointer; font-size:12px; font-weight:700; transition:.2s; }
-    .apc-signout:hover { background:rgba(255,123,114,.18); }
+    #adminProfileModal.open { display:flex; }
+    .apm-box {
+      background:var(--surface); border:1px solid var(--border); border-radius:18px;
+      padding:32px; width:100%; max-width:500px; max-height:90vh; overflow-y:auto;
+      box-shadow:0 24px 60px rgba(0,0,0,.7);
+    }
+    .apm-header { display:flex; align-items:center; gap:16px; margin-bottom:28px; }
+    .apm-avatar { width:64px; height:64px; border-radius:50%; background:linear-gradient(135deg,var(--accent),var(--purple)); display:flex; align-items:center; justify-content:center; font-size:26px; font-weight:900; color:#fff; flex-shrink:0; border:2px solid var(--accent); }
+    .apm-header-text { flex:1; }
+    .apm-title { font-size:20px; font-weight:900; margin-bottom:2px; }
+    .apm-badge { display:inline-flex; align-items:center; gap:4px; background:rgba(88,166,255,.12); color:var(--accent); font-size:10px; font-weight:800; padding:2px 10px; border-radius:12px; letter-spacing:1px; border:1px solid rgba(88,166,255,.25); }
+    .apm-close { background:none; border:none; color:var(--muted); font-size:22px; cursor:pointer; padding:4px; line-height:1; }
+    .apm-close:hover { color:var(--text); }
+    .apm-section { margin-bottom:22px; }
+    .apm-section-label { font-size:10px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; }
+    .apm-field { margin-bottom:12px; }
+    .apm-field label { display:block; font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:5px; }
+    .apm-field input { width:100%; padding:10px 12px; background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:13px; outline:none; transition:border-color .2s; }
+    .apm-field input:focus { border-color:var(--accent); }
+    .apm-field input[readonly] { opacity:.55; cursor:default; }
+    .apm-2col { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .apm-linkedin-row { display:flex; gap:8px; align-items:flex-end; }
+    .apm-linkedin-row input { flex:1; }
+    .apm-linkedin-btn { padding:10px 14px; background:rgba(10,102,194,.2); border:1px solid rgba(10,102,194,.4); color:#0A66C2; border-radius:8px; cursor:pointer; font-size:12px; font-weight:700; white-space:nowrap; transition:.2s; text-decoration:none; display:flex; align-items:center; gap:4px; }
+    .apm-linkedin-btn:hover { background:rgba(10,102,194,.35); }
+    .apm-save-btn { width:100%; padding:12px; background:var(--accent); color:#0D1117; border:none; border-radius:10px; font-size:14px; font-weight:800; cursor:pointer; transition:.2s; letter-spacing:.3px; margin-top:4px; }
+    .apm-save-btn:hover { opacity:.9; transform:translateY(-1px); }
+    .apm-signout { width:100%; margin-top:10px; padding:10px; background:rgba(255,123,114,.08); border:1px solid rgba(255,123,114,.25); color:var(--red); border-radius:10px; cursor:pointer; font-size:12px; font-weight:700; transition:.2s; }
+    .apm-signout:hover { background:rgba(255,123,114,.16); }
+    .apm-uid { font-size:10px; color:var(--muted); font-family:monospace; word-break:break-all; padding:6px 10px; background:var(--bg); border-radius:6px; margin-bottom:16px; }
 
     .tb-btn { padding:7px 14px; border:1px solid var(--border); border-radius:7px; background:var(--surface2); color:var(--text); cursor:pointer; font-size:12px; font-weight:600; transition:.2s; }
     .tb-btn:hover { border-color:var(--accent); color:var(--accent); }
@@ -300,38 +319,96 @@
     </div>
   </div>
 
-  <!-- Admin Profile Card -->
-  <div id="adminProfileCard">
-    <div class="apc-avatar" id="apcAvatar">A</div>
-    <div class="apc-name" id="apcName">Admin</div>
-    <div class="apc-email" id="apcEmail"></div>
-    <div class="apc-uid" id="apcUID"></div>
-    <div class="apc-row"><span>Role</span><span>Super Admin</span></div>
-    <div class="apc-row"><span>Pool Key</span><span id="apcKeyStatus" style="color:var(--red)">Not set</span></div>
-    <div class="apc-row"><span>Portal</span><span>v4.0</span></div>
-    <div class="apc-row"><span>Status</span><span style="color:var(--green)">● Active</span></div>
+  <!-- Admin Profile Modal -->
+  <div id="adminProfileModal" onclick="if(event.target===this)closeAdminProfile()">
+    <div class="apm-box">
 
-    <!-- Pool Key Config -->
-    <div class="cfg-section">
-      <span class="cfg-label">🔑 Pool Groq Key (Hair Band for all users)</span>
-      <input type="password" class="cfg-input" id="cfgPoolKey" placeholder="gsk_…" autocomplete="off"/>
-      <span class="cfg-label">🟣 JazzCash Number</span>
-      <input type="text" class="cfg-input" id="cfgPayNum" placeholder="03XX-XXXXXXX"/>
-      <span class="cfg-label">💬 WhatsApp Number</span>
-      <input type="text" class="cfg-input" id="cfgWANum" placeholder="03XX-XXXXXXX"/>
-      <button class="cfg-save-btn" onclick="saveAdminConfig()">💾 Save Config</button>
-      <button class="cfg-test-btn" onclick="testPoolKey()">⚡ Test Pool Key</button>
-      <div id="cfgStatus" style="font-size:10px;color:var(--muted);margin-top:6px;text-align:center"></div>
+      <!-- Header -->
+      <div class="apm-header">
+        <div class="apm-avatar" id="apmAvatar">M</div>
+        <div class="apm-header-text">
+          <div class="apm-title" id="apmDisplayName">Minhal Abbas Rizvi</div>
+          <div class="apm-badge">⚡ SUPER ADMIN</div>
+        </div>
+        <button class="apm-close" onclick="closeAdminProfile()">✕</button>
+      </div>
+
+      <!-- UID row -->
+      <div class="apm-uid" id="apmUID" title="Your Firebase UID"></div>
+
+      <!-- Personal Info -->
+      <div class="apm-section">
+        <div class="apm-section-label">Personal Information</div>
+        <div class="apm-2col">
+          <div class="apm-field">
+            <label>Full Name</label>
+            <input id="apm_name" type="text" placeholder="S. M. Minhal Abbas Rizvi"/>
+          </div>
+          <div class="apm-field">
+            <label>Email (Auth)</label>
+            <input id="apm_email" type="email" readonly placeholder="your@gmail.com"/>
+          </div>
+        </div>
+        <div class="apm-2col">
+          <div class="apm-field">
+            <label>Phone</label>
+            <input id="apm_phone" type="tel" placeholder="+92 300 0000000"/>
+          </div>
+          <div class="apm-field">
+            <label>WhatsApp</label>
+            <input id="apm_whatsapp" type="tel" placeholder="+92 300 0000000"/>
+          </div>
+        </div>
+        <div class="apm-field">
+          <label>Location</label>
+          <input id="apm_location" type="text" placeholder="City, Country"/>
+        </div>
+        <div class="apm-field">
+          <label>LinkedIn Profile URL</label>
+          <div class="apm-linkedin-row">
+            <input id="apm_linkedin" type="url" placeholder="https://linkedin.com/in/your-profile"/>
+            <a id="apm_linkedin_btn" href="#" target="_blank" class="apm-linkedin-btn" onclick="openLinkedIn(event)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+              Connect
+            </a>
+          </div>
+        </div>
+        <div class="apm-field">
+          <label>GitHub Profile URL</label>
+          <input id="apm_github" type="url" placeholder="https://github.com/your-username"/>
+        </div>
+        <div class="apm-field">
+          <label>Bio / Title</label>
+          <input id="apm_bio" type="text" placeholder="BSSE Student · DSA · Author of 'The Bet of Belief'"/>
+        </div>
+      </div>
+
+      <!-- System Info -->
+      <div class="apm-section">
+        <div class="apm-section-label">System</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px">
+          <div style="padding:10px;background:var(--bg);border-radius:8px;border:1px solid var(--border)">
+            <div style="color:var(--muted);font-size:10px;margin-bottom:4px">ROLE</div>
+            <div style="font-weight:700;color:var(--accent)">Super Admin</div>
+          </div>
+          <div style="padding:10px;background:var(--bg);border-radius:8px;border:1px solid var(--border)">
+            <div style="color:var(--muted);font-size:10px;margin-bottom:4px">PORTAL</div>
+            <div style="font-weight:700">v4.0</div>
+          </div>
+          <div style="padding:10px;background:var(--bg);border-radius:8px;border:1px solid var(--border)">
+            <div style="color:var(--muted);font-size:10px;margin-bottom:4px">POOL KEY</div>
+            <div style="font-weight:700" id="apmKeyStatus">Checking…</div>
+          </div>
+          <div style="padding:10px;background:var(--bg);border-radius:8px;border:1px solid var(--border)">
+            <div style="color:var(--muted);font-size:10px;margin-bottom:4px">STATUS</div>
+            <div style="font-weight:700;color:var(--green)">● Active</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="apm-save-btn" onclick="saveAdminProfile()">💾 Save Profile</button>
+      <button class="apm-signout" onclick="adminSignOut()">Sign Out</button>
     </div>
-
-    <!-- Admin Hair Band Key (for admin panel HB only) -->
-    <div class="cfg-section">
-      <span class="cfg-label">🪢 Admin Hair Band Key</span>
-      <input type="password" class="cfg-input" id="adminApiKey" placeholder="gsk_… (your own key for admin panel HB)" autocomplete="off"/>
-      <button class="cfg-save-btn" onclick="saveAdminApiKey()">Save Admin Key</button>
-    </div>
-
-    <button class="apc-signout" onclick="adminSignOut()">Sign Out</button>
   </div>
 
   <div class="main">
@@ -523,6 +600,16 @@
           <div id="payInfoSaveStatus" style="font-size:11px;margin-top:8px;color:var(--muted)"></div>
         </div>
 
+        <!-- Admin Own HB Key -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px">
+          <div style="font-size:14px;font-weight:800;margin-bottom:4px">🪢 Admin Hair Band Key</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:16px">Your own Groq key for using Hair Band inside this admin panel. Not shared with users.</div>
+          <div style="margin-bottom:12px">
+            <input id="adminApiKey" type="password" placeholder="gsk_… (your personal key)" style="width:100%;padding:9px 11px;background:var(--bg);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:12px;font-family:monospace;outline:none"/>
+          </div>
+          <button class="btn-sm" style="border-color:var(--green);color:var(--green)" onclick="saveAdminApiKey()">💾 Save Admin Key</button>
+        </div>
+
         <!-- Free Tier Info -->
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px">
           <div style="font-size:14px;font-weight:800;margin-bottom:4px">ℹ Free Tier Rules</div>
@@ -606,15 +693,13 @@ function showAuthScreen() {
 function showDashboard() {
   document.getElementById('authScreen').style.display='none';
   document.getElementById('dashboard').style.display='block';
-  // Fill admin profile
+  // Fill admin topbar
   const initials = (adUser.displayName||adUser.email||'A').charAt(0).toUpperCase();
   document.getElementById('tbAdminAvatar').textContent = initials;
-  document.getElementById('apcAvatar').textContent = initials;
   document.getElementById('tbAdminName').textContent  = adUser.displayName || adUser.email.split('@')[0];
   document.getElementById('tbAdminEmail').textContent = adUser.email;
-  document.getElementById('apcName').textContent  = adUser.displayName || 'Admin';
-  document.getElementById('apcEmail').textContent = adUser.email;
-  document.getElementById('apcUID').textContent   = adUser.uid;
+  // Load saved admin profile into modal fields
+  _loadAdminProfile();
   refreshAll();
 }
 
@@ -623,16 +708,75 @@ function showErr(msg) {
 }
 function hideErr() { document.getElementById('adErr').style.display='none'; }
 
-// ── Admin Profile Toggle ───────────────────────────────────────────────
-function toggleAdminProfile() {
-  const card=document.getElementById('adminProfileCard');
-  card.classList.toggle('open');
+// ── Admin Profile Modal ────────────────────────────────────────────────
+function toggleAdminProfile() { openAdminProfile(); }
+
+function openAdminProfile() {
+  _loadAdminProfile();
+  document.getElementById('adminProfileModal').classList.add('open');
 }
-document.addEventListener('click', e => {
-  if (!e.target.closest('#adminProfileCard') && !e.target.closest('.admin-profile-btn')) {
-    document.getElementById('adminProfileCard').classList.remove('open');
+function closeAdminProfile() {
+  document.getElementById('adminProfileModal').classList.remove('open');
+}
+
+function _loadAdminProfile() {
+  // Fill from Firebase auth (read-only)
+  const email = adUser?.email || '';
+  const authName = adUser?.displayName || email.split('@')[0] || 'Admin';
+  document.getElementById('apm_email').value = email;
+  document.getElementById('apmUID').textContent = adUser?.uid ? `UID: ${adUser.uid}` : '';
+  document.getElementById('apmAvatar').textContent = authName.charAt(0).toUpperCase();
+
+  // Fill editable fields from localStorage
+  const p = JSON.parse(localStorage.getItem('lc_admin_profile') || '{}');
+  document.getElementById('apm_name').value     = p.name      || authName;
+  document.getElementById('apm_phone').value    = p.phone     || '';
+  document.getElementById('apm_whatsapp').value = p.whatsapp  || '';
+  document.getElementById('apm_location').value = p.location  || '';
+  document.getElementById('apm_linkedin').value = p.linkedin  || '';
+  document.getElementById('apm_github').value   = p.github    || '';
+  document.getElementById('apm_bio').value      = p.bio       || '';
+
+  // Update display name in modal header
+  document.getElementById('apmDisplayName').textContent = p.name || authName;
+
+  // Pool key status — check Firestore loaded key
+  const keyEl = document.getElementById('apmKeyStatus');
+  if (keyEl) {
+    const display = document.getElementById('poolKeyDisplay')?.textContent || '';
+    const hasKey = display && display !== 'Not set' && display !== 'Loading…' && display !== '(none)';
+    keyEl.textContent = hasKey ? '✓ Set' : 'Not set';
+    keyEl.style.color = hasKey ? 'var(--green)' : 'var(--red)';
   }
-});
+}
+
+function saveAdminProfile() {
+  const profile = {
+    name:      document.getElementById('apm_name').value.trim(),
+    phone:     document.getElementById('apm_phone').value.trim(),
+    whatsapp:  document.getElementById('apm_whatsapp').value.trim(),
+    location:  document.getElementById('apm_location').value.trim(),
+    linkedin:  document.getElementById('apm_linkedin').value.trim(),
+    github:    document.getElementById('apm_github').value.trim(),
+    bio:       document.getElementById('apm_bio').value.trim(),
+  };
+  localStorage.setItem('lc_admin_profile', JSON.stringify(profile));
+  // Update topbar name
+  if (profile.name) {
+    document.getElementById('tbAdminName').textContent = profile.name;
+    document.getElementById('apmDisplayName').textContent = profile.name;
+    document.getElementById('apmAvatar').textContent = profile.name.charAt(0).toUpperCase();
+    document.getElementById('tbAdminAvatar').textContent = profile.name.charAt(0).toUpperCase();
+  }
+  showAdminToast('Profile saved!', 'success');
+  closeAdminProfile();
+}
+
+function openLinkedIn(e) {
+  const url = document.getElementById('apm_linkedin').value.trim();
+  if (!url) { e.preventDefault(); showAdminToast('Enter your LinkedIn URL first', 'error'); return; }
+  document.getElementById('apm_linkedin_btn').href = url;
+}
 function saveAdminApiKey() {
   const key=document.getElementById('adminApiKey').value.trim();
   if (key) { localStorage.setItem('lc_admin_api_key',key); alert('API key saved!'); }
