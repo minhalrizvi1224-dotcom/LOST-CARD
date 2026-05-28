@@ -908,13 +908,9 @@ function openChat(id) {
   } else if (id === 'ai_assistant') {
     startAIAssistant();
   } else {
-    // If setup already saved for this chat, go straight in — no re-filling every time
-    const saved = getSavedSetup(id);
-    if (saved && saved.yourName && saved.theirName && saved.scenario) {
-      startCustomMode(id, saved);
-    } else {
-      openSetupModal(id);
-    }
+    // Always show setup modal — it pre-fills from saved values
+    // This ensures setup is always confirmed fresh, never silently reused
+    openSetupModal(id);
   }
 }
 
@@ -1779,7 +1775,10 @@ async function generateCustomReply(chatId, setup, userText) {
     if (!isUpgraded()) incrementHBCount();
   } catch(err) {
     typingEl.remove();
-    addMessage('them', setup.theirName, _friendlyAPIError(err));
+    // Opening message failure (userText === null): fail silently — just let the user type
+    if (userText !== null) {
+      addMessage('them', setup.theirName, _friendlyAPIError(err));
+    }
   } finally {
     setInputEnabled(true);
   }
@@ -3454,8 +3453,12 @@ function updateChatStatus(chatId, stateLabel) {
 
 function closeTerminal() {
   document.getElementById('terminalOverlay').style.display = 'none';
-  // Restart the same chat
-  if (currentChatId) openChat(currentChatId);
+  // Play Again: if setup is still in memory, skip the modal and go directly
+  if (currentChatId && currentChatSetup) {
+    startCustomMode(currentChatId, currentChatSetup);
+  } else if (currentChatId) {
+    openChat(currentChatId);
+  }
 }
 
 function exitChat() {
