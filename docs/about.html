@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>LOST CARD — Psychological Relationship Simulation</title>
+<meta name="description" content="LOST CARD is a psychological simulation web app that models relational belief decay using computational structures. AI-powered relationship simulations, neurological load tracking, and deep psychological analysis."/>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#0D1117;color:#E6EDF3;font-family:'Segoe UI',system-ui,sans-serif;line-height:1.6}
+  a{color:#58A6FF;text-decoration:none}
+  a:hover{text-decoration:underline}
+
+  /* NAV */
+  nav{display:flex;align-items:center;justify-content:space-between;padding:18px 40px;border-bottom:1px solid rgba(255,255,255,.07);position:sticky;top:0;background:#0D1117;z-index:100}
+  .nav-logo{font-size:18px;font-weight:800;color:#E6EDF3;letter-spacing:1px}
+  .nav-logo span{color:#58A6FF}
+  .nav-links{display:flex;gap:24px;align-items:center}
+  .nav-links a{font-size:13px;color:#8B949E}
+  .nav-cta{background:#58A6FF;color:#0D1117!important;font-weight:700;padding:8px 18px;border-radius:8px;font-size:13px;text-decoration:none!important}
+  .nav-cta:hover{background:#79b8ff}
+
+  /* HERO */
+  .hero{text-align:center;padding:90px 20px 70px}
+  .hero-badge{display:inline-block;background:rgba(88,166,255,.1);border:1px solid rgba(88,166,255,.25);color:#58A6FF;font-size:12px;font-weight:600;padding:5px 14px;border-radius:20px;margin-bottom:24px;letter-spacing:.4px}
+  .hero h1{font-size:clamp(36px,6vw,64px);font-weight:900;line-height:1.1;margin-bottom:20px;letter-spacing:-1px}
+  .hero h1 span{color:#58A6FF}
+  .hero p{font-size:17px;color:#8B949E;max-width:560px;margin:0 auto 36px;line-height:1.7}
+  .hero-buttons{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+  .btn-primary{background:#58A6FF;color:#0D1117;font-weight:700;padding:14px 28px;border-radius:10px;font-size:15px;text-decoration:none;transition:background .2s}
+  .btn-primary:hover{background:#79b8ff;text-decoration:none}
+  .btn-secondary{background:rgba(255,255,255,.06);color:#E6EDF3;font-weight:600;padding:14px 28px;border-radius:10px;font-size:15px;text-decoration:none;border:1px solid rgba(255,255,255,.1);transition:background .2s}
+  .btn-secondary:hover{background:rgba(255,255,255,.1);text-decoration:none}
+
+  /* STATS */
+  .stats{display:flex;justify-content:center;gap:48px;padding:40px 20px;border-top:1px solid rgba(255,255,255,.07);border-bottom:1px solid rgba(255,255,255,.07);flex-wrap:wrap}
+  .stat-item{text-align:center}
+  .stat-num{font-size:28px;font-weight:800;color:#58A6FF}
+  .stat-label{font-size:12px;color:#8B949E;margin-top:2px;letter-spacing:.4px;text-transform:uppercase}
+
+  /* FEATURES */
+  .section{padding:70px 20px;max-width:1100px;margin:0 auto}
+  .section-title{text-align:center;margin-bottom:50px}
+  .section-title h2{font-size:32px;font-weight:800;margin-bottom:10px}
+  .section-title p{color:#8B949E;font-size:15px;max-width:500px;margin:0 auto}
+
+  .features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+  .feature-card{background:#161B22;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:28px}
+  .feature-icon{font-size:28px;margin-bottom:14px}
+  .feature-card h3{font-size:16px;font-weight:700;margin-bottom:8px;color:#E6EDF3}
+  .feature-card p{font-size:13px;color:#8B949E;line-height:1.6}
+
+  /* THREE CARDS */
+  .cards-row{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-top:40px}
+  .rcard{flex:1;min-width:200px;max-width:280px;border-radius:12px;padding:24px;text-align:center}
+  .rcard h3{font-size:15px;font-weight:800;margin-bottom:6px;letter-spacing:.6px;text-transform:uppercase}
+  .rcard p{font-size:12px;line-height:1.6;opacity:.85}
+  .rcard-devotion{background:rgba(198,120,221,.12);border:1px solid rgba(198,120,221,.3);color:#C678DD}
+  .rcard-excitement{background:rgba(86,182,194,.12);border:1px solid rgba(86,182,194,.3);color:#56B6C2}
+  .rcard-presence{background:rgba(152,195,121,.12);border:1px solid rgba(152,195,121,.3);color:#98C379}
+  .rcard h3{color:inherit}
+  .rcard p{color:#E6EDF3}
+
+  /* PRICING */
+  .pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;max-width:860px;margin:0 auto}
+  .price-card{background:#161B22;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:32px 24px;text-align:center;position:relative}
+  .price-card.popular{border-color:#58A6FF;box-shadow:0 0 30px rgba(88,166,255,.12)}
+  .popular-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#58A6FF;color:#0D1117;font-size:11px;font-weight:700;padding:4px 14px;border-radius:20px;letter-spacing:.4px}
+  .price-name{font-size:13px;font-weight:700;color:#8B949E;letter-spacing:.6px;text-transform:uppercase;margin-bottom:12px}
+  .price-amount{font-size:38px;font-weight:900;color:#E6EDF3;margin-bottom:4px}
+  .price-amount span{font-size:16px;font-weight:400;color:#8B949E}
+  .price-desc{font-size:12px;color:#8B949E;margin-bottom:20px}
+  .price-features{list-style:none;text-align:left;margin-bottom:24px}
+  .price-features li{font-size:13px;color:#8B949E;padding:5px 0;display:flex;gap:8px;align-items:flex-start}
+  .price-features li::before{content:"✓";color:#58A6FF;font-weight:700;flex-shrink:0}
+  .price-btn{display:block;background:#58A6FF;color:#0D1117;font-weight:700;padding:11px;border-radius:8px;font-size:14px;text-decoration:none}
+  .price-btn:hover{background:#79b8ff;text-decoration:none}
+  .price-btn.free{background:rgba(255,255,255,.07);color:#E6EDF3}
+  .price-btn.free:hover{background:rgba(255,255,255,.12)}
+
+  /* TECH */
+  .tech-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+  .tech-item{background:#161B22;border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:18px 20px;display:flex;gap:14px;align-items:flex-start}
+  .tech-num{font-size:11px;font-weight:700;color:#58A6FF;background:rgba(88,166,255,.1);border-radius:6px;padding:3px 8px;flex-shrink:0;margin-top:2px}
+  .tech-item h4{font-size:13px;font-weight:700;color:#E6EDF3;margin-bottom:3px}
+  .tech-item p{font-size:12px;color:#8B949E}
+
+  /* AUTHOR */
+  .author-section{background:#161B22;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:40px;text-align:center;max-width:620px;margin:0 auto}
+  .author-section h3{font-size:20px;font-weight:800;margin-bottom:8px}
+  .author-section .role{font-size:13px;color:#8B949E;margin-bottom:16px}
+  .author-section p{font-size:14px;color:#8B949E;line-height:1.7}
+
+  /* FOOTER */
+  footer{border-top:1px solid rgba(255,255,255,.07);padding:30px 40px;display:flex;justify-content:space-between;align-items:center;flex-wrap:gap;gap:12px;flex-wrap:wrap}
+  .footer-left{font-size:13px;color:#8B949E}
+  .footer-right{display:flex;gap:20px}
+  .footer-right a{font-size:13px;color:#8B949E}
+  .footer-right a:hover{color:#58A6FF}
+
+  @media(max-width:600px){
+    nav{padding:14px 20px}
+    .hero{padding:60px 20px 50px}
+    .stats{gap:28px}
+    footer{flex-direction:column;text-align:center}
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">LOST <span>CARD</span></div>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#pricing">Pricing</a>
+    <a href="./terms.html">Terms</a>
+    <a href="./index.html" class="nav-cta">Launch App →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">Psychological Simulation · AI-Powered</div>
+  <h1>What if your relationship<br/>ran on a <span>data structure</span>?</h1>
+  <p>LOST CARD is a computational model of relational belief decay. Simulate real conversations, track neurological load in real time, and understand why connections break before they do.</p>
+  <div class="hero-buttons">
+    <a href="./index.html" class="btn-primary">Start Simulation — Free</a>
+    <a href="#features" class="btn-secondary">Learn More</a>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat-item">
+    <div class="stat-num">7</div>
+    <div class="stat-label">DSA Concepts Active</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">50</div>
+    <div class="stat-label">Free AI Messages</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">3</div>
+    <div class="stat-label">Psychological Cards</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">23</div>
+    <div class="stat-label">Simulation Moves</div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<div class="section" id="features">
+  <div class="section-title">
+    <h2>Built different. Psychologically precise.</h2>
+    <p>Every feature maps to a real neurological or relational mechanism.</p>
+  </div>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">🧠</div>
+      <h3>Neurological Load Index (NLI)</h3>
+      <p>A real-time score tracking PFC degradation, cortisol accumulation, and dopamine levels — computed from your conversation choices.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🤖</div>
+      <h3>AI-Powered Simulation</h3>
+      <p>Simulate real conversations with a psychologically reactive AI character. The AI adapts based on your NLI and trust state — harder when you're already losing.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📊</div>
+      <h3>Deep Psychological Report</h3>
+      <p>After each session, receive a detailed analysis of your relational patterns, card drop events, and neurological state trajectory.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">♟️</div>
+      <h3>Chess Engine Integration</h3>
+      <p>A minimax algorithm mirrors the Immortal Game (1851). Your moves shift the position. Checkmate is not metaphorical — it is computed.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔗</div>
+      <h3>7 Live DSA Structures</h3>
+      <p>Weighted DAG, LIFO Stack, Min-Heap, Linked List, Hash Map, Finite State Machine, and Minimax — all simultaneously active in every session.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔒</div>
+      <h3>Custom Relationship Simulations</h3>
+      <p>Recreate any relationship dynamic with custom names and context. The AI learns the setup and responds according to the psychological state.</p>
+    </div>
+  </div>
+
+  <!-- THREE CARDS -->
+  <div style="text-align:center;margin-top:60px;margin-bottom:20px">
+    <h2 style="font-size:26px;font-weight:800;margin-bottom:8px">The Three Relational Cards</h2>
+    <p style="color:#8B949E;font-size:14px">Every relationship runs on three finite psychological resources.</p>
+  </div>
+  <div class="cards-row">
+    <div class="rcard rcard-devotion">
+      <h3>Devotion</h3>
+      <p>Emotional investment & boundary-setting. Lost through habitual aggression at low neurological load.</p>
+    </div>
+    <div class="rcard rcard-excitement">
+      <h3>Excitement</h3>
+      <p>Relational energy & curiosity. Lost through reactive escalation or consecutive aggressive moves.</p>
+    </div>
+    <div class="rcard rcard-presence">
+      <h3>Presence</h3>
+      <p>Psychological availability. Lost through repeated withdrawal and prolonged high-stress states.</p>
+    </div>
+  </div>
+</div>
+
+<!-- TECH / DSA -->
+<div style="background:#161B22;border-top:1px solid rgba(255,255,255,.07);border-bottom:1px solid rgba(255,255,255,.07);padding:60px 20px">
+  <div class="section" style="padding:0">
+    <div class="section-title">
+      <h2>7 Data Structures. 1 Relationship.</h2>
+      <p>Each DSA concept maps to a real psychological mechanism, running simultaneously.</p>
+    </div>
+    <div class="tech-grid">
+      <div class="tech-item">
+        <div class="tech-num">DSA 1</div>
+        <div>
+          <h4>Weighted DAG + Dijkstra</h4>
+          <p>Hippocampal memory decay — edge weights degrade with aggression</p>
+        </div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-num">DSA 2</div>
+        <div>
+          <h4>LIFO Stack</h4>
+          <p>Cortisol accumulation — NLI-gated conflict resolution</p>
+        </div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-num">DSA 3</div>
+        <div>
+          <h4>Min-Heap Priority Queue</h4>
+          <p>PFC corruption — stress-weighted choice ranking</p>
+        </div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-num">DSA 4</div>
+        <div>
+          <h4>Singly Linked List</h4>
+          <p>Default Mode Network — intentional memory leak as longing</p>
+        </div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-num">DSA 5</div>
+        <div>
+          <h4>Hash Map</h4>
+          <p>Identity keys — O(1) access to protected relational memory</p>
+        </div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-num">DSA 6</div>
+        <div>
+          <h4>Finite State Machine</h4>
+          <p>Phase transitions — Harmony → Fracture → Collapse → Terminal</p>
+        </div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-num">DSA 7</div>
+        <div>
+          <h4>Minimax Algorithm</h4>
+          <p>Game theory — chess position eval per move, O(b^d)</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PRICING -->
+<div class="section" id="pricing">
+  <div class="section-title">
+    <h2>Simple, transparent pricing</h2>
+    <p>Start free. Upgrade when you need unlimited access.</p>
+  </div>
+  <div class="pricing-grid">
+    <div class="price-card">
+      <div class="price-name">Free</div>
+      <div class="price-amount">$0</div>
+      <div class="price-desc">Forever free</div>
+      <ul class="price-features">
+        <li>50 AI messages total</li>
+        <li>Default simulation mode</li>
+        <li>Custom chat (shared limit)</li>
+        <li>Psychological analysis report</li>
+      </ul>
+      <a href="./index.html" class="price-btn free">Get Started Free</a>
+    </div>
+    <div class="price-card popular">
+      <div class="popular-badge">MOST POPULAR</div>
+      <div class="price-name">Monthly</div>
+      <div class="price-amount">$5 <span>/ month</span></div>
+      <div class="price-desc">Cancel anytime</div>
+      <ul class="price-features">
+        <li>Unlimited AI messages</li>
+        <li>Default + Custom simulation</li>
+        <li>Full psychological reports</li>
+        <li>Priority AI responses</li>
+      </ul>
+      <a href="./index.html" class="price-btn">Upgrade Now</a>
+    </div>
+    <div class="price-card">
+      <div class="price-name">Annual</div>
+      <div class="price-amount">$35 <span>/ year</span></div>
+      <div class="price-desc">Best value — save 42%</div>
+      <ul class="price-features">
+        <li>Unlimited AI messages</li>
+        <li>Default + Custom simulation</li>
+        <li>Full psychological reports</li>
+        <li>Priority AI responses</li>
+      </ul>
+      <a href="./index.html" class="price-btn">Upgrade Now</a>
+    </div>
+  </div>
+</div>
+
+<!-- AUTHOR -->
+<div style="padding:0 20px 70px">
+  <div class="section-title" style="margin-bottom:30px">
+    <h2>Built on original theory</h2>
+  </div>
+  <div class="author-section">
+    <h3>S. M. Minhal Abbas Rizvi</h3>
+    <div class="role">BSSE Student · Author · Data Structures & Algorithms</div>
+    <p>LOST CARD is a computational implementation of the <strong>Lost Card Theory</strong> and <strong>The Bet of Belief</strong> framework — an original theoretical model of relational belief decay. All algorithms, psychological mappings, and simulation structures are original work.</p>
+  </div>
+</div>
+
+<!-- CTA -->
+<div style="background:linear-gradient(135deg,rgba(88,166,255,.08),rgba(198,120,221,.06));border-top:1px solid rgba(88,166,255,.15);border-bottom:1px solid rgba(88,166,255,.15);padding:70px 20px;text-align:center">
+  <h2 style="font-size:32px;font-weight:900;margin-bottom:12px">Ready to understand your relationships?</h2>
+  <p style="color:#8B949E;font-size:16px;margin-bottom:30px">50 free AI messages. No credit card required.</p>
+  <a href="./index.html" class="btn-primary" style="font-size:16px;padding:16px 36px">Start for Free →</a>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-left">© 2026 LOST CARD · S. M. Minhal Abbas Rizvi · For educational purposes only.</div>
+  <div class="footer-right">
+    <a href="./terms.html">Terms</a>
+    <a href="./privacy.html">Privacy</a>
+    <a href="./refund.html">Refunds</a>
+    <a href="mailto:minhalrizvi1224@gmail.com">Contact</a>
+  </div>
+</footer>
+
+</body>
+</html>
