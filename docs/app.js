@@ -3481,6 +3481,10 @@ function exitChat() {
   document.getElementById('chatWelcome').style.display = '';
   document.querySelectorAll('.chat-item').forEach(el => el.classList.remove('active'));
   if (currentChatId) delete customAIHistories[currentChatId];
+  // Clear saved setup so next click always shows fresh names/scenario modal
+  if (currentChatId && currentChatId !== 'default' && currentChatId !== 'ai_assistant') {
+    localStorage.removeItem(`lc_setup_${currentChatId}`);
+  }
   currentChatId        = null;
   currentChatSetup     = null;
   isCustomMode         = false;
