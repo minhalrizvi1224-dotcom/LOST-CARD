@@ -1393,13 +1393,14 @@
     <div class="terminal-msg" id="termMsg">...</div>
     <div class="terminal-cards" id="termCards"></div>
     <div class="terminal-report-row">
-      <button class="terminal-btn report-btn" onclick="showDSAReport('dsa')">⚙ DSA</button>
-      <button class="terminal-btn report-btn" onclick="showDSAReport('psych')">🧠 Psychology</button>
-      <button class="terminal-btn report-btn" onclick="showDSAReport('mistakes')">🔍 Mistakes</button>
-      <button class="terminal-btn report-btn" onclick="showDSAReport('chess')">♟ Chess</button>
-      <button class="terminal-btn report-btn" onclick="showDSAReport('replay')">▶ Replay</button>
+      <button class="terminal-btn report-btn" onclick="showDSAReport('dsa')">DSA</button>
+      <button class="terminal-btn report-btn" onclick="showDSAReport('psych')">Psychology</button>
+      <button class="terminal-btn report-btn" onclick="showDSAReport('mistakes')">Mistakes</button>
+      <button class="terminal-btn report-btn" onclick="showDSAReport('chess')">Chess</button>
+      <button class="terminal-btn report-btn" onclick="showDSAReport('replay')">Replay</button>
     </div>
-    <div class="terminal-btns" style="margin-top:8px">
+    <div class="terminal-btns" style="margin-top:8px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+      <button class="terminal-btn" onclick="document.getElementById('terminalOverlay').style.display='none';showSection('home')" style="background:transparent;border:1px solid rgba(255,255,255,.15);color:var(--muted)">← Back to Home</button>
       <button class="terminal-btn primary" onclick="closeTerminal()">Play Again ▶</button>
     </div>
   </div>
@@ -1409,16 +1410,16 @@
 <div id="dsaReportOverlay" class="modal-overlay" style="display:none">
   <div class="modal-box report-modal-box">
     <div class="report-tab-bar">
-      <button class="rtab active" data-tab="dsa"       onclick="switchReportTab('dsa')">⚙ DSA</button>
-      <button class="rtab"        data-tab="psych"     onclick="switchReportTab('psych')">🧠 Psych</button>
-      <button class="rtab"        data-tab="mistakes"  onclick="switchReportTab('mistakes')">🔍 Mistakes</button>
-      <button class="rtab"        data-tab="archetype" onclick="switchReportTab('archetype')">🧬 Archetype</button>
-      <button class="rtab"        data-tab="chess"     onclick="switchReportTab('chess')">♟ Chess</button>
-      <button class="rtab"        data-tab="replay"    onclick="switchReportTab('replay')">▶ Replay</button>
+      <button class="rtab active" data-tab="dsa"       onclick="switchReportTab('dsa')">DSA</button>
+      <button class="rtab"        data-tab="psych"     onclick="switchReportTab('psych')">Psychology</button>
+      <button class="rtab"        data-tab="mistakes"  onclick="switchReportTab('mistakes')">Analysis</button>
+      <button class="rtab"        data-tab="archetype" onclick="switchReportTab('archetype')">Archetype</button>
+      <button class="rtab"        data-tab="chess"     onclick="switchReportTab('chess')">Chess</button>
+      <button class="rtab"        data-tab="replay"    onclick="switchReportTab('replay')">Replay</button>
     </div>
     <div class="report-panel" id="reportContent"></div>
     <div class="modal-btns">
-      <button class="modal-btn ghost" onclick="exportReportPDF()" title="Download all 4 reports as PDF">⬇ Export PDF</button>
+      <button class="modal-btn ghost" onclick="exportReportPDF()" title="Download all reports as PDF">Export PDF</button>
       <button class="modal-btn primary" onclick="closeDSAReport()">Close</button>
     </div>
   </div>

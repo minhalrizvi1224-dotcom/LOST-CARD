@@ -2802,14 +2802,12 @@ function esc(str) {
 // ══════════════════════════════════════════════════════════════════════
 function renderChoices(choices, handler) {
   const area = document.getElementById('choicesArea');
-  area.innerHTML = `<div class="choices-label">Your Response</div>`;
+  area.innerHTML = `<div class="choices-label">Choose your response</div>`;
 
   choices.forEach(choice => {
-    const typeClass = choice.type === 0 ? 'soft' : choice.type === 1 ? 'aggressive' : 'silent';
-    const typeLabel = choice.type === 0 ? 'SOFT' : choice.type === 1 ? 'AGGRESSIVE' : 'SILENT';
     const btn = document.createElement('button');
     btn.className = 'choice-btn';
-    btn.innerHTML = `<span class="choice-type-badge badge-${typeClass}">${typeLabel}</span><span class="choice-text">${esc(choice.text)}</span>`;
+    btn.innerHTML = `<span class="choice-text">${esc(choice.text)}</span>`;
     btn.onclick = () => {
       document.querySelectorAll('.choice-btn').forEach(b => b.classList.remove('selected'));
       btn.classList.add('selected');
@@ -3814,100 +3812,281 @@ function generateMistakesReport(s) {
   const excLost  = !s.excitement?.startsWith('RETAINED');
   const presLost = !s.presence?.startsWith('RETAINED');
   const trust    = parseFloat(s.finalTrust) || 0;
+  const nli      = parseFloat(s.finalNLI)   || 0;
   const log      = s.moveLog || [];
 
-  // ── Move-by-move mistake detection ───────────────────────────────────
-  const mistakes = []; // { move, title, body, fix, severity }
+  // ── Detailed move-by-move mistake detection ──────────────────────────
+  const mistakes = [];
   if (log.length > 0) {
-    let prevType = null, silentRun = 0, highNLIRun = 0;
+    let prevType = null, silentRun = 0, highNLIRun = 0, aggrRun = 0;
+    let softCount = 0, aggrCount = 0, silentCount = 0;
     log.forEach(m => {
-      const nli  = parseFloat(m.nli)   || 0;
+      const nliV = parseFloat(m.nli)   || 0;
       const trst = parseFloat(m.trust) || 0;
       const type = m.type, mn = m.move;
-      if (type === 'AGGRESSIVE' && prevType === 'AGGRESSIVE')
-        mistakes.push({ move: mn, title: 'Double AGGRESSIVE', body: 'Two aggressive moves in a row - cortisol stacked before it could clear. The second press is always the one that breaks things.', fix: 'After any aggressive move, the next MUST be SOFT - no exceptions.', severity: 'high' });
-      if (type === 'AGGRESSIVE' && nli < 0.30)
-        mistakes.push({ move: mn, title: 'Calm-State Aggression', body: `AGGRESSIVE at NLI ${m.nli} - you were calm. This wasn't stress-driven; it was a choice. That's the pattern that loses Devotion.`, fix: 'Low NLI is the window for SOFT moves. Don\'t waste it on aggression.', severity: 'high' });
-      if (type === 'AGGRESSIVE' && nli >= 0.70)
-        mistakes.push({ move: mn, title: 'Overloaded Aggression', body: `AGGRESSIVE at NLI ${m.nli} - your prefrontal cortex was compromised. You escalated when you needed to decelerate.`, fix: 'At NLI > 0.70, pause. Even a SILENT move is better than AGGRESSIVE here.', severity: 'high' });
+
+      if (type === 'SOFT')       softCount++;
+      if (type === 'AGGRESSIVE') aggrCount++;
+      if (type === 'SILENT')     silentCount++;
+
+      // Consecutive aggressive
+      if (type === 'AGGRESSIVE' && prevType === 'AGGRESSIVE') {
+        aggrRun++;
+        mistakes.push({
+          move: mn, severity: 'critical',
+          title: 'Consecutive Escalation',
+          what: `Two hostile responses in a row at Move ${mn-1} and Move ${mn}. Cortisol stacked without a resolution window between them.`,
+          why: 'The nervous system cannot process a second aggressive input before the first has been metabolized. The second escalation always causes compounding damage — it doesn\'t add, it multiplies. This is the primary mechanism behind EXCITEMENT card loss.',
+          fix: 'The rule is absolute: after any hostile response, the immediate next response must be connective. No exceptions. In a real conversation: pause, breathe, re-enter with acknowledgment before you make another demand.',
+          signal: 'Pattern detected: reactive escalation cycle'
+        });
+      }
+
+      // Calm-state aggression (most damaging — habitual not stress-driven)
+      if (type === 'AGGRESSIVE' && nliV < 0.35) {
+        mistakes.push({
+          move: mn, severity: 'critical',
+          title: 'Habitual Aggression (Low NLI)',
+          what: `Hostile response at Move ${mn} while neurological load was only ${m.nli} — well below the stress threshold.`,
+          why: 'This is the most psychologically revealing mistake. Stress-driven aggression is understandable. Calm-state aggression is a choice. When the prefrontal cortex is fully online (low NLI) and aggression still fires, the model identifies it as an embedded behavioral habit — not a reaction to pressure, but a default relational posture. This pattern directly triggers DEVOTION card loss.',
+          fix: 'Low NLI is the most valuable window in the simulation — your nervous system is regulated and repair is available. Use it for connection. In real relationships, moments of calm are the moments to bridge, not press.',
+          signal: 'Habitual aggression pattern identified'
+        });
+      }
+
+      // High-NLI aggression
+      if (type === 'AGGRESSIVE' && nliV >= 0.65 && nliV < 0.85) {
+        mistakes.push({
+          move: mn, severity: 'high',
+          title: 'Escalation Under Neurological Overload',
+          what: `Hostile response at Move ${mn} with NLI at ${m.nli}. The prefrontal cortex was already significantly compromised.`,
+          why: 'At NLI above 0.65, the rational decision-making center is degraded. Hostile responses at this threshold are amplified by the stress state — the damage to trust and cortisol buffer is multiplied compared to the same response at lower NLI. The chess engine penalizes this heavily because it is the neurological equivalent of a blunder under pressure.',
+          fix: 'When NLI crosses 0.60, the correct response in almost all cases is connective — not because it feels natural, but because it is the only option that stops the cascade. If you cannot respond connectivley, say nothing. Silence is less damaging than aggression at this threshold.',
+          signal: 'Stress-amplified escalation'
+        });
+      }
+
+      // Amygdala override
+      if (type === 'AGGRESSIVE' && nliV >= 0.85) {
+        mistakes.push({
+          move: mn, severity: 'critical',
+          title: 'Amygdala Override — PFC Offline',
+          what: `Move ${mn} was executed with NLI at ${m.nli}. The prefrontal cortex was offline. The amygdala (threat response center) was in control.`,
+          why: 'At NLI ≥ 0.85, the model classifies all responses as amygdala-driven regardless of what was chosen. The rational brain was not making a decision — it was observing one being made for it. This is not a failure of will. It is a biological process. But the relational consequences are identical to conscious aggression.',
+          fix: 'In real conversations: if you are this escalated, end the interaction. Not with hostility — with transparency. "I need to step away and come back to this." Re-entering a conversation in amygdala override only produces more data for the conflict stack.',
+          signal: 'PFC deactivation event'
+        });
+      }
+
+      // Silent accumulation
       if (type === 'SILENT') {
         silentRun++;
-        if (silentRun === 2) mistakes.push({ move: mn, title: 'Second Silence', body: 'The other person is starting to feel the withdrawal. One silence is space. Two is a signal.', fix: 'Break the silence with something soft. It doesn\'t need to be much.', severity: 'med' });
-        if (silentRun === 3) mistakes.push({ move: mn, title: 'Third Silence - PRESENCE LOST', body: 'Presence card is at breaking point. Absence became the message.', fix: 'Show up. Even one genuine word prevents this.', severity: 'high' });
+        if (silentRun === 2) {
+          mistakes.push({
+            move: mn, severity: 'high',
+            title: 'Second Withdrawal — Pattern Forming',
+            what: `Move ${mn} marks the second silent response. The other person has now experienced two consecutive withdrawals.`,
+            why: 'One silence is space. Two silences is a pattern. The nervous system of the person on the other end begins to interpret repeated absence as communication — specifically, as rejection or indifference. Mirror neuron activity drops significantly after the second withdrawal. The psychological cost of the second silence is approximately three times that of the first.',
+            fix: 'After any silent response, the model requires a connective response within the next move to prevent PRESENCE card degradation. In real life: you do not need to have all the words. Acknowledging that you are still there and still care is sufficient. Presence does not require eloquence.',
+            signal: 'Withdrawal pattern initiated'
+          });
+        }
+        if (silentRun >= 3) {
+          mistakes.push({
+            move: mn, severity: 'critical',
+            title: 'Sustained Withdrawal — Presence Threshold Crossed',
+            what: `Move ${mn}: third (or more) silent response. PRESENCE card is at or past its threshold.`,
+            why: 'Three withdrawals in sequence confirm an avoidant response pattern. The relationship is now operating in a state where the other person cannot rely on your psychological availability. This is not perceived as "needing space" — it is experienced as abandonment. The PRESENCE card models exactly this: once psychological availability collapses, it cannot be restored within the same session.',
+            fix: 'Presence is not about quantity of words — it is about continuity of signal. Even a single genuine sentence that says "I am here and I have not left" resets the withdrawal clock. The failure to provide this signal is what the simulation is measuring.',
+            signal: 'Presence threshold exceeded'
+          });
+        }
       } else { silentRun = 0; }
-      if (nli > 0.75) {
+
+      // Sustained high NLI
+      if (nliV > 0.72) {
         highNLIRun++;
-        if (highNLIRun === 2) mistakes.push({ move: mn, title: 'Sustained Overload', body: `NLI ${m.nli} - two moves deep into the red zone. You stayed too long in overload.`, fix: 'One SOFT move here drops NLI and breaks the chain before it becomes 3.', severity: 'med' });
+        if (highNLIRun === 2) {
+          mistakes.push({
+            move: mn, severity: 'high',
+            title: 'Sustained Neurological Overload',
+            what: `NLI at ${m.nli} — second consecutive move in the collapse zone (above 0.70).`,
+            why: 'Sustained overload (two or more moves above 0.70) means the conversation has entered a phase where rational processing is impaired for multiple consecutive moments. Each move at this level degrades the DAG edges faster, pushes the conflict stack deeper, and makes repair geometrically harder — not linearly.',
+            fix: 'Break the chain at the second high-NLI move, not the third. One genuine acknowledgment is enough to interrupt the cascade. The longer you stay in this zone, the harder recovery becomes — the simulation compounds passively at 0.022 × (1 + move × 0.04) per move regardless of what you choose.',
+            signal: 'Cascade risk — sustained overload'
+          });
+        }
       } else { highNLIRun = 0; }
-      if (type === 'SOFT' && nli >= 0.50)
-        mistakes.push({ move: mn, title: 'Repair Rejected (NLI Too High)', body: `SOFT move while NLI was ${m.nli} - the cortisol was too high for repair to land. The stack couldn't pop.`, fix: 'Repair only works when calm enough to receive it. Lower NLI first.', severity: 'low' });
-      if (type === 'AGGRESSIVE' && trst < 0.35)
-        mistakes.push({ move: mn, title: 'Aggression on Broken Trust', body: `AGGRESSIVE with trust at ${Math.round(trst*100)}% - you pressed when the foundation was already cracking.`, fix: 'When trust is below 40%, every SOFT move is more valuable than 5 aggressive ones.', severity: 'high' });
+
+      // Repair attempted but NLI too high
+      if (type === 'SOFT' && nliV >= 0.52) {
+        mistakes.push({
+          move: mn, severity: 'medium',
+          title: 'Repair Attempt Blocked by Cortisol',
+          what: `Connective response at Move ${mn} while NLI was ${m.nli}. The conflict stack could not clear — repair was rejected.`,
+          why: 'The LIFO stack (cortisol model) can only pop — i.e., resolve a conflict — when NLI is below the threshold of 0.50. Above that, the nervous system is too stressed to metabolize resolution. This means the connective response you gave had good intent but no structural effect. The cortisol was too high for the other person\'s system to receive it.',
+          fix: 'Repair must come early, before NLI escalates past 0.50. In real relationships: do not wait until both parties are overwhelmed to introduce softness. The window for repair closes as stress accumulates. Earlier is always more effective.',
+          signal: 'Stack pop rejected (NLI > 0.50)'
+        });
+      }
+
+      // Aggression on critically low trust
+      if (type === 'AGGRESSIVE' && trst < 0.40) {
+        mistakes.push({
+          move: mn, severity: 'critical',
+          title: 'Aggression on Damaged Foundation',
+          what: `Hostile response at Move ${mn} with relational trust at only ${Math.round(trst*100)}%. The foundation was already critically compromised.`,
+          why: 'Trust at below 40% means the other person is already in a defensive and vigilant state. Every aggressive move at this trust level is interpreted through a threat-lens — it confirms the fear that the relationship is unsafe. The trust model decreases by −0.14 per hostile response (vs. only +0.01 per connective response). At below 40%, there is no mathematical recovery pathway with aggression.',
+          fix: 'When trust is below 40%, the only viable moves are connective. Not because you are not allowed to feel frustration, but because the relationship cannot absorb any more damage. Each connective response at this trust level is an investment — slow, but compounding. Each aggressive response accelerates toward TC_TRUST_FLOOR.',
+          signal: `Trust at ${Math.round(trst*100)}% — critical threshold`
+        });
+      }
+
       prevType = type;
     });
   }
 
+  // ── Pattern summary ──────────────────────────────────────────────────
+  const totalMoves = log.length;
+  const softRatio  = totalMoves > 0 ? (log.filter(m => m.type==='SOFT').length / totalMoves * 100).toFixed(0) : 0;
+  const aggrRatio  = totalMoves > 0 ? (log.filter(m => m.type==='AGGRESSIVE').length / totalMoves * 100).toFixed(0) : 0;
+  const silRatio   = totalMoves > 0 ? (log.filter(m => m.type==='SILENT').length / totalMoves * 100).toFixed(0) : 0;
+
+  let patternName = 'Balanced', patternDesc = 'No dominant behavioral pattern detected.', patternColor = 'var(--blue)';
+  const aggrPct = parseInt(aggrRatio), silPct = parseInt(silRatio), softPct = parseInt(softRatio);
+  if      (aggrPct >= 50) { patternName = 'Reactive-Aggressive';  patternColor = 'var(--red)';    patternDesc = 'More than half of responses were hostile. The nervous system defaulted to attack as a primary relational strategy. This pattern predicts card loss across all three dimensions.'; }
+  else if (silPct  >= 40) { patternName = 'Avoidant-Withdrawn';   patternColor = 'var(--yellow)'; patternDesc = 'Withdrawal was the dominant strategy. The nervous system consistently chose disengagement over presence. This pattern is especially damaging because it is invisible — it doesn\'t feel like aggression, but the relational cost is equivalent.'; }
+  else if (aggrPct >= 30) { patternName = 'Intermittent Escalator'; patternColor = 'var(--orange)'; patternDesc = 'Aggression appeared in clusters — not constant, but enough to destabilize. The pattern of occasional hostile responses punctuating otherwise connective behavior is one of the most damaging because it creates unpredictability, which the nervous system experiences as chronic threat.'; }
+  else if (softPct >= 70) { patternName = 'Over-Investing';       patternColor = '#C678DD';        patternDesc = 'High connective output. If Devotion was lost despite this, it indicates over-investment — giving beyond what the relational foundation can hold. Softness without reciprocal trust creates vulnerability, not safety.'; }
+  else if (softPct >= 50) { patternName = 'Predominantly Connective'; patternColor = 'var(--green)'; patternDesc = 'Connective responses dominated. This is the most regulation-compatible pattern. Losses, if any, were likely due to specific threshold crossings rather than chronic patterns.'; }
+
+  // ── Card loss detailed analysis ──────────────────────────────────────
+  const lossBlock = (name, color, retained, move, mechanisms, realMeaning, recoveryPath) => `
+    <div style="background:var(--bg2);border:1px solid ${retained ? color+'33' : 'rgba(248,81,73,0.25)'};border-left:3px solid ${retained ? color : 'var(--red)'};border-radius:10px;padding:20px;margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <div style="width:8px;height:8px;border-radius:50%;background:${retained?color:'var(--red)'}"></div>
+        <div style="font-size:13px;font-weight:800;color:${retained?color:'var(--red)'};letter-spacing:0.5px">${name} — ${retained?'RETAINED':'LOST'}</div>
+        ${!retained && move ? `<div style="margin-left:auto;font-size:10px;font-weight:700;background:rgba(248,81,73,0.12);color:var(--red);padding:3px 8px;border-radius:6px">DROPPED AT MOVE ${move}</div>` : ''}
+      </div>
+      ${!retained ? `
+      <div style="margin-bottom:10px">
+        <div style="font-size:10px;letter-spacing:1.5px;color:var(--muted);font-weight:700;margin-bottom:6px">TRIGGER MECHANISM</div>
+        <div style="font-size:12px;color:var(--text);line-height:1.7">${mechanisms}</div>
+      </div>
+      <div style="margin-bottom:10px">
+        <div style="font-size:10px;letter-spacing:1.5px;color:var(--muted);font-weight:700;margin-bottom:6px">PSYCHOLOGICAL MEANING</div>
+        <div style="font-size:12px;color:var(--text);line-height:1.7">${realMeaning}</div>
+      </div>
+      <div style="background:rgba(88,166,255,0.06);border:1px solid rgba(88,166,255,0.15);border-radius:8px;padding:12px">
+        <div style="font-size:10px;letter-spacing:1.5px;color:var(--blue);font-weight:700;margin-bottom:6px">RECOVERY PROTOCOL</div>
+        <div style="font-size:12px;color:var(--text);line-height:1.7">${recoveryPath}</div>
+      </div>` : `<div style="font-size:12px;color:var(--muted);line-height:1.7">This card was held throughout the session. The behavioral conditions that trigger its loss were not met.</div>`}
+    </div>`;
+
+  // ── Mistake cards HTML ───────────────────────────────────────────────
   const mistakeHTML = mistakes.length > 0
     ? mistakes.map(m => {
-        const sc = m.severity === 'high' ? 'var(--red)' : m.severity === 'med' ? 'var(--orange)' : 'var(--yellow)';
-        return `<div class="rpt-mistake-card" style="border-left-color:${sc}">
-          <div class="rpt-mistake-header">
-            <span class="rpt-mistake-move" style="background:${sc}22;color:${sc}">Move ${m.move}</span>
-            <span class="rpt-mistake-title">${m.title}</span>
+        const sc = m.severity === 'critical' ? 'var(--red)' : m.severity === 'high' ? 'var(--orange)' : 'var(--yellow)';
+        const sevLabel = m.severity === 'critical' ? 'CRITICAL' : m.severity === 'high' ? 'HIGH' : 'MEDIUM';
+        return `<div style="background:var(--bg2);border:1px solid var(--border);border-left:3px solid ${sc};border-radius:10px;padding:18px;margin-bottom:12px">
+          <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;flex-wrap:wrap">
+            <div style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:5px;background:${sc}18;color:${sc};white-space:nowrap">MOVE ${m.move}</div>
+            <div style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:5px;background:${sc}12;color:${sc};white-space:nowrap">${sevLabel}</div>
+            <div style="font-size:13px;font-weight:700;color:var(--text)">${m.title}</div>
           </div>
-          <div class="rpt-mistake-body">${m.body}</div>
-          <div class="rpt-mistake-fix"><span style="color:var(--blue)">→</span> ${m.fix}</div>
+          <div style="margin-bottom:10px">
+            <div style="font-size:10px;letter-spacing:1.5px;color:var(--muted);font-weight:700;margin-bottom:4px">WHAT HAPPENED</div>
+            <div style="font-size:12px;color:var(--muted);line-height:1.7">${m.what}</div>
+          </div>
+          <div style="margin-bottom:10px">
+            <div style="font-size:10px;letter-spacing:1.5px;color:var(--muted);font-weight:700;margin-bottom:4px">WHY IT MATTERS</div>
+            <div style="font-size:12px;color:var(--text);line-height:1.7">${m.why}</div>
+          </div>
+          <div style="background:rgba(88,166,255,0.06);border:1px solid rgba(88,166,255,0.15);border-radius:8px;padding:12px">
+            <div style="font-size:10px;letter-spacing:1.5px;color:var(--blue);font-weight:700;margin-bottom:4px">CORRECTION</div>
+            <div style="font-size:12px;color:var(--text);line-height:1.7">${m.fix}</div>
+          </div>
+          ${m.signal ? `<div style="margin-top:8px;font-size:10px;color:var(--muted);font-style:italic">Signal: ${m.signal}</div>` : ''}
         </div>`;
       }).join('')
     : log.length > 0
-      ? `<div class="rpt-clean-session"><div style="font-size:22px">✓</div><div style="font-weight:700;color:var(--green)">Clean Pattern</div><div style="color:var(--muted);font-size:12px;margin-top:4px">No critical errors in the move sequence. Every escalation was managed within one move.</div></div>`
-      : `<div class="rpt-clean-session"><div style="color:var(--muted);font-size:12px">No move log available. Play a session to see move-by-move analysis.</div></div>`;
+      ? `<div style="background:var(--bg2);border:1px solid rgba(63,185,80,0.3);border-radius:10px;padding:24px;text-align:center">
+           <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:6px">No Critical Errors Detected</div>
+           <div style="font-size:12px;color:var(--muted);line-height:1.7">No algorithmically detectable violations in this session. Every escalation was contained or followed by regulation within one move. This is consistent with a regulated behavioral pattern.</div>
+         </div>`
+      : `<div style="color:var(--muted);font-size:12px;padding:20px;text-align:center">No move log available. Play a session to see move-by-move analysis.</div>`;
 
-  const lossCard = (name, color, cause, meaning, fix, rule) =>
-    `<div class="rpt-loss-card" style="border-color:rgba(248,81,73,0.3)">
-       <div class="rpt-loss-name" style="color:var(--red)">✗ ${name} LOST</div>
-       <div class="rpt-loss-row"><span class="rpt-loss-label">Cause</span><span>${cause}</span></div>
-       <div class="rpt-loss-row"><span class="rpt-loss-label">Meaning</span><span>${meaning}</span></div>
-       <div class="rpt-loss-row"><span class="rpt-loss-label">Fix</span><span style="color:var(--blue)">${fix}</span></div>
-       <div class="rpt-loss-rule">"${rule}"</div>
-     </div>`;
-
-  const rules = [
-    { text: 'Never 2 consecutive AGGRESSIVE moves', icon: '⚡', color: 'var(--red)' },
-    { text: 'Max 2 SILENT moves total - never 3 consecutive', icon: '🤫', color: 'var(--yellow)' },
-    { text: 'When NLI crosses 0.60 → go SOFT immediately', icon: '🧠', color: 'var(--orange)' },
-    { text: 'Don\'t invest Devotion before trust > 0.55', icon: '💜', color: '#C678DD' },
-    { text: 'Repair only works when NLI < 0.50', icon: '🛠️', color: 'var(--green)' },
-    { text: 'In real life: pause before the second hit', icon: '⏸️', color: 'var(--blue)' },
+  // ── Deviation from optimal path ──────────────────────────────────────
+  const deviationRows = [
+    { label: 'Connective responses', val: `${softRatio}%`, note: 'Optimal: 50–60%', good: parseInt(softRatio) >= 40 && parseInt(softRatio) <= 65 },
+    { label: 'Hostile responses',    val: `${aggrRatio}%`, note: 'Optimal: < 25%',  good: parseInt(aggrRatio) < 25 },
+    { label: 'Silent responses',     val: `${silRatio}%`,  note: 'Optimal: < 20%',  good: parseInt(silRatio)  < 20 },
+    { label: 'Final trust level',    val: `${Math.round(trust*100)}%`, note: 'Optimal: > 60%', good: trust > 0.60 },
+    { label: 'Final NLI',            val: s.finalNLI, note: 'Optimal: < 0.45',  good: nli < 0.45 },
+    { label: 'Cards retained',       val: `${3-(s.cardsLost||0)}/3`, note: 'Optimal: 3/3',  good: s.cardsLost === 0 },
   ];
 
   return `<div class="rpt-wrap">
     <div class="rpt-header">
-      <div class="rpt-eyebrow">LOST CARD · MISTAKES & CORRECTIONS</div>
+      <div class="rpt-eyebrow">LOST CARD · BEHAVIORAL ANALYSIS & CORRECTION REPORT</div>
       <div class="rpt-author">S. M. Minhal Abbas Rizvi · The Bet of Belief Framework</div>
     </div>
 
-    ${(devLost || excLost || presLost || (s.amygdalaOverrides||0) > 0 || (s.stackMaxDepth||0) >= 4 || trust < 0.50) ? `
-    <div class="rpt-section-label">WHAT WENT WRONG</div>
-    <div class="rpt-loss-list">
-      ${devLost  ? lossCard('DEVOTION',   '#C678DD', 'Aggression at low NLI (habitual), OR trust < 0.55 while dopamine high.', 'Investment given before the foundation could hold it.', 'Calibrate investment to trust level. Give less when trust is low.', 'Don\'t bet big on a hand you haven\'t earned yet.') : ''}
-      ${excLost  ? lossCard('EXCITEMENT', '#56B6C2', 'Stack depth ≥4 + aggression, OR 2 consecutive AGGRESSIVE moves.', 'Cortisol buffer couldn\'t absorb the conflict pressure.', 'After any AGGRESSIVE move, the next MUST be SOFT.', 'Never press twice. The second press triggers the avalanche.') : ''}
-      ${presLost ? lossCard('PRESENCE',   '#98C379', '3+ SILENT moves total, OR 3 consecutive moves with NLI > 0.75.', 'Nervous system chose withdrawal over engagement.', 'Silence is valid once. Twice signals retreat. Three times: lost.', 'Show up. Even imperfectly. Absence is the loudest message.') : ''}
-      ${(s.amygdalaOverrides||0) > 0 ? `<div class="rpt-loss-card" style="border-color:rgba(248,81,73,0.3)"><div class="rpt-loss-name" style="color:var(--red)">⚠ AMYGDALA OVERRIDE ×${s.amygdalaOverrides}</div><div style="font-size:11px;color:var(--muted);line-height:1.6">NLI exceeded 0.85. The prefrontal cortex went offline.<br><span style="color:var(--blue)">Fix:</span> At NLI > 0.70, pause before responding. In real life: wait 5 minutes.</div></div>` : ''}
-      ${(s.stackMaxDepth||0) >= 4 ? `<div class="rpt-loss-card" style="border-color:rgba(227,179,65,0.3)"><div class="rpt-loss-name" style="color:var(--yellow)">⚠ CORTISOL OVERLOAD - Stack ${s.stackMaxDepth}/7</div><div style="font-size:11px;color:var(--muted);line-height:1.6">Unresolved conflicts stacked beyond capacity.<br><span style="color:var(--blue)">Fix:</span> Each SOFT move at NLI < 0.50 resolves one conflict. One at a time.</div></div>` : ''}
-      ${trust < 0.50 ? `<div class="rpt-loss-card" style="border-color:rgba(240,136,62,0.3)"><div class="rpt-loss-name" style="color:var(--orange)">⚠ TRUST EROSION - ${Math.round(trust*100)}%</div><div style="font-size:11px;color:var(--muted);line-height:1.6">Trust drops with AGGRESSIVE, recovers slowly with SOFT.<br><span style="color:var(--blue)">Note:</span> Below 10%: no recovery path exists - TC_TRUST_FLOOR fires.</div></div>` : ''}
-      ${s.cardsLost === 0 ? `<div class="rpt-loss-card" style="border-color:rgba(63,185,80,0.3)"><div class="rpt-loss-name" style="color:var(--green)">✓ SALVATION - NO CARD LOSSES</div><div style="font-size:11px;color:var(--muted)">All three cards retained. This almost never happens.</div></div>` : ''}
-    </div>` : ''}
-
-    <div class="rpt-section-label">SPECIFIC MISTAKES IN THIS SESSION</div>
-    ${mistakeHTML}
-
-    <div class="rpt-section-label">HOW TO DO THIS DIFFERENTLY</div>
-    <div class="rpt-rules-grid">
-      ${rules.map(r => `<div class="rpt-rule-item"><div class="rpt-rule-icon">${r.icon}</div><div style="font-size:11px;color:var(--text);line-height:1.5">${r.text}</div></div>`).join('')}
+    <div style="background:var(--bg2);border:1px solid ${patternColor}33;border-radius:10px;padding:20px;margin-bottom:20px">
+      <div style="font-size:10px;letter-spacing:2px;color:var(--muted);font-weight:700;margin-bottom:6px">BEHAVIORAL PATTERN IDENTIFIED</div>
+      <div style="font-size:16px;font-weight:900;color:${patternColor};margin-bottom:10px">${patternName}</div>
+      <div style="font-size:12px;color:var(--text);line-height:1.7">${patternDesc}</div>
     </div>
 
-    <div class="rpt-quote">"There is nothing to talk about… unless you change the next move."</div>
+    <div class="rpt-section-label">SESSION METRICS vs OPTIMAL RANGE</div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:20px">
+      ${deviationRows.map((r,i) => `
+        <div style="display:flex;align-items:center;padding:10px 16px;${i<deviationRows.length-1?'border-bottom:1px solid var(--border)':''}">
+          <div style="flex:1;font-size:12px;color:var(--muted)">${r.label}</div>
+          <div style="font-size:12px;font-weight:700;color:${r.good?'var(--green)':'var(--red)'};min-width:48px;text-align:right">${r.val}</div>
+          <div style="font-size:10px;color:var(--muted);min-width:100px;text-align:right">${r.note}</div>
+        </div>`).join('')}
+    </div>
+
+    <div class="rpt-section-label">CARD-BY-CARD LOSS ANALYSIS</div>
+    ${lossBlock('DEVOTION', '#C678DD', !devLost,
+      s.devotionLostAt || (devLost ? s.moveLog?.find(m => m.cards?.includes('DEVOTION'))?.move : null),
+      'Devotion was lost through one of four mechanisms: (1) hostile response while neurological load was below 0.55 — calm-state aggression, the most diagnostic pattern; (2) trust fell below 0.70 while dopamine remained elevated, creating an emotional blindspot; (3) five consecutive connective responses that over-invested before the foundation could sustain it; (4) continued giving after trust had already dropped below 0.45.',
+      'The DEVOTION card models the emotional investment dimension of a relationship. Its loss indicates that investment was given without structural foundation — that care was extended into a relational structure that could not hold it. In attachment theory terms, this is anxious investment: high output, low security. The result is not just loss of this session\'s card — it is the permanent locking of 6 memory nodes in the hippocampal DAG.',
+      'To prevent Devotion loss: calibrate the depth of your emotional investment to the current trust level. The model\'s rule is that investment should not exceed the weight the foundation can carry. When trust is below 0.55, maintain connection without over-extending. Connective responses should be present but measured — not an escalating pattern of five consecutive soft moves.'
+    )}
+    ${lossBlock('EXCITEMENT', '#56B6C2', !excLost,
+      s.excitementLostAt || (excLost ? s.moveLog?.find(m => m.cards?.includes('EXCITEMENT'))?.move : null),
+      'Excitement was lost through one of three mechanisms: (1) two or more unresolved conflicts in the cortisol stack combined with another hostile response — the stack was pushed past its critical threshold; (2) two consecutive hostile responses without a regulation event between them; (3) a hostile response while NLI was already above 0.55 — stress turning engagement into pure reactivity.',
+      'The EXCITEMENT card models relational energy — the quality of engagement, curiosity, and enthusiasm that makes the other person want to continue the interaction. Its loss does not mean the relationship becomes hostile; it means it becomes inert. The structural signature of excitement loss is the severing of the DAG bridge nodes (7, 8, 11, 12) — the memory connections that make the relationship feel alive and dynamic are cut.',
+      'To prevent Excitement loss: the cortisol buffer (LIFO stack) must be actively managed. Each unresolved conflict that stacks creates vulnerability for the next hostile response. The repair window — NLI below 0.50 — must be used to clear the stack. Identify the move where the stack exceeded depth 2 and trace backward: what prevented repair at that point?'
+    )}
+    ${lossBlock('PRESENCE', '#98C379', !presLost,
+      s.presenceLostAt || (presLost ? s.moveLog?.find(m => m.cards?.includes('PRESENCE'))?.move : null),
+      'Presence was lost through one of three mechanisms: (1) cumulative silent responses reaching a total of 2 or more — a withdrawal pattern that became a signal; (2) two or more consecutive moves with NLI above 0.62 — sustained overload that made psychological availability impossible; (3) NLI reaching or exceeding 0.70 at or after Move 3.',
+      'The PRESENCE card models psychological availability — the lived experience of the other person that you are there, engaged, and reachable. It is the most invisible card to monitor, because silence rarely feels like an active choice. But the model treats absence as communication. Two silent responses signal withdrawal; three confirm it. The loss of PRESENCE means the other person\'s mirror neuron system has disengaged — they stop expecting availability and begin adjusting to its absence.',
+      'To prevent Presence loss: treat silence as a finite resource. You are permitted one per session without structural damage. The second requires an immediate recovery — even a minimal connective response resets the counter. Monitor NLI vigilantly at the session\'s midpoint; if it crosses 0.60 before Move 12, the risk of sustained overload triggering presence loss is high.'
+    )}
+
+    <div class="rpt-section-label">MOVE-BY-MOVE VIOLATIONS — ${mistakes.length} DETECTED</div>
+    ${mistakeHTML}
+
+    ${mistakes.length > 0 ? `
+    <div class="rpt-section-label">PRIORITY CORRECTIONS FOR NEXT SESSION</div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:20px">
+      ${[
+        ...( mistakes.some(m => m.title.includes('Consecutive') || m.title.includes('Habitual')) ? [{ n:1, text: 'After any hostile response — the immediate next response must be connective. This is non-negotiable. If you cannot do this, use silence. But never follow hostility with more hostility.' }] : [] ),
+        ...( mistakes.some(m => m.title.includes('Withdrawal') || m.title.includes('Sustained Withdrawal')) ? [{ n:2, text: 'After any silent response — re-enter with presence within the next move. You do not need the right words. You need continuity of signal. "I\'m still here" is enough.' }] : [] ),
+        ...( mistakes.some(m => m.title.includes('Cortisol') || m.title.includes('Repair Attempt Blocked')) ? [{ n:3, text: 'Use connective responses early — before NLI crosses 0.50. The repair window is narrow and closes fast. Repair at NLI 0.30 is worth three repairs at NLI 0.55.' }] : [] ),
+        ...( mistakes.some(m => m.title.includes('Foundation') || m.title.includes('Damaged Foundation')) ? [{ n:4, text: 'When trust is below 40%, all hostile responses must be suspended. There is no mathematical recovery pathway with aggression at this trust level.' }] : [] ),
+        { n: mistakes.length > 3 ? 5 : 4, text: 'Run this session again with full awareness of the NLI and trust bars. The goal is not to avoid all hostile responses — it is to notice the moment before the second one.' }
+      ].map(r => `<div style="display:flex;gap:14px;padding:14px 16px;border-bottom:1px solid var(--border)">
+        <div style="font-size:11px;font-weight:800;color:var(--blue);min-width:20px;padding-top:1px">${r.n}.</div>
+        <div style="font-size:12px;color:var(--text);line-height:1.7">${r.text}</div>
+      </div>`).join('')}
+    </div>` : ''}
+
+    <div class="rpt-quote">"There is nothing to talk about unless you change the next move. The model runs again. It always runs again."</div>
   </div>`;
 }
 
