@@ -884,8 +884,9 @@ async function loadStats() {
       adDB.collection('users').get(),
       adDB.collection('sessions').orderBy('timestamp','desc').limit(500).get()
     ]);
-    setConn('ok', `Connected — ${usersSnap.size} users, ${sessSnap.size} sessions`);
-    document.getElementById('statUsers').textContent    = usersSnap.size;
+    const realUserCount = usersSnap.docs.filter(d => !d.data().isAdmin).length;
+    setConn('ok', `Connected — ${realUserCount} users, ${sessSnap.size} sessions`);
+    document.getElementById('statUsers').textContent    = realUserCount;
     document.getElementById('statSessions').textContent = sessSnap.size;
 
     if (sessSnap.size > 0) {
@@ -945,7 +946,7 @@ async function loadUsers() {
     try { snap=await adDB.collection('users').orderBy('createdAt','desc').get(); }
     catch(e) { snap=await adDB.collection('users').get(); }
     allUsers=[];
-    snap.forEach(d=>allUsers.push({id:d.id,...d.data()}));
+    snap.forEach(d=>{ if(!d.data().isAdmin) allUsers.push({id:d.id,...d.data()}); });
     document.getElementById('usersCount').textContent='('+allUsers.length+')';
     renderUsersTable(allUsers);
   } catch(e) {
