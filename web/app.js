@@ -2145,11 +2145,35 @@ async function sendAIMessage() {
     aiAssistantHistory.push({ role: 'assistant', content: reply });
     addMessage('them', 'Hair Band', reply);
     scrollMessages();
+    // Log query for admin (only app-related, not personal info)
+    logHairBandQuery(text, reply);
   } catch(err) {
     typingEl.remove();
     isAITyping = false;
     addMessage('them', 'Hair Band', `Sorry, I couldn't reach the API. ${err.message || 'Check your API key and connection.'}`);
   }
+}
+
+// ── Log Hair Band queries for admin visibility ─────────────────────────
+function logHairBandQuery(userMsg, aiReply) {
+  try {
+    if (!firebaseDB || !currentUser) return;
+    // Privacy filter: skip if query mentions personal-only info with no app context
+    const lower = userMsg.toLowerCase();
+    const appKeywords = ['card','nli','devotion','excitement','presence','lost card','bet of belief',
+      'cortisol','dopamine','pfc','dijkstra','stack','minimax','fsm','graph','dsa','algorithm',
+      'minhal','hair band','relationship','repair','decay','harmony','fracture','collapse','session',
+      'archetype','trust','aggressive','soft','silent','move','simulation','custom','default'];
+    const hasAppContext = appKeywords.some(k => lower.includes(k));
+    if (!hasAppContext && userMsg.length < 80) return; // too personal, skip
+    firebaseDB.collection('hairBandLogs').add({
+      uid:       currentUser.uid || null,
+      name:      currentUser.displayName || 'Anonymous',
+      query:     userMsg.substring(0, 500),
+      reply:     aiReply.substring(0, 500),
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    }).catch(() => {});
+  } catch(e) {}
 }
 
 // ══════════════════════════════════════════════════════════════════════

@@ -2086,7 +2086,7 @@ select.form-input option { background: var(--bg3); }
   position: fixed;
   bottom: 24px;
   left: 50%;
-  transform: translateX(-50%) translateY(80px);
+  transform: translateX(-50%) translateY(100px);
   background: var(--bg2);
   border: 1px solid var(--border);
   border-radius: 10px;
@@ -2098,11 +2098,17 @@ select.form-input option { background: var(--bg3); }
   box-shadow: 0 8px 30px rgba(0,0,0,.4);
   transition: transform .3s ease;
   pointer-events: none;
+  max-width: 90vw;
+  text-align: center;
+  white-space: nowrap;
 }
 .toast.show { transform: translateX(-50%) translateY(0); }
 .toast.success { border-color: var(--green);  color: var(--green); }
 .toast.error   { border-color: var(--red);    color: var(--red); }
 .toast.info    { border-color: var(--blue);   color: var(--blue); }
+@media (max-width: 768px) {
+  .toast { bottom: calc(var(--nav-h) + 10px); font-size: 12px; padding: 8px 16px; white-space: normal; max-width: 88vw; }
+}
 
 /* ══════════════════════════════════════════════════════════
    LOADING SPINNER
@@ -2417,11 +2423,34 @@ select.form-input option { background: var(--bg3); }
   }
 
   /* ── Hero section ── */
-  .hero-title    { font-size: 42px; }
-  .hero-subtitle { font-size: 13px; }
+  .hero { padding: 32px 16px 24px; }
+  .hero-title    { font-size: clamp(36px, 11vw, 56px); letter-spacing: 6px; }
+  .hero-subtitle { font-size: 12px; margin-bottom: 20px; }
+  .hero-badge    { font-size: 9px; letter-spacing: 1.2px; padding: 4px 10px; margin-bottom: 12px; }
+  .hero-tagline  { font-size: 12px; padding: 0 12px; margin-top: 10px; }
+  .hero-project-tagline { font-size: 13px; margin-bottom: 16px; }
+  .world-globe-svg { width: 220px; height: 220px; }
   .mode-btns     { flex-direction: column; gap: 10px; align-items: center; }
-  .mode-btn      { width: 80%; }
-  .landing-about { padding: 20px 14px; }
+  .mode-btn      { width: 85%; font-size: 13px; padding: 12px 20px; }
+
+  /* ── Landing about: stat cards + obj grid ── */
+  .landing-about { padding: 16px 12px; }
+  .about-grid    { grid-template-columns: repeat(2,1fr); gap: 10px; margin-bottom: 20px; }
+  .stat-card     { padding: 14px 10px; border-radius: 10px; }
+  .stat-num      { font-size: 26px; }
+  .stat-label    { font-size: 10px; }
+  .obj-grid      { grid-template-columns: 1fr; gap: 10px; }
+  .obj-card      { padding: 14px; }
+
+  /* ── Features grid ── */
+  .features-strip  { padding: 0 12px 24px; }
+  .features-grid   { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .feature-card    { padding: 14px 12px; }
+  .feature-name    { font-size: 12px; }
+  .feature-desc    { font-size: 11px; }
+  .features-title  { font-size: 20px; }
+  .fi-icon         { width: 40px; height: 40px; margin-bottom: 10px; }
+  .fi-emoji        { font-size: 20px; }
 
   /* ── Bottom nav ── */
   #bottomNav {
