@@ -2975,11 +2975,19 @@ async function callAI(provider, key, history, systemPrompt, userMsg, maxTokens =
   for (const m of trimmed) messages.push(m);
   if (userMsg) messages.push({ role: 'user', content: userMsg });
 
-  const resp = await fetch(url, {
+  const _doFetch = () => fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
     body: JSON.stringify({ model, messages, max_tokens: maxTokens, temperature: 0.9 })
   });
+
+  let resp = await _doFetch();
+
+  // Auto-retry once on rate limit (wait 3 s then try again silently)
+  if (!resp.ok && resp.status === 429) {
+    await new Promise(r => setTimeout(r, 3000));
+    resp = await _doFetch();
+  }
 
   if (!resp.ok) {
     const errData = await resp.json().catch(() => ({}));
