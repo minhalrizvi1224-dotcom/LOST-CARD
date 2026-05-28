@@ -1159,13 +1159,20 @@ function confirmSetup() {
   startCustomMode(chatIdToStart, setup);
 }
 
+// In-memory cache — fastest, guaranteed to work within same session
+const _setupCache = {};
+
 function getSavedSetup(chatId) {
+  // 1. In-memory (always works in same session)
+  if (_setupCache[chatId]) return _setupCache[chatId];
+  // 2. localStorage (survives page refresh)
   try { return JSON.parse(localStorage.getItem(`lc_setup_${chatId}`)); }
   catch(e) { return null; }
 }
 function saveSetup(chatId, setup) {
+  _setupCache[chatId] = setup;  // in-memory first — instant, always works
   localStorage.setItem(`lc_setup_${chatId}`, JSON.stringify(setup));
-  // Also persist to Firestore so setup survives sign-out / browser clear
+  // Firestore — persists across sign-out and devices
   if (typeof firebaseDB !== 'undefined' && firebaseDB && currentUser?.uid) {
     const patch = {};
     patch[`chatSetups.${chatId}`] = setup;
@@ -1780,8 +1787,22 @@ async function generateCustomReply(chatId, setup, userText) {
           ? ` TRUST FRAGILE: You want to believe them but you've been hurt before. Soft replies get cautious, half-open responses — not warmth. Warmth costs too much right now.`
           : ` BASELINE DIFFICULTY: You are not hostile right now — but you are not easy either. You are guarded in the way people who have been through things are always a little guarded. Don't be warm without reason. Don't reward effort too quickly. There is weight in this relationship and you carry it without showing it. Respond as someone who is present but not fully open.`;
 
+  // Detect explicit / morally violating content — forces harsh character reaction
+  const _explicitPatterns = /\b(fuck(?:ing)?|shit|bitch|asshole|bastard|sex|porn|naked|nudes?|dick|cock|pussy|boobs?|horny|slutt?|whore|rape)\b/i;
+  const isExplicit = userText ? _explicitPatterns.test(userText) : false;
+
+  // Detect general aggression/hostility (non-explicit) from the classifier
+  const _lastMsgClass = userText ? classifyMessageHeuristic(userText) : 0;
+  const isHostile = !isExplicit && _lastMsgClass === 1;
+
+  const explicitOverride = isExplicit
+    ? ` BOUNDARY VIOLATION: The other person just said something sexually inappropriate, offensive, or shocking. You are NOT okay with this. React as a real person would — disgusted, hurt, angry, or cold shutdown. This changes the entire conversation. Do NOT play along, do NOT be polite about it. Let your reaction show. This is a serious breach and your reply makes that absolutely clear. Short, real, cutting. No softness.`
+    : isHostile
+      ? ` HOSTILE MESSAGE RECEIVED: They were aggressive, hurtful, or disrespectful just now. Do NOT absorb it. Do NOT smooth it over. React as ${setup.theirName} truly would — go colder, pull back, or push back with real weight. Your reply must make it felt that this cost them something in this relationship. The tone has shifted. You are not as available as you were a moment ago. Make them feel that.`
+      : '';
+
   const sysPrompt = userText
-    ? `You are ${setup.theirName}. ${character} You're texting ${setup.yourName}. Situation: ${setup.scenario}. You're ${mood}${trstLine ? ', ' + trstLine : ''}.${diffLayer} ${langHint} They just wrote: "${userText}". Reply as ${setup.theirName} — real, in character, psychologically true to your state. 1-2 sentences MAX. Text message style. No asterisks, no labels, no explanations. ${typeReactivityHint} ${varietyNote}${charLock}`
+    ? `You are ${setup.theirName}. ${character} You're texting ${setup.yourName}. Situation: ${setup.scenario}. You're ${mood}${trstLine ? ', ' + trstLine : ''}.${diffLayer}${explicitOverride} ${langHint} They just wrote: "${userText}". Reply as ${setup.theirName} — real, in character, psychologically true to your state. 1-2 sentences MAX. Text message style. No asterisks, no labels, no explanations. ${typeReactivityHint} ${varietyNote}${charLock}`
     : `You are ${setup.theirName}. ${character} You're texting ${setup.yourName}. Situation: ${setup.scenario}. ${langHint} Context: ${openingSeed} ${typeOpeningHint} 1-2 sentences max. No labels.${charLock}`;
 
   // ── Free message limit check (shared with Hair Band) ─────────────────
@@ -1824,6 +1845,18 @@ async function generateCustomReply(chatId, setup, userText) {
 
     addMessage('them', setup.theirName, aiText);
     scrollMessages();
+
+    // Explicit message → extra simulation damage beyond normal AGGRESSIVE scoring
+    if (isExplicit && sim) {
+      sim.ns.cortisol  = Math.min(1, sim.ns.cortisol  + 0.18);
+      sim.ns.pfc       = Math.min(1, sim.ns.pfc        + 0.15);
+      sim.ns.dopamine  = Math.max(0, sim.ns.dopamine   - 0.15);
+      sim.trust        = Math.max(0, sim.trust          - 0.20);
+      sim.ns.recompute();
+      updateSidebarStats();
+      showToast('⚠ Boundary violated — trust and NLI severely damaged.', 'error');
+    }
+
     // Count toward the shared 50-message free limit
     if (!isUpgraded()) incrementHBCount();
   } catch(err) {
