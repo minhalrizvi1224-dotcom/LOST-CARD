@@ -2233,10 +2233,37 @@ async function generateFinalLetter(setup, summary) {
   const key = getPoolOrUserKey();
   if (!key) return; // silently skip if no pool key configured yet
 
-  const character = getRelCharacter(CHAT_META[currentChatId]?.relType || 'Friend');
-  const sysPrompt = `You are ${setup.theirName}. ${character} The conversation with ${setup.yourName} just ended - outcome: ${outcome}. ${cardsLost}/3 relational cards were lost. NLI at end: ${nli.toFixed(2)}.
+  const relType   = CHAT_META[currentChatId]?.relType || 'Friend';
+  const character = getRelCharacter(relType);
 
-Write a brief, honest, emotionally real closing letter to ${setup.yourName}. From your perspective - what you felt during this conversation, what you noticed, what you're left with. Not a verdict. Not analysis. A letter. Personal, specific, honest. 3-5 sentences. No asterisks, no labels, just the letter.`;
+  // Per-type final letter voice — each relationship ends differently
+  const finalLetterVoiceMap = {
+    'Best Friend':
+      `Write like someone who cares deeply but is protecting themselves. Warm on the surface, quietly hurt underneath. You don't say everything you feel — but what you do say lands. Reference something specific from the conversation without making it an accusation.`,
+    'Friend':
+      `Write something a little casual and emotionally restrained — you're being honest but you won't expose yourself fully. You care more than you show. Keep it shorter than the feeling deserves.`,
+    'Partner/Romantic':
+      `Write something that holds real feeling underneath controlled language. You feel more than you'll say. Say one thing you meant and didn't say during the conversation. Don't perform emotion — let it surface in the precision of the words you choose.`,
+    'Family':
+      `Write with the weight of shared history. Love and obligation are woven together and you can't separate them. You might reference something from the past, not to guilt — just because it's there. The letter is real and complicated.`,
+    'Colleague':
+      `Write with careful professional warmth — even the emotional parts are phrased in a way that could be read in a meeting. You are honest but controlled. You close the loop clearly.`,
+    'Childhood':
+      `Write with nostalgia and a little grief. Reference something from who you both were — not to manipulate, just because it's actually there. The sadness is real. You're not sure what this means for what comes next.`,
+    'Mentor':
+      `Write with precision and measured care. Note what you observed — what they did well, what you're concerned about. This is not unkind. It is exactly what a mentor would say. It might land harder than warmth.`,
+    'Rival':
+      `Write something that is genuinely respectful — and can't quite resist having a competitive frame, even in a letter. You see them clearly. You're almost fond of them. But you're still keeping score.`,
+    'Ex/Former':
+      `Write something that reveals more than you intended — or go deliberately cold and brief, as if the letter is a door closing. Either approach should feel final. If warm, the warmth has grief in it. If cold, the coldness has history in it.`,
+    'Online Friend':
+      `Write something that trails off slightly — like you started it thinking clearly and then got tangled in your own thoughts. Genuine but slightly scattered. Like a DM that sat in drafts for an hour before you sent it.`
+  };
+  const finalLetterVoice = finalLetterVoiceMap[relType] || `Write something honest, brief, emotionally real. 3-5 sentences.`;
+
+  const sysPrompt = `You are ${setup.theirName}. ${character} The conversation with ${setup.yourName} just ended — outcome: ${outcome}. ${cardsLost}/3 relational cards were lost. NLI at end: ${nli.toFixed(2)}.
+
+Write a brief, honest closing letter to ${setup.yourName}. ${finalLetterVoice} 3-5 sentences max. No asterisks, no labels, no headers — just the letter itself.`;
 
   // Show a separator then "writing letter" indicator
   const sepDiv = document.createElement('div');
