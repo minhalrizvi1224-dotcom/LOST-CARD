@@ -1535,6 +1535,14 @@ async function generateCustomReply(chatId, setup, userText) {
       ? `You are ${setup.theirName}. ${character} You're texting ${setup.yourName}. Situation: ${setup.scenario}. ${langHint} Context for this moment: ${openingSeed} Open with something short, cautious, and not fully warm - you're not sure why they're here or what you want. 1 sentence, max. Real. No labels. Do NOT start with "Hey" or generic greetings.${charLock}`
       : `You are ${setup.theirName}. ${character} You're texting ${setup.yourName}. Situation: ${setup.scenario}. ${langHint} Context for this moment: ${openingSeed} Send your opening message - natural, real, no labels, no generic "Hey" greetings. Start with something that reflects the actual situation. 1-2 sentences max.${charLock}`;
 
+  // ── Free message limit check (shared with Hair Band) ─────────────────
+  if (!isUpgraded() && hbCountLocal >= HB_FREE_LIMIT) {
+    addMessage('them', setup.theirName,
+      '⚠️ You\'ve used all 50 free AI messages. Upgrade in Settings → Upgrade to keep chatting.');
+    setInputEnabled(true);
+    return;
+  }
+
   const key = getPoolOrUserKey();
   if (!key) {
     addMessage('them', setup.theirName, '[AI is not available right now — try again shortly]');
@@ -1567,9 +1575,11 @@ async function generateCustomReply(chatId, setup, userText) {
 
     addMessage('them', setup.theirName, aiText);
     scrollMessages();
+    // Count toward the shared 50-message free limit
+    if (!isUpgraded()) incrementHBCount();
   } catch(err) {
     typingEl.remove();
-    addMessage('them', setup.theirName, `[Error: ${err.message || 'API call failed. Check your key.'}]`);
+    addMessage('them', setup.theirName, _friendlyAPIError(err));
   } finally {
     setInputEnabled(true);
   }
@@ -2377,7 +2387,7 @@ async function sendAIMessage() {
   } catch(err) {
     typingEl.remove();
     isAITyping = false;
-    addMessage('them', 'Hair Band', `Sorry, couldn't reach the AI. ${err.message || 'Please try again.'}`);
+    addMessage('them', 'Hair Band', _friendlyAPIError(err));
   }
 }
 
@@ -2397,7 +2407,7 @@ function _hbSubLabel() {
     }
     return '✨ Upgraded · Unlimited';
   }
-  return `${hbCountLocal} / ${HB_FREE_LIMIT} free messages`;
+  return `${hbCountLocal} / ${HB_FREE_LIMIT} free AI messages`;
 }
 
 // ── Hair Band: build input UI ─────────────────────────────────────────
@@ -2666,6 +2676,17 @@ function logHairBandQuery(userMsg, aiReply) {
 // ══════════════════════════════════════════════════════════════════════
 // AI API CALL
 // ══════════════════════════════════════════════════════════════════════
+function _friendlyAPIError(err) {
+  const msg = (err && err.message) ? err.message : '';
+  if (/rate.?limit|TPM|tokens.per.minute|too.many.request/i.test(msg))
+    return '⏳ Too many messages at once — please wait a few seconds and try again.';
+  if (/invalid.api.key|invalid_api_key|Incorrect API/i.test(msg))
+    return '❌ AI service unavailable right now. Please try again shortly.';
+  if (/connect|network|fetch/i.test(msg))
+    return '📡 Connection issue — check your internet and try again.';
+  return '⚠️ Could not reach AI — please try again.';
+}
+
 async function callAI(provider, key, history, systemPrompt, userMsg, maxTokens = 300) {
   const url   = provider === 'groq'
     ? 'https://api.groq.com/openai/v1/chat/completions'

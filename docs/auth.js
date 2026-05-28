@@ -193,8 +193,16 @@ function toggleProfileDropdown() {
     if (currentUser) {
       const ddName  = document.getElementById('ddName');
       const ddEmail = document.getElementById('ddEmail');
+      const ddPlan  = document.getElementById('ddPlanBadge');
       if (ddName)  ddName.textContent  = currentUser.displayName || 'User';
       if (ddEmail) ddEmail.textContent = currentUser.email || 'LOST CARD';
+      if (ddPlan) {
+        const isPro = currentUser.hbPlan === 'upgraded';
+        ddPlan.textContent = isPro ? '✨ Pro' : '🔓 Free';
+        ddPlan.style.cssText = isPro
+          ? 'display:inline-block;font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;background:linear-gradient(90deg,#635BFF,#8B7FFF);color:#fff;letter-spacing:.4px'
+          : 'display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:rgba(255,255,255,.08);color:var(--muted);letter-spacing:.4px';
+      }
     }
   }
 }
