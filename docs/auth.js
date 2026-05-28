@@ -18,6 +18,10 @@ let adminWANum       = '';     // WhatsApp number shown in upgrade modal
 let stripeLink15d    = '';     // Stripe payment link — 15 Days plan
 let stripeLinkMonthly= '';     // Stripe payment link — Monthly plan
 let stripeLinkAnnual = '';     // Stripe payment link — Annual plan
+let jazzCashTitle    = '';     // Account holder name shown in JazzCash UI
+let pkrPrice15d      = 560;   // PKR price for 15-day plan
+let pkrPriceMonthly  = 1400;  // PKR price for monthly plan
+let pkrPriceAnnual   = 9800;  // PKR price for annual plan
 
 // ── Initialize ────────────────────────────────────────────────────────
 function initAuth() {
@@ -83,6 +87,10 @@ function initAuth() {
         stripeLink15d     = c.stripeLink15d    || '';
         stripeLinkMonthly = c.stripeLinkMonthly|| '';
         stripeLinkAnnual  = c.stripeLinkAnnual || '';
+        jazzCashTitle     = c.jazzCashTitle    || '';
+        pkrPrice15d       = c.pkrPrice15d      || 560;
+        pkrPriceMonthly   = c.pkrPriceMonthly  || 1400;
+        pkrPriceAnnual    = c.pkrPriceAnnual   || 9800;
       }
     }).catch(() => {});
 

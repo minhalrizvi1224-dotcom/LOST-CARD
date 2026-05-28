@@ -1225,11 +1225,44 @@ function selectPlan(plan) {
       + '</div>'
       + '</div>';
   } else {
-    // ── Fallback: no Stripe link set yet ────────────────────────────
-    sec.innerHTML = '<div class="up-pay-methods" style="text-align:center;padding:20px 0;color:var(--muted)">'
-      + 'Payment is being set up.<br>Contact us to upgrade.'
-      + (waLink ? '<br><br><a href="' + waLink + '" target="_blank" class="up-wa-btn" style="display:inline-block;margin-top:8px">📱 WhatsApp Us</a>' : '')
-      + '</div>';
+    // ── JazzCash / EasyPaisa flow ────────────────────────────────────
+    const payNum  = (typeof adminPayNum   !== 'undefined' && adminPayNum)   ? adminPayNum   : null;
+    const jcTitle = (typeof jazzCashTitle !== 'undefined' && jazzCashTitle) ? jazzCashTitle : null;
+    const pkrAmounts = {
+      '15d':    (typeof pkrPrice15d     !== 'undefined') ? pkrPrice15d     : 560,
+      'monthly':(typeof pkrPriceMonthly !== 'undefined') ? pkrPriceMonthly : 1400,
+      'annual': (typeof pkrPriceAnnual  !== 'undefined') ? pkrPriceAnnual  : 9800
+    };
+    const pkr = pkrAmounts[plan];
+
+    if (payNum) {
+      sec.innerHTML = '<div class="up-pay-title">Pay for ' + names[plan] + ' — <strong>' + prices[plan] + '</strong></div>'
+        + '<div style="background:var(--bg3,#0d1117);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px">'
+        + '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:14px">Step 1 — Send Payment</div>'
+        + '<div style="background:var(--surface);border:1px solid rgba(88,166,255,.25);border-radius:10px;padding:14px 16px;margin-bottom:14px">'
+        + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
+        + '<span style="font-size:12px;color:var(--muted)">Send to (JazzCash / EasyPaisa)</span>'
+        + '</div>'
+        + (jcTitle ? '<div style="font-size:13px;font-weight:700;margin-bottom:4px">' + jcTitle + '</div>' : '')
+        + '<div style="font-size:18px;font-weight:800;font-family:monospace;letter-spacing:1px;color:var(--accent)">' + payNum + '</div>'
+        + '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">'
+        + '<span style="font-size:12px;color:var(--muted)">Amount</span>'
+        + '<span style="font-size:20px;font-weight:800;color:var(--green)">Rs ' + pkr.toLocaleString() + '</span>'
+        + '</div>'
+        + '</div>'
+        + '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px">Step 2 — Confirm Payment</div>'
+        + '<div style="display:flex;gap:10px;flex-wrap:wrap">'
+        + (waLink ? '<a href="' + waLink + '" target="_blank" class="up-wa-btn">💬 WhatsApp Us</a>' : '')
+        + '<button class="up-confirm-btn" onclick="confirmUpgradeRequest()">✓ I\'ve Sent Payment</button>'
+        + '</div>'
+        + '<div style="font-size:11px;color:var(--muted);margin-top:12px;opacity:.7">⏰ Plan activated within a few hours of payment confirmation.</div>'
+        + '</div>';
+    } else {
+      sec.innerHTML = '<div class="up-pay-methods" style="text-align:center;padding:20px 0;color:var(--muted)">'
+        + 'Payment not set up yet. Contact us to upgrade.'
+        + (waLink ? '<br><br><a href="' + waLink + '" target="_blank" class="up-wa-btn" style="display:inline-block;margin-top:8px">💬 WhatsApp Us</a>' : '')
+        + '</div>';
+    }
   }
 }
 
@@ -2454,6 +2487,14 @@ async function selectHBPlan(planKey, priceLabel) {
       + '<div class="hb-limit-title">Upgrade — ' + planLabel + '</div>'
       + '<div class="hb-payment-box">';
 
+    const jcTitle    = (typeof jazzCashTitle !== 'undefined' && jazzCashTitle) ? jazzCashTitle : null;
+    const pkrAmounts = {
+      '15d':    (typeof pkrPrice15d     !== 'undefined') ? pkrPrice15d     : 560,
+      'monthly':(typeof pkrPriceMonthly !== 'undefined') ? pkrPriceMonthly : 1400,
+      'annual': (typeof pkrPriceAnnual  !== 'undefined') ? pkrPriceAnnual  : 9800
+    };
+    const pkr = pkrAmounts[planKey];
+
     if (stripeUrl) {
       payHtml += '<div class="hb-payment-step" style="margin-bottom:14px">Pay securely with your card:</div>'
         + '<a href="' + stripeUrl + '" target="_blank" '
@@ -2466,6 +2507,21 @@ async function selectHBPlan(planKey, priceLabel) {
         + '<div class="hb-payment-step" style="font-size:11px;color:var(--muted);margin-bottom:10px">'
         + 'After paying, click below so we can activate your plan:</div>'
         + (waLink ? '<a href="' + waLink + '" target="_blank" class="hb-wa-link">💬 WhatsApp Us →</a>' : '');
+    } else if (payNum) {
+      // ── JazzCash / EasyPaisa flow ──────────────────────────────────
+      payHtml += '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px">Step 1 — Send Payment</div>'
+        + '<div style="background:rgba(88,166,255,.06);border:1px solid rgba(88,166,255,.2);border-radius:10px;padding:12px 14px;margin-bottom:12px">'
+        + '<div style="font-size:11px;color:var(--muted);margin-bottom:4px">JazzCash / EasyPaisa</div>'
+        + (jcTitle ? '<div style="font-size:13px;font-weight:700;margin-bottom:2px">' + jcTitle + '</div>' : '')
+        + '<div style="font-size:17px;font-weight:800;font-family:monospace;letter-spacing:1px;color:var(--accent)">' + payNum + '</div>'
+        + '<div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;align-items:center">'
+        + '<span style="font-size:11px;color:var(--muted)">Amount</span>'
+        + '<span style="font-size:18px;font-weight:800;color:var(--green)">Rs ' + pkr.toLocaleString() + '</span>'
+        + '</div></div>'
+        + '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px">Step 2 — Confirm</div>'
+        + '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">'
+        + (waLink ? '<a href="' + waLink + '" target="_blank" class="hb-wa-link">💬 WhatsApp Us</a>' : '')
+        + '</div>';
     } else {
       payHtml += '<div class="hb-payment-step" style="color:var(--muted)">Payment not set up yet. Contact us to upgrade.</div>'
         + (waLink ? '<br><a href="' + waLink + '" target="_blank" class="hb-wa-link">💬 WhatsApp Us →</a>' : '');
