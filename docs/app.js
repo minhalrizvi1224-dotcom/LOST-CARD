@@ -3025,30 +3025,34 @@ async function callAI(provider, key, history, systemPrompt, userMsg, maxTokens =
 
   let resp       = null;
   let lastErrMsg = 'HTTP error';
-  let allWere429 = true;
+  let allWereSkipped = true;
 
-  // First pass — try every entry once, skip on 429, stop on other errors
+  // Key-level errors: skip and try next key
+  // 429 = rate limited, 402 = insufficient balance, 401 = invalid key
+  const _isKeyError = (status) => status === 429 || status === 402 || status === 401;
+
+  // First pass — try every entry once, skip on key-level errors, stop on other errors
   for (let i = 0; i < entries.length; i++) {
     const entry = entries[(startIdx + i) % entries.length];
     resp = await _fetchEntry(entry);
     if (resp.ok) {
-      _poolKeyIdx = (startIdx + i + 1) % entries.length;
-      allWere429  = false;
+      _poolKeyIdx    = (startIdx + i + 1) % entries.length;
+      allWereSkipped = false;
       break;
     }
-    if (resp.status === 429) {
+    if (_isKeyError(resp.status)) {
       const ed = await resp.json().catch(() => ({}));
-      lastErrMsg = ed?.error?.message || 'HTTP 429';
+      lastErrMsg = ed?.error?.message || `HTTP ${resp.status}`;
       resp = null;
       continue;
     }
-    allWere429 = false;
+    allWereSkipped = false;
     break;
   }
 
-  // All entries were 429 → wait 5 s (rate-limit window starts resetting)
+  // All entries were skipped → wait 5 s (rate-limit window starts resetting)
   // then do a second full pass — rescues brief spikes without showing error
-  if (!resp && allWere429 && entries.length > 0) {
+  if (!resp && allWereSkipped && entries.length > 0) {
     await new Promise(r => setTimeout(r, 5000));
     for (let i = 0; i < entries.length; i++) {
       const entry = entries[(_poolKeyIdx + i) % entries.length];
@@ -3057,7 +3061,7 @@ async function callAI(provider, key, history, systemPrompt, userMsg, maxTokens =
         _poolKeyIdx = (_poolKeyIdx + i + 1) % entries.length;
         break;
       }
-      if (resp.status === 429) { resp = null; continue; }
+      if (_isKeyError(resp.status)) { resp = null; continue; }
       break;
     }
   }
