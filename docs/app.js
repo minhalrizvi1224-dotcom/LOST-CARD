@@ -1010,6 +1010,59 @@ function updateMobileStats(nli, trust, cards, stackSize, pfc, cor, dop, state) {
 // ══════════════════════════════════════════════════════════════════════
 // SETUP MODAL
 // ══════════════════════════════════════════════════════════════════════
+const SCENARIO_SUGGESTIONS = {
+  bestfriend: [
+    `We've been inseparable for 5 years but lately they've been pulling away without explanation. Every time I reach out they say they're busy. Last week I found out they made plans with mutual friends without telling me.`,
+    `We had a big fight 3 months ago and said we were fine — but I can feel something is still unresolved underneath everything. They're warmer now but something is different.`,
+    `I've been going through the hardest period of my life and they haven't really shown up. Supportive in words but keeps cancelling when it actually matters.`
+  ],
+  friend: [
+    `We've been friends for 2 years. I always feel like I'm putting in more effort. They reply late, cancel plans, but seem genuinely happy when we do meet.`,
+    `We used to hang out every week but things shifted when they got into a new relationship. I'm not sure if I'm being replaced or if this is just how life goes.`,
+    `Something awkward happened between us at a group gathering and we've been acting normal since but neither of us has addressed it.`
+  ],
+  partner: [
+    `We've been together for 8 months but lately feel like roommates. The affection is down and when I try to bring it up they say I'm overthinking.`,
+    `Last week they said something that really hurt me. They apologised immediately and have been extra sweet since — but I keep replaying what they said.`,
+    `We had our worst fight last month. Things seemed to return to normal but there's an underlying tension neither of us is addressing.`
+  ],
+  family: [
+    `I've been pulling away from family gatherings and they've noticed. Every conversation turns into a reminder of what they've sacrificed and why I don't call more.`,
+    `I made a major life decision they disapprove of. They've 'accepted it' but I can feel the weight of their disappointment in every single interaction.`,
+    `We're close but there are things we've never said to each other — things that sit underneath every conversation like static.`
+  ],
+  colleague: [
+    `We work well together professionally but there's underlying tension after a project where things didn't go to plan and the blame was never clearly assigned.`,
+    `They've been subtly undermining me in team meetings — never directly, always plausibly deniable. I've let it go twice. It happened again yesterday.`,
+    `We've been paired on a high-stakes project and I genuinely can't tell if they respect me or if they're just being professionally cooperative.`
+  ],
+  childhood: [
+    `We grew up together but have become completely different people. Every time we meet it's warm but also strange — like talking to a stranger who knows all your secrets.`,
+    `We reconnected last year after years apart and things felt immediately like they picked up. But there are things neither of us has addressed from how we drifted.`,
+    `Something came out recently — something from our past — and it's changed how I see them. We haven't talked about it.`
+  ],
+  mentor: [
+    `They invested a lot in me and I'm not living up to the standard they set. The last meeting was professional but I could feel them pulling back.`,
+    `I got feedback that was technically accurate but landed very hard. I'm not sure if I'm being developed or being managed.`,
+    `I've started quietly disagreeing with some of their decisions and I don't know how to navigate pushing back against someone with that kind of authority over me.`
+  ],
+  rival: [
+    `We both applied for the same position. They got it. Now we have to work together and pretend the competition never happened.`,
+    `We respect each other but it's always had an edge. They recently accomplished something I've been working toward and I'm trying to process it without showing anything.`,
+    `We've always pushed each other. Lately the energy feels less collegial and more zero-sum. Something shifted and I don't know when exactly.`
+  ],
+  ex: [
+    `We broke up 4 months ago — mutually, we said. They texted last week for the first time and I still don't know what they actually want.`,
+    `We ended things badly. It's been 8 months. They reached out saying they needed to talk about "closing things properly". I don't know what that means.`,
+    `We were together 2 years. The break-up was my call. They've been polite and distant since. I reached out because I think there's something unresolved between us.`
+  ],
+  online: [
+    `We met online 2 years ago and had an intense connection. Lately they disappear for weeks then come back acting like nothing happened.`,
+    `We've never met in person but the connection felt more real than most IRL friendships. Something shifted recently — they're online but not replying.`,
+    `We talked every single day and then they went completely quiet for 3 weeks. They came back with "sorry been busy". I still don't know what to do with that.`
+  ]
+};
+
 function openSetupModal(chatId) {
   pendingChatId = chatId;
   const meta    = CHAT_META[chatId];
@@ -1023,6 +1076,38 @@ function openSetupModal(chatId) {
   document.getElementById('sf_yourGender').value  = saved?.yourGender  || 'male';
   document.getElementById('sf_theirGender').value = saved?.theirGender || 'female';
   document.getElementById('sf_scenario').value    = saved?.scenario   || '';
+
+  // Populate scenario suggestions for this chat type
+  const suggestionsContainer = document.getElementById('sf_scenarioSuggestions');
+  const chipsContainer       = document.getElementById('sf_scenarioChips');
+  const suggestions = SCENARIO_SUGGESTIONS[chatId];
+  if (suggestions && suggestions.length) {
+    chipsContainer.innerHTML = '';
+    suggestions.forEach(s => {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.style.cssText = `text-align:left;background:rgba(88,166,255,.06);border:1px solid rgba(88,166,255,.18);border-radius:6px;padding:8px 12px;font-size:12px;color:var(--muted);cursor:pointer;line-height:1.5;width:100%;transition:border-color .2s,background .2s`;
+      chip.textContent = s;
+      chip.onmouseenter = () => { chip.style.borderColor = 'rgba(88,166,255,.5)'; chip.style.background = 'rgba(88,166,255,.10)'; chip.style.color = 'var(--text)'; };
+      chip.onmouseleave = () => { chip.style.borderColor = 'rgba(88,166,255,.18)'; chip.style.background = 'rgba(88,166,255,.06)'; chip.style.color = 'var(--muted)'; };
+      chip.onclick = () => {
+        document.getElementById('sf_scenario').value = s;
+        // Highlight selected
+        chipsContainer.querySelectorAll('button').forEach(b => {
+          b.style.borderColor = 'rgba(88,166,255,.18)';
+          b.style.background  = 'rgba(88,166,255,.06)';
+          b.style.color       = 'var(--muted)';
+        });
+        chip.style.borderColor = 'rgba(88,166,255,.7)';
+        chip.style.background  = 'rgba(88,166,255,.15)';
+        chip.style.color       = 'var(--text)';
+      };
+      chipsContainer.appendChild(chip);
+    });
+    suggestionsContainer.style.display = '';
+  } else {
+    suggestionsContainer.style.display = 'none';
+  }
 
   // Always use pool Groq key — hide provider selection
   document.getElementById('sf_aiProviderRow').style.display = 'none';

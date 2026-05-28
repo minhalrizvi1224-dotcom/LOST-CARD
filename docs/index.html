@@ -1274,6 +1274,10 @@
       <div class="form-field">
         <label>Scenario - What is the current state of this relationship?</label>
         <textarea id="sf_scenario" class="form-input form-textarea" placeholder="Describe in 2-3 sentences. E.g. We've been close for 3 years but lately they've been distant. I feel like I'm always the one reaching out..."></textarea>
+        <div id="sf_scenarioSuggestions" style="margin-top:10px;display:none">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:6px;letter-spacing:0.4px;text-transform:uppercase;font-weight:600">Or choose a scenario</div>
+          <div id="sf_scenarioChips" style="display:flex;flex-direction:column;gap:6px"></div>
+        </div>
       </div>
       <div class="form-field" id="sf_aiProviderRow" style="display:none">
         <label>AI Provider</label>
