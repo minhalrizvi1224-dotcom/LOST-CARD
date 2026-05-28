@@ -1188,37 +1188,49 @@ function selectPlan(plan) {
   const names  = { '15d': '15 Days', 'monthly': 'Monthly', 'annual': 'Annual' };
   const prices = { '15d': '$2', 'monthly': '$5', 'annual': '$35 / year' };
 
-  // Build payment info from admin config
-  const payNum = (typeof adminPayNum !== 'undefined' && adminPayNum) ? adminPayNum : null;
-  const waNum  = (typeof adminWANum  !== 'undefined' && adminWANum)  ? adminWANum  : null;
+  // Stripe links and fallback JazzCash/WhatsApp from admin config
+  const stripeLinks = {
+    '15d':    (typeof stripeLink15d     !== 'undefined') ? stripeLink15d     : '',
+    'monthly':(typeof stripeLinkMonthly !== 'undefined') ? stripeLinkMonthly : '',
+    'annual': (typeof stripeLinkAnnual  !== 'undefined') ? stripeLinkAnnual  : ''
+  };
+  const stripeUrl = stripeLinks[plan] || '';
+  const waNum     = (typeof adminWANum !== 'undefined' && adminWANum) ? adminWANum : null;
+  const waLink    = waNum ? 'https://wa.me/' + waNum.replace(/[^0-9]/g,'') : null;
 
   const sec = document.getElementById('upPaymentSection');
   sec.style.display = 'block';
-  sec.innerHTML = `
-    <div class="up-pay-title">Pay for ${names[plan]} — <strong>${prices[plan]}</strong></div>
-    ${payNum ? `
-    <div class="up-pay-methods">
-      <div class="up-pay-row">
-        <span class="up-pay-label">🟣 JazzCash</span>
-        <span class="up-pay-num" style="font-weight:700;font-size:15px">${payNum}</span>
-      </div>
-      ${waNum ? `<div class="up-pay-row">
-        <span class="up-pay-label">📱 WhatsApp</span>
-        <a href="https://wa.me/${waNum.replace(/[^0-9]/g,'')}" target="_blank" class="up-pay-num">${waNum}</a>
-      </div>` : ''}
-    </div>
-    <div class="up-pay-steps">
-      <div>1. Send <strong>${prices[plan]}</strong> to the JazzCash number above</div>
-      <div>2. Take a screenshot of the payment</div>
-      <div>3. WhatsApp us your email + screenshot</div>
-    </div>
-    <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
-      ${waNum ? `<a href="https://wa.me/${waNum.replace(/[^0-9]/g,'')}" target="_blank" class="up-wa-btn">📱 WhatsApp Us</a>` : ''}
-      <button class="up-confirm-btn" onclick="confirmUpgradeRequest()">✓ I've Sent Payment</button>
-    </div>` : `
-    <div class="up-pay-methods" style="text-align:center;padding:20px 0;color:var(--muted)">
-      Payment info not set up yet.<br>Contact the app owner to upgrade.
-    </div>`}`;
+
+  if (stripeUrl) {
+    // ── Stripe payment flow ──────────────────────────────────────────
+    sec.innerHTML = '<div class="up-pay-title">Pay for ' + names[plan] + ' — <strong>' + prices[plan] + '</strong></div>'
+      + '<div style="background:var(--bg3,#0d1117);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center;margin-bottom:16px">'
+      + '<div style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.6">'
+      + 'Click the button below to pay securely.<br>'
+      + '<span style="font-size:11px;color:var(--muted);opacity:.7">Visa · Mastercard · Debit Cards accepted</span>'
+      + '</div>'
+      + '<a href="' + stripeUrl + '" target="_blank" onclick="setTimeout(()=>document.getElementById(\'upConfirmArea\').style.display=\'block\',3000)" '
+      + 'style="display:inline-flex;align-items:center;gap:10px;padding:13px 28px;background:linear-gradient(90deg,#635BFF,#8B7FFF);color:#fff;text-decoration:none;border-radius:10px;font-size:14px;font-weight:800;letter-spacing:.3px;transition:.2s">'
+      + '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>'
+      + 'Pay ' + prices[plan] + ' with Card →'
+      + '</a>'
+      + '</div>'
+      + '<div id="upConfirmArea" style="display:none">'
+      + '<div style="font-size:12px;color:var(--muted);margin-bottom:10px;text-align:center">'
+      + 'Paid? Click below and we\'ll activate your plan shortly.'
+      + '</div>'
+      + '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">'
+      + (waLink ? '<a href="' + waLink + '" target="_blank" class="up-wa-btn">📱 WhatsApp Us</a>' : '')
+      + '<button class="up-confirm-btn" onclick="confirmUpgradeRequest()">✓ I\'ve Completed Payment</button>'
+      + '</div>'
+      + '</div>';
+  } else {
+    // ── Fallback: no Stripe link set yet ────────────────────────────
+    sec.innerHTML = '<div class="up-pay-methods" style="text-align:center;padding:20px 0;color:var(--muted)">'
+      + 'Payment is being set up.<br>Contact us to upgrade.'
+      + (waLink ? '<br><br><a href="' + waLink + '" target="_blank" class="up-wa-btn" style="display:inline-block;margin-top:8px">📱 WhatsApp Us</a>' : '')
+      + '</div>';
+  }
 }
 
 async function confirmUpgradeRequest() {
@@ -2427,27 +2439,43 @@ async function selectHBPlan(planKey, priceLabel) {
     currentUser.upgradeRequested     = true;
     currentUser.upgradeRequestedPlan = planKey;
 
-    const payNum = (typeof adminPayNum !== 'undefined' && adminPayNum) ? adminPayNum : null;
-    const waNum  = (typeof adminWANum  !== 'undefined' && adminWANum)  ? adminWANum  : null;
-    const waLink = waNum ? `https://wa.me/${waNum.replace(/[^0-9]/g,'')}` : null;
+    const stripeLinks = {
+      '15d':    (typeof stripeLink15d     !== 'undefined') ? stripeLink15d     : '',
+      'monthly':(typeof stripeLinkMonthly !== 'undefined') ? stripeLinkMonthly : '',
+      'annual': (typeof stripeLinkAnnual  !== 'undefined') ? stripeLinkAnnual  : ''
+    };
+    const stripeUrl = stripeLinks[planKey] || '';
+    const waNum     = (typeof adminWANum !== 'undefined' && adminWANum) ? adminWANum : null;
+    const waLink    = waNum ? 'https://wa.me/' + waNum.replace(/[^0-9]/g,'') : null;
 
     const choicesArea = document.getElementById('choicesArea');
-    choicesArea.innerHTML = `
-      <div class="hb-limit-wall">
-        <div class="hb-limit-icon">✅</div>
-        <div class="hb-limit-title">Plan Selected: ${planLabel}</div>
-        <div class="hb-payment-box">
-          ${payNum ? `
-          <div class="hb-payment-step">① Send <strong>${priceLabel}</strong> via JazzCash:</div>
-          <div class="hb-payment-num">📱 ${payNum}</div>` : ''}
-          ${waLink ? `
-          <div class="hb-payment-step">② WhatsApp us your email + payment screenshot:</div>
-          <a href="${waLink}" target="_blank" class="hb-wa-link">💬 WhatsApp Us →</a>` : `
-          <div class="hb-payment-step" style="color:var(--muted)">Contact the app owner to complete payment.</div>`}
-          <div class="hb-payment-note">⏰ We'll activate your plan within a few hours.</div>
-        </div>
-      </div>`;
-    showToast('Plan selected! Follow the payment steps.', 'success');
+    let payHtml = '<div class="hb-limit-wall">'
+      + '<div class="hb-limit-icon">💳</div>'
+      + '<div class="hb-limit-title">Upgrade — ' + planLabel + '</div>'
+      + '<div class="hb-payment-box">';
+
+    if (stripeUrl) {
+      payHtml += '<div class="hb-payment-step" style="margin-bottom:14px">Pay securely with your card:</div>'
+        + '<a href="' + stripeUrl + '" target="_blank" '
+        + 'style="display:flex;align-items:center;justify-content:center;gap:10px;padding:13px 20px;'
+        + 'background:linear-gradient(90deg,#635BFF,#8B7FFF);color:#fff;text-decoration:none;'
+        + 'border-radius:10px;font-size:14px;font-weight:800;margin-bottom:16px;letter-spacing:.3px">'
+        + '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">'
+        + '<rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>'
+        + 'Pay ' + priceLabel + ' with Card →</a>'
+        + '<div class="hb-payment-step" style="font-size:11px;color:var(--muted);margin-bottom:10px">'
+        + 'After paying, click below so we can activate your plan:</div>'
+        + (waLink ? '<a href="' + waLink + '" target="_blank" class="hb-wa-link">💬 WhatsApp Us →</a>' : '');
+    } else {
+      payHtml += '<div class="hb-payment-step" style="color:var(--muted)">Payment not set up yet. Contact us to upgrade.</div>'
+        + (waLink ? '<br><a href="' + waLink + '" target="_blank" class="hb-wa-link">💬 WhatsApp Us →</a>' : '');
+    }
+
+    payHtml += '<div class="hb-payment-note">⏰ Plan activated within a few hours of payment.</div>'
+      + '</div></div>';
+
+    choicesArea.innerHTML = payHtml;
+    showToast('Plan selected! Complete payment to activate.', 'success');
   } catch(e) {
     showToast('Could not submit. Please try again.', 'error');
   }

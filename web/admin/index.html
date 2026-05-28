@@ -585,19 +585,42 @@
           <div id="poolKeySaveStatus" style="font-size:11px;margin-top:8px;color:var(--muted)"></div>
         </div>
 
-        <!-- Payment Info -->
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px">
-          <div style="font-size:14px;font-weight:800;margin-bottom:4px">💳 Payment Info</div>
-          <div style="font-size:12px;color:var(--muted);margin-bottom:16px">Shown to users when they request an upgrade. Keep this updated.</div>
-          <div class="field" style="margin-bottom:12px">
-            <label style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">JazzCash Number</label>
-            <input id="paymentNum" type="text" placeholder="03XX-XXXXXXX" style="width:100%;padding:9px 11px;background:var(--bg);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:13px;outline:none"/>
+        <!-- Stripe Payment Links -->
+        <div style="background:var(--surface);border:1px solid rgba(99,91,255,.4);border-radius:12px;padding:22px">
+          <div style="font-size:14px;font-weight:800;margin-bottom:2px">💳 Stripe Payment Links</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:4px">Create payment links on <a href="https://dashboard.stripe.com/payment-links" target="_blank" style="color:#635BFF">dashboard.stripe.com</a> → paste each link below.</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:16px;padding:8px 10px;background:rgba(99,91,255,.08);border-radius:6px;border:1px solid rgba(99,91,255,.2)">
+            💡 Stripe → Payment Links → Create Link → set price → copy link starting with <code style="color:#8B7FFF">https://buy.stripe.com/…</code>
           </div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+            <span style="font-size:11px;color:var(--muted);width:80px;flex-shrink:0">15 Days ($2)</span>
+            <input id="stripeLink15d" type="url" placeholder="https://buy.stripe.com/…" style="flex:1;padding:8px 10px;background:var(--bg);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:12px;outline:none"/>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+            <span style="font-size:11px;color:var(--muted);width:80px;flex-shrink:0">Monthly ($5)</span>
+            <input id="stripeLinkMonthly" type="url" placeholder="https://buy.stripe.com/…" style="flex:1;padding:8px 10px;background:var(--bg);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:12px;outline:none"/>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+            <span style="font-size:11px;color:var(--muted);width:80px;flex-shrink:0">Annual ($35)</span>
+            <input id="stripeLinkAnnual" type="url" placeholder="https://buy.stripe.com/…" style="flex:1;padding:8px 10px;background:var(--bg);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:12px;outline:none"/>
+          </div>
+          <button class="btn-sm" style="border-color:#635BFF;color:#8B7FFF" onclick="saveStripeLinks()">💾 Save Stripe Links</button>
+          <div id="stripeSaveStatus" style="font-size:11px;margin-top:8px;color:var(--muted)"></div>
+        </div>
+
+        <!-- Payment Info (WhatsApp contact) -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px">
+          <div style="font-size:14px;font-weight:800;margin-bottom:4px">📱 WhatsApp Contact</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:16px">Users WhatsApp you after paying to confirm. Shown alongside payment button.</div>
           <div class="field" style="margin-bottom:12px">
             <label style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">WhatsApp Number (with country code)</label>
             <input id="whatsappNum" type="text" placeholder="+92XXXXXXXXXX" style="width:100%;padding:9px 11px;background:var(--bg);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:13px;outline:none"/>
           </div>
-          <button class="btn-sm" style="border-color:var(--green);color:var(--green)" onclick="savePaymentInfo()">💾 Save Payment Info</button>
+          <div class="field" style="margin-bottom:12px">
+            <label style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">JazzCash Number (backup)</label>
+            <input id="paymentNum" type="text" placeholder="03XX-XXXXXXX" style="width:100%;padding:9px 11px;background:var(--bg);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:13px;outline:none"/>
+          </div>
+          <button class="btn-sm" style="border-color:var(--green);color:var(--green)" onclick="savePaymentInfo()">💾 Save Contact Info</button>
           <div id="payInfoSaveStatus" style="font-size:11px;margin-top:8px;color:var(--muted)"></div>
         </div>
 
@@ -616,9 +639,9 @@
           <div style="font-size:14px;font-weight:800;margin-bottom:4px">ℹ Free Tier Rules</div>
           <div style="font-size:12px;color:var(--muted);line-height:1.7">
             <div>• Free users: <strong style="color:var(--text)">50 Hair Band messages</strong> (lifetime)</div>
-            <div>• After limit → upgrade wall shown</div>
+            <div>• After limit → upgrade wall shown with Stripe payment button</div>
             <div>• Simulations: <strong style="color:var(--text)">no limit</strong></div>
-            <div>• Upgrade plans: <strong style="color:var(--text)">Rs 250 / 15 days</strong>, <strong style="color:var(--text)">Rs 600 / month</strong>, <strong style="color:var(--text)">$35 / year</strong></div>
+            <div>• Upgrade plans: <strong style="color:var(--text)">$2 / 15 days</strong>, <strong style="color:var(--text)">$5 / month</strong>, <strong style="color:var(--text)">$35 / year</strong></div>
             <div style="margin-top:10px">To approve an upgrade: go to <strong style="color:var(--accent)">Upgrades tab</strong> → click Approve → user gets unlimited access.</div>
           </div>
         </div>
@@ -1531,10 +1554,41 @@ async function loadAdminSettings() {
       if (pn) pn.value = c.paymentNumber || '';
       const wn = document.getElementById('whatsappNum');
       if (wn) wn.value = c.whatsappNumber || '';
+      // Stripe links
+      const sl15   = document.getElementById('stripeLink15d');
+      const slMon  = document.getElementById('stripeLinkMonthly');
+      const slAnn  = document.getElementById('stripeLinkAnnual');
+      if (sl15)  sl15.value  = c.stripeLink15d     || '';
+      if (slMon) slMon.value = c.stripeLinkMonthly || '';
+      if (slAnn) slAnn.value = c.stripeLinkAnnual  || '';
     }
   } catch(e) {
     const kd = document.getElementById('poolKeyDisplay');
     if (kd) kd.textContent = 'Error loading — check Firestore rules';
+  }
+}
+
+async function saveStripeLinks() {
+  const link15   = document.getElementById('stripeLink15d').value.trim();
+  const linkMon  = document.getElementById('stripeLinkMonthly').value.trim();
+  const linkAnn  = document.getElementById('stripeLinkAnnual').value.trim();
+  const status   = document.getElementById('stripeSaveStatus');
+  // Basic validation
+  const valid = (v) => !v || v.startsWith('https://');
+  if (!valid(link15) || !valid(linkMon) || !valid(linkAnn)) {
+    if (status) { status.style.color='var(--red)'; status.textContent='Links must start with https://'; }
+    return;
+  }
+  try {
+    await adDB.collection('adminSettings').doc('config').set({
+      stripeLink15d:     link15  || null,
+      stripeLinkMonthly: linkMon || null,
+      stripeLinkAnnual:  linkAnn || null
+    }, { merge: true });
+    if (status) { status.style.color='var(--green)'; status.textContent='✅ Stripe links saved!'; }
+    setTimeout(() => { if (status) status.textContent = ''; }, 3000);
+  } catch(e) {
+    if (status) { status.style.color='var(--red)'; status.textContent='Error: '+e.message; }
   }
 }
 

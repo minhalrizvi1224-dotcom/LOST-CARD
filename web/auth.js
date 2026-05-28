@@ -12,9 +12,12 @@ let firebaseDB    = null;
 let authReady     = false;
 
 // ── Admin-side config (fetched from Firestore adminSettings/config) ────
-let poolGroqKey  = null;   // admin's Groq key — used for all Hair Band calls
-let adminPayNum  = '';     // JazzCash number shown in upgrade modal
-let adminWANum   = '';     // WhatsApp number shown in upgrade modal
+let poolGroqKey      = null;   // admin's Groq key — used for all Hair Band calls
+let adminPayNum      = '';     // JazzCash number shown in upgrade modal
+let adminWANum       = '';     // WhatsApp number shown in upgrade modal
+let stripeLink15d    = '';     // Stripe payment link — 15 Days plan
+let stripeLinkMonthly= '';     // Stripe payment link — Monthly plan
+let stripeLinkAnnual = '';     // Stripe payment link — Annual plan
 
 // ── Initialize ────────────────────────────────────────────────────────
 function initAuth() {
@@ -74,9 +77,12 @@ function initAuth() {
     await firebaseDB.collection('adminSettings').doc('config').get().then(cfg => {
       if (cfg.exists) {
         const c = cfg.data();
-        poolGroqKey = c.poolKey      || null;
-        adminPayNum = c.paymentNumber || '';
-        adminWANum  = c.whatsappNumber|| '';
+        poolGroqKey       = c.poolKey          || null;
+        adminPayNum       = c.paymentNumber    || '';
+        adminWANum        = c.whatsappNumber   || '';
+        stripeLink15d     = c.stripeLink15d    || '';
+        stripeLinkMonthly = c.stripeLinkMonthly|| '';
+        stripeLinkAnnual  = c.stripeLinkAnnual || '';
       }
     }).catch(() => {});
 
