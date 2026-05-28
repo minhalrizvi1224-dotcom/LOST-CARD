@@ -1197,7 +1197,9 @@ function _populateSettings() {
   const planEl = document.getElementById('set_planStatus');
   if (planEl) {
     const upgraded = isUpgraded();
-    if (upgraded) {
+    if (currentUser && currentUser.isAdmin) {
+      planEl.innerHTML = `<span style="color:var(--c-green)">⚡ Admin</span> &nbsp;·&nbsp; <span style="color:var(--muted);font-size:12px">Unlimited access</span>`;
+    } else if (upgraded) {
       const expiry = currentUser.planExpiry?.seconds
         ? new Date(currentUser.planExpiry.seconds * 1000).toLocaleDateString()
         : '—';
@@ -1435,7 +1437,8 @@ function _getKeyPool() {
 }
 
 function isUpgraded() {
-  return currentUser && currentUser.hbPlan === 'upgraded';
+  // Admin always has unlimited access — no message limit
+  return currentUser && (currentUser.hbPlan === 'upgraded' || currentUser.isAdmin === true);
 }
 
 // ══════════════════════════════════════════════════════════════════════
@@ -2704,7 +2707,7 @@ async function sendAIMessage() {
 // ── Hair Band: premium check ──────────────────────────────────────────
 // auth.js already validates expiry and sets hbPlan to 'free' if expired
 function checkHBPremium() {
-  return !!(currentUser && (currentUser.hbPlan === 'upgraded' || currentUser.hbPlan === 'premium'));
+  return !!(currentUser && (currentUser.hbPlan === 'upgraded' || currentUser.hbPlan === 'premium' || currentUser.isAdmin === true));
 }
 
 // ── Hair Band: sub-header label ───────────────────────────────────────
