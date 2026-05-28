@@ -572,7 +572,7 @@
             <div style="font-size:14px;font-weight:800">🔑 API Key Pool — Groq</div>
             <span id="poolKeyCounter" style="font-size:11px;font-weight:700;color:var(--muted);background:var(--bg);padding:3px 10px;border-radius:20px;border:1px solid var(--border)">0 / 10</span>
           </div>
-          <div style="font-size:12px;color:var(--muted);margin-bottom:16px">Up to 10 Groq keys — rotates with DeepSeek pool when rate-limited. Keys start with <code style="color:var(--accent)">gsk_</code></div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:16px">Up to 10 Groq keys — rotates with Gemini pool when rate-limited. Keys start with <code style="color:var(--accent)">gsk_</code></div>
           <div id="poolKeysList" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px"></div>
           <div style="display:flex;gap:8px;align-items:center">
             <input id="newPoolKey" type="password" placeholder="gsk_… paste Groq key here" style="flex:1;padding:9px 11px;background:var(--bg);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:12px;font-family:monospace;outline:none"/>
@@ -581,19 +581,19 @@
           <div id="poolKeySaveStatus" style="font-size:11px;margin-top:8px;color:var(--muted)"></div>
         </div>
 
-        <!-- Pool API Key — DeepSeek -->
-        <div style="background:var(--surface);border:1px solid rgba(88,166,255,.3);border-radius:12px;padding:22px">
+        <!-- Pool API Key — Gemini -->
+        <div style="background:var(--surface);border:1px solid rgba(66,200,120,.3);border-radius:12px;padding:22px">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-            <div style="font-size:14px;font-weight:800">🔷 API Key Pool — DeepSeek</div>
-            <span id="dsPoolKeyCounter" style="font-size:11px;font-weight:700;color:var(--muted);background:var(--bg);padding:3px 10px;border-radius:20px;border:1px solid var(--border)">0 / 10</span>
+            <div style="font-size:14px;font-weight:800">🟢 API Key Pool — Gemini</div>
+            <span id="geminiPoolKeyCounter" style="font-size:11px;font-weight:700;color:var(--muted);background:var(--bg);padding:3px 10px;border-radius:20px;border:1px solid var(--border)">0 / 10</span>
           </div>
-          <div style="font-size:12px;color:var(--muted);margin-bottom:16px">Up to 10 DeepSeek keys — interleaved with Groq pool for maximum throughput. Keys start with <code style="color:#58A6FF">sk-</code></div>
-          <div id="dsPoolKeysList" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px"></div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:16px">Up to 10 Gemini keys (free tier) — interleaved with Groq pool. Get keys at <code style="color:#42C878">aistudio.google.com</code></div>
+          <div id="geminiPoolKeysList" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px"></div>
           <div style="display:flex;gap:8px;align-items:center">
-            <input id="newDSPoolKey" type="password" placeholder="sk-… paste DeepSeek key here" style="flex:1;padding:9px 11px;background:var(--bg);border:1px solid rgba(88,166,255,.3);border-radius:7px;color:var(--text);font-size:12px;font-family:monospace;outline:none"/>
-            <button id="addDSPoolKeyBtn" class="btn-sm" style="border-color:#58A6FF;color:#58A6FF;white-space:nowrap" onclick="addDSPoolKey()">+ Add</button>
+            <input id="newGeminiPoolKey" type="password" placeholder="AIza… paste Gemini key here" style="flex:1;padding:9px 11px;background:var(--bg);border:1px solid rgba(66,200,120,.3);border-radius:7px;color:var(--text);font-size:12px;font-family:monospace;outline:none"/>
+            <button id="addGeminiPoolKeyBtn" class="btn-sm" style="border-color:#42C878;color:#42C878;white-space:nowrap" onclick="addGeminiPoolKey()">+ Add</button>
           </div>
-          <div id="dsPoolKeySaveStatus" style="font-size:11px;margin-top:8px;color:var(--muted)"></div>
+          <div id="geminiPoolKeySaveStatus" style="font-size:11px;margin-top:8px;color:var(--muted)"></div>
         </div>
 
         <!-- Stripe Payment Links -->
@@ -764,9 +764,9 @@ function showDashboard() {
       const c = cfg.data();
       _poolKeys   = Array.isArray(c.poolKeys) && c.poolKeys.length ? c.poolKeys : (c.poolKey ? [c.poolKey] : []);
       adPoolKey   = _poolKeys[0] || null;
-      _poolDSKeys = Array.isArray(c.deepseekPoolKeys) && c.deepseekPoolKeys.length ? c.deepseekPoolKeys : [];
+      _poolGeminiKeys = Array.isArray(c.geminiPoolKeys) && c.geminiPoolKeys.length ? c.geminiPoolKeys : [];
       _renderPoolKeys();
-      _renderDSPoolKeys();        // renders DeepSeek list + calls _updateCombinedKeyStatus
+      _renderGeminiPoolKeys();        // renders Gemini list + calls _updateCombinedKeyStatus
     }
   }).catch(()=>{});
   refreshAll();
@@ -1620,10 +1620,10 @@ async function loadAdminSettings() {
                     : (c.poolKey ? [c.poolKey] : []);
       adPoolKey = _poolKeys[0] || null;
       _renderPoolKeys();
-      // Load DeepSeek pool keys
-      _poolDSKeys = Array.isArray(c.deepseekPoolKeys) && c.deepseekPoolKeys.length
-                      ? c.deepseekPoolKeys : [];
-      _renderDSPoolKeys();
+      // Load Gemini pool keys
+      _poolGeminiKeys = Array.isArray(c.geminiPoolKeys) && c.geminiPoolKeys.length
+                          ? c.geminiPoolKeys : [];
+      _renderGeminiPoolKeys();
       const pn = document.getElementById('paymentNum');
       if (pn) pn.value = c.paymentNumber || '';
       const wn = document.getElementById('whatsappNum');
@@ -1735,29 +1735,29 @@ async function removePoolKey(idx) {
   }
 }
 
-// ── DeepSeek pool management ──────────────────────────────────────────
-let _poolDSKeys = [];  // local copy of DeepSeek pool
+// ── Gemini pool management ──────────────────────────────────────────
+let _poolGeminiKeys = [];  // local copy of Gemini pool
 
-function _renderDSPoolKeys() {
-  const list    = document.getElementById('dsPoolKeysList');
-  const counter = document.getElementById('dsPoolKeyCounter');
-  const addBtn  = document.getElementById('addDSPoolKeyBtn');
+function _renderGeminiPoolKeys() {
+  const list    = document.getElementById('geminiPoolKeysList');
+  const counter = document.getElementById('geminiPoolKeyCounter');
+  const addBtn  = document.getElementById('addGeminiPoolKeyBtn');
   if (!list) return;
   list.innerHTML = '';
-  _poolDSKeys.forEach((k, i) => {
+  _poolGeminiKeys.forEach((k, i) => {
     const row = document.createElement('div');
-    row.style.cssText = 'display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid rgba(88,166,255,.2);border-radius:7px;padding:7px 10px';
+    row.style.cssText = 'display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid rgba(66,200,120,.2);border-radius:7px;padding:7px 10px';
     row.innerHTML = `
-      <span style="font-family:monospace;font-size:11px;color:var(--muted);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${k.substring(0,6)}••••••••••••••••</span>
-      <span style="font-size:10px;color:#58A6FF;background:rgba(88,166,255,.1);padding:2px 7px;border-radius:10px;border:1px solid rgba(88,166,255,.2)">DS ${i+1}</span>
-      <button onclick="removeDSPoolKey(${i})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:13px;padding:0 2px" title="Remove key">🗑</button>`;
+      <span style="font-family:monospace;font-size:11px;color:var(--muted);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${k.substring(0,8)}••••••••••••••••</span>
+      <span style="font-size:10px;color:#42C878;background:rgba(66,200,120,.1);padding:2px 7px;border-radius:10px;border:1px solid rgba(66,200,120,.2)">G ${i+1}</span>
+      <button onclick="removeGeminiPoolKey(${i})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:13px;padding:0 2px" title="Remove key">🗑</button>`;
     list.appendChild(row);
   });
-  if (!_poolDSKeys.length) {
-    list.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:8px 0">No DeepSeek keys added yet.</div>';
+  if (!_poolGeminiKeys.length) {
+    list.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:8px 0">No Gemini keys added yet.</div>';
   }
-  if (counter) counter.textContent = `${_poolDSKeys.length} / 10`;
-  if (addBtn)  addBtn.disabled = _poolDSKeys.length >= 10;
+  if (counter) counter.textContent = `${_poolGeminiKeys.length} / 10`;
+  if (addBtn)  addBtn.disabled = _poolGeminiKeys.length >= 10;
   // Also update the combined count in the dashboard
   _updateCombinedKeyStatus();
 }
@@ -1765,47 +1765,47 @@ function _renderDSPoolKeys() {
 function _updateCombinedKeyStatus() {
   const keyEl = document.getElementById('apmKeyStatus');
   if (!keyEl) return;
-  const total = _poolKeys.length + _poolDSKeys.length;
+  const total = _poolKeys.length + _poolGeminiKeys.length;
   if (total === 0) {
     keyEl.textContent = 'Not set';
     keyEl.style.color = 'var(--red)';
   } else {
     const parts = [];
-    if (_poolKeys.length)   parts.push(`${_poolKeys.length} Groq`);
-    if (_poolDSKeys.length) parts.push(`${_poolDSKeys.length} DeepSeek`);
+    if (_poolKeys.length)       parts.push(`${_poolKeys.length} Groq`);
+    if (_poolGeminiKeys.length) parts.push(`${_poolGeminiKeys.length} Gemini`);
     keyEl.textContent = `✓ ${total} keys (${parts.join(' + ')})`;
     keyEl.style.color = 'var(--green)';
   }
 }
 
-async function addDSPoolKey() {
-  const input  = document.getElementById('newDSPoolKey');
+async function addGeminiPoolKey() {
+  const input  = document.getElementById('newGeminiPoolKey');
   const key    = input.value.trim();
-  const status = document.getElementById('dsPoolKeySaveStatus');
+  const status = document.getElementById('geminiPoolKeySaveStatus');
   if (!key) { if(status){status.style.color='var(--red)';status.textContent='Paste a key first.';} return; }
-  if (!key.startsWith('sk-')) { if(status){status.style.color='var(--red)';status.textContent='DeepSeek keys start with sk-';} return; }
-  if (_poolDSKeys.length >= 10) { if(status){status.style.color='var(--red)';status.textContent='Pool is full (10/10). Remove a key first.';} return; }
-  if (_poolDSKeys.includes(key)) { if(status){status.style.color='var(--red)';status.textContent='This key is already in the pool.';} return; }
+  if (!key.startsWith('AIza')) { if(status){status.style.color='var(--red)';status.textContent='Gemini keys start with AIza';} return; }
+  if (_poolGeminiKeys.length >= 10) { if(status){status.style.color='var(--red)';status.textContent='Pool is full (10/10). Remove a key first.';} return; }
+  if (_poolGeminiKeys.includes(key)) { if(status){status.style.color='var(--red)';status.textContent='This key is already in the pool.';} return; }
   try {
-    _poolDSKeys.push(key);
-    await adDB.collection('adminSettings').doc('config').set({ deepseekPoolKeys: _poolDSKeys }, { merge: true });
+    _poolGeminiKeys.push(key);
+    await adDB.collection('adminSettings').doc('config').set({ geminiPoolKeys: _poolGeminiKeys }, { merge: true });
     input.value = '';
-    _renderDSPoolKeys();
-    if (status) { status.style.color='var(--green)'; status.textContent=`✅ DeepSeek Key ${_poolDSKeys.length} added!`; setTimeout(()=>{status.textContent='';},3000); }
+    _renderGeminiPoolKeys();
+    if (status) { status.style.color='var(--green)'; status.textContent=`✅ Gemini Key ${_poolGeminiKeys.length} added!`; setTimeout(()=>{status.textContent='';},3000); }
   } catch(e) {
-    _poolDSKeys.pop();
+    _poolGeminiKeys.pop();
     if (status) { status.style.color='var(--red)'; status.textContent='Error: '+e.message; }
   }
 }
 
-async function removeDSPoolKey(idx) {
-  if (!confirm(`Remove DeepSeek Key ${idx+1} from the pool?`)) return;
-  const status = document.getElementById('dsPoolKeySaveStatus');
+async function removeGeminiPoolKey(idx) {
+  if (!confirm(`Remove Gemini Key ${idx+1} from the pool?`)) return;
+  const status = document.getElementById('geminiPoolKeySaveStatus');
   try {
-    _poolDSKeys.splice(idx, 1);
-    await adDB.collection('adminSettings').doc('config').set({ deepseekPoolKeys: _poolDSKeys }, { merge: true });
-    _renderDSPoolKeys();
-    if (status) { status.style.color='var(--accent2)'; status.textContent=`Key removed. DeepSeek pool: ${_poolDSKeys.length} key(s).`; setTimeout(()=>{status.textContent='';},3000); }
+    _poolGeminiKeys.splice(idx, 1);
+    await adDB.collection('adminSettings').doc('config').set({ geminiPoolKeys: _poolGeminiKeys }, { merge: true });
+    _renderGeminiPoolKeys();
+    if (status) { status.style.color='var(--accent2)'; status.textContent=`Key removed. Gemini pool: ${_poolGeminiKeys.length} key(s).`; setTimeout(()=>{status.textContent='';},3000); }
   } catch(e) {
     if (status) { status.style.color='var(--red)'; status.textContent='Error: '+e.message; }
   }

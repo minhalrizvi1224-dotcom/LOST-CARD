@@ -14,7 +14,7 @@ let authReady     = false;
 // ── Admin-side config (fetched from Firestore adminSettings/config) ────
 let poolGroqKey      = null;   // first key in pool (backward compat)
 let poolGroqKeys     = [];     // Groq key pool — up to 10 keys
-let poolDeepSeekKeys = [];     // DeepSeek key pool — up to 10 keys
+let poolGeminiKeys   = [];     // Gemini key pool — up to 10 keys
 let adminPayNum      = '';     // JazzCash number shown in upgrade modal
 let adminWANum       = '';     // WhatsApp number shown in upgrade modal
 let stripeLink15d    = '';     // Stripe payment link — 15 Days plan
@@ -81,12 +81,12 @@ function initAuth() {
 
     // ── Helper: apply admin config fields from a Firestore doc ──────────
     function _applyAdminConfig(c) {
-      poolGroqKeys      = Array.isArray(c.poolKeys) && c.poolKeys.length
-                            ? c.poolKeys
-                            : (c.poolKey ? [c.poolKey] : []);
-      poolGroqKey       = poolGroqKeys[0] || null;
-      poolDeepSeekKeys  = Array.isArray(c.deepseekPoolKeys) && c.deepseekPoolKeys.length
-                            ? c.deepseekPoolKeys : [];
+      poolGroqKeys    = Array.isArray(c.poolKeys) && c.poolKeys.length
+                          ? c.poolKeys
+                          : (c.poolKey ? [c.poolKey] : []);
+      poolGroqKey     = poolGroqKeys[0] || null;
+      poolGeminiKeys  = Array.isArray(c.geminiPoolKeys) && c.geminiPoolKeys.length
+                          ? c.geminiPoolKeys : [];
       adminPayNum       = c.paymentNumber    || '';
       adminWANum        = c.whatsappNumber   || '';
       stripeLink15d     = c.stripeLink15d    || '';

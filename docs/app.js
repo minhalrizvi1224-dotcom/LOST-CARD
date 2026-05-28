@@ -1395,30 +1395,30 @@ function getAPIKey(provider) {
 // ── Unified pool rotation (Groq + DeepSeek interleaved) ──────────────
 let _poolKeyIdx = 0;  // round-robin pointer across the unified pool
 
-// Returns [{key, provider}, ...] interleaving Groq and DeepSeek keys
+// Returns [{key, provider}, ...] interleaving Groq and Gemini keys
 function _getUnifiedPool() {
   const groqList = (typeof poolGroqKeys !== 'undefined' && poolGroqKeys.length)
     ? poolGroqKeys
     : (typeof poolGroqKey !== 'undefined' && poolGroqKey ? [poolGroqKey] : []);
 
-  const dsList = (typeof poolDeepSeekKeys !== 'undefined' && poolDeepSeekKeys.length)
-    ? poolDeepSeekKeys : [];
+  const geminiList = (typeof poolGeminiKeys !== 'undefined' && poolGeminiKeys.length)
+    ? poolGeminiKeys : [];
 
-  // Interleave: groq[0], ds[0], groq[1], ds[1], ... for balanced distribution
+  // Interleave: groq[0], gemini[0], groq[1], gemini[1], ... for balanced distribution
   const unified = [];
-  const maxLen = Math.max(groqList.length, dsList.length);
+  const maxLen = Math.max(groqList.length, geminiList.length);
   for (let i = 0; i < maxLen; i++) {
-    if (i < groqList.length) unified.push({ key: groqList[i], provider: 'groq' });
-    if (i < dsList.length)   unified.push({ key: dsList[i],   provider: 'deepseek' });
+    if (i < groqList.length)   unified.push({ key: groqList[i],   provider: 'groq' });
+    if (i < geminiList.length) unified.push({ key: geminiList[i], provider: 'gemini' });
   }
   if (unified.length) return unified;
 
   // localStorage fallback
-  const localGroq = localStorage.getItem('lc_groq_key');
-  const localDS   = localStorage.getItem('lc_deepseek_key');
-  const fallback  = [];
-  if (localGroq) fallback.push({ key: localGroq, provider: 'groq' });
-  if (localDS)   fallback.push({ key: localDS,   provider: 'deepseek' });
+  const localGroq   = localStorage.getItem('lc_groq_key');
+  const localGemini = localStorage.getItem('lc_gemini_key');
+  const fallback    = [];
+  if (localGroq)   fallback.push({ key: localGroq,   provider: 'groq' });
+  if (localGemini) fallback.push({ key: localGemini, provider: 'gemini' });
   return fallback;
 }
 
@@ -3004,7 +3004,7 @@ async function callAI(provider, key, history, systemPrompt, userMsg, maxTokens =
   for (const m of trimmed) messages.push(m);
   if (userMsg) messages.push({ role: 'user', content: userMsg });
 
-  // Unified pool: [{key, provider}, ...] — Groq + DeepSeek interleaved
+  // Unified pool: [{key, provider}, ...] — Groq + Gemini interleaved
   // Falls back to the passed key/provider if pool is empty
   const pool    = _getUnifiedPool();
   const entries = pool.length ? pool : [{ key, provider }];
@@ -3012,10 +3012,15 @@ async function callAI(provider, key, history, systemPrompt, userMsg, maxTokens =
 
   // Fetch helper — uses each entry's own provider URL and model
   const _fetchEntry = (entry) => {
-    const eUrl   = entry.provider === 'groq'
-      ? 'https://api.groq.com/openai/v1/chat/completions'
-      : 'https://api.deepseek.com/v1/chat/completions';
-    const eModel = entry.provider === 'groq' ? 'llama-3.3-70b-versatile' : 'deepseek-chat';
+    let eUrl, eModel;
+    if (entry.provider === 'groq') {
+      eUrl   = 'https://api.groq.com/openai/v1/chat/completions';
+      eModel = 'llama-3.3-70b-versatile';
+    } else {
+      // Gemini OpenAI-compatible endpoint
+      eUrl   = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
+      eModel = 'gemini-2.0-flash';
+    }
     return fetch(eUrl, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${entry.key}` },
