@@ -1088,7 +1088,7 @@ function renderSessionsTable(sessions) {
   if(!sessions.length){el.innerHTML='<div class="empty"><div class="empty-icon">📊</div>No sessions found.</div>';return;}
   let html=`<table class="data-table"><thead><tr>
     <th>#</th><th>User</th><th>Chat Type</th><th>Final NLI</th><th>Cards Lost</th>
-    <th>Health</th><th>Archetype</th><th>State</th><th>Moves</th><th>Platform</th><th>Date</th>
+    <th>Health</th><th>Archetype</th><th>State</th><th>Moves</th><th>Platform</th><th>Date</th><th></th>
   </tr></thead><tbody>`;
   sessions.forEach((s,i)=>{
     const dt=s.timestamp?fmtDate(s.timestamp.seconds):'-';
@@ -1096,7 +1096,6 @@ function renderSessionsTable(sessions) {
     const nli=nliNum.toFixed(2);
     const nliCol=nliNum>0.7?'var(--red)':nliNum>0.3?'var(--yellow)':'var(--green)';
     const stateBadge=s.finalState==='HARMONY'?'badge-green':s.finalState==='FRACTURE'?'badge-yellow':'badge-red';
-    const lostCards=(s.cardsLost||[]).join(', ')||'None';
     html+=`<tr onclick="showSessionDetail(${i})">
       <td style="color:var(--muted);font-size:11px">${i+1}</td>
       <td><div style="font-weight:700;font-size:12px">${esc(s.displayName||'—')}</div><div style="font-size:10px;color:var(--muted)">${esc(s.email||'')}</div></td>
@@ -1109,6 +1108,7 @@ function renderSessionsTable(sessions) {
       <td style="font-size:11px;color:var(--muted)">${s.totalMoves||0}</td>
       <td><span class="badge ${(s.platform||'desktop')==='mobile'?'badge-green':'badge-blue'}">${esc(s.platform||'desktop')}</span></td>
       <td style="color:var(--muted);font-size:11px">${dt}</td>
+      <td onclick="event.stopPropagation()"><button class="btn-sm btn-danger" style="padding:3px 8px;font-size:11px" onclick="deleteSession('${s.id}',${i})">🗑</button></td>
     </tr>`;
   });
   html+='</tbody></table>';
@@ -1788,6 +1788,18 @@ async function deleteUser(uid,name,idx) {
     closeDetail(); renderUsersTable(allUsers);
     alert(`${name} and all their sessions have been deleted.`);
   } catch(e) { alert('Error: '+e.message); }
+}
+
+async function deleteSession(sessionId, idx) {
+  if (!confirm('Delete this session? This cannot be undone.')) return;
+  try {
+    await adDB.collection('sessions').doc(sessionId).delete();
+    allSessions.splice(idx, 1);
+    const cnt = document.getElementById('sessionsCount');
+    if (cnt) cnt.textContent = '(' + allSessions.length + ')';
+    renderSessionsTable(allSessions);
+    showAdminToast('Session deleted.');
+  } catch(e) { alert('Error: ' + e.message); }
 }
 
 // ── CSV Export ─────────────────────────────────────────────────────────

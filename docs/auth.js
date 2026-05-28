@@ -412,9 +412,29 @@ async function saveSessionToFirestore(sessionData, chatId, displayNameOverride) 
       lastSession:   firebase.firestore.FieldValue.serverTimestamp()
     }).catch(() => {});
 
+    // Auto-purge: if this user's sessions hit 100, delete ALL their sessions (clean slate)
+    _autoPurgeSessions(uid).catch(() => {});
+
   } catch(err) {
     console.warn('Session save failed:', err);
   }
+}
+
+async function _autoPurgeSessions(uid) {
+  const snap = await firebaseDB.collection('sessions')
+    .where('uid', '==', uid)
+    .get();
+  if (snap.size < 100) return; // under the limit — nothing to do
+
+  // 100+ sessions: delete ALL of them in batches of 500
+  const batch = firebaseDB.batch();
+  snap.forEach(doc => batch.delete(doc.ref));
+  await batch.commit();
+
+  // Reset the session counter on the user doc
+  await firebaseDB.collection('users').doc(uid).update({
+    totalSessions: 0
+  }).catch(() => {});
 }
 
 // ── Backward compatibility ────────────────────────────────────────────
