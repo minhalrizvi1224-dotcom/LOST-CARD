@@ -1783,7 +1783,7 @@ async function addGeminiPoolKey() {
   const key    = input.value.trim();
   const status = document.getElementById('geminiPoolKeySaveStatus');
   if (!key) { if(status){status.style.color='var(--red)';status.textContent='Paste a key first.';} return; }
-  if (!key.startsWith('AIza')) { if(status){status.style.color='var(--red)';status.textContent='Gemini keys start with AIza';} return; }
+  if (key.length < 20) { if(status){status.style.color='var(--red)';status.textContent='Key too short — paste the full key.';} return; }
   if (_poolGeminiKeys.length >= 10) { if(status){status.style.color='var(--red)';status.textContent='Pool is full (10/10). Remove a key first.';} return; }
   if (_poolGeminiKeys.includes(key)) { if(status){status.style.color='var(--red)';status.textContent='This key is already in the pool.';} return; }
   try {
