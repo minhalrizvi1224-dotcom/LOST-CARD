@@ -666,7 +666,7 @@ function showSection(name) {
     Object.values(SECTION_ANIM).forEach(cls => sec.classList.remove(cls));
     sec.classList.add('active');
     // Always scroll to top when switching sections
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    try { window.scrollTo({ top: 0, behavior: 'instant' }); } catch(e) { window.scrollTo(0, 0); }
     // Force reflow so browser sees the class before animation starts
     void sec.offsetWidth;
     const animClass = SECTION_ANIM[name];
@@ -1116,22 +1116,23 @@ function _populateSettings() {
       const used = hbCountLocal || 0;
       const pct  = Math.min(100, (used / HB_FREE_LIMIT) * 100);
       const remaining = Math.max(0, HB_FREE_LIMIT - used);
-      planEl.innerHTML = `
-        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px">
-          <span style="font-weight:600">Free Plan</span>
-          <span style="color:${used>=HB_FREE_LIMIT?'var(--c-red)':used>=40?'var(--c-orange)':'var(--muted)'};font-weight:700">${used} / ${HB_FREE_LIMIT} used</span>
-        </div>
-        <div style="height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-bottom:6px">
-          <div style="height:100%;width:${pct}%;background:${pct>=100?'var(--c-red)':pct>=80?'var(--c-orange)':'var(--accent)'};border-radius:3px;transition:width 0.4s"></div>
-        </div>
-        <div style="font-size:11px;color:var(--muted);margin-bottom:10px">
-          ${used>=HB_FREE_LIMIT
-            ? '<span style="color:var(--c-red);font-weight:700">⚠ Limit reached</span> — upgrade to keep chatting with Hair Band'
-            : `<span style="color:var(--muted)">${remaining} message${remaining===1?'':'s'} remaining</span>`}
-        </div>
-        <button onclick="closeSettingsModal();showUpgradeModal()" style="width:100%;padding:9px;background:linear-gradient(90deg,var(--accent),#7c3aed);border:none;color:#fff;font-size:12px;font-weight:700;border-radius:8px;cursor:pointer;letter-spacing:0.3px">
-          ✨ ${used>=HB_FREE_LIMIT ? 'Upgrade Now — Limit Reached' : 'Upgrade for Unlimited Access'}
-        </button>`;
+      const limitColor = used >= HB_FREE_LIMIT ? 'var(--c-red)' : used >= 40 ? 'var(--c-orange)' : 'var(--muted)';
+      const barColor   = pct >= 100 ? 'var(--c-red)' : pct >= 80 ? 'var(--c-orange)' : 'var(--accent)';
+      const statusHtml = used >= HB_FREE_LIMIT
+        ? '<span style="color:var(--c-red);font-weight:700">⚠ Limit reached</span> — upgrade to keep chatting with Hair Band'
+        : '<span style="color:var(--muted)">' + remaining + ' message' + (remaining === 1 ? '' : 's') + ' remaining</span>';
+      const btnText = used >= HB_FREE_LIMIT ? 'Upgrade Now — Limit Reached' : 'Upgrade for Unlimited Access';
+      planEl.innerHTML = '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px">'
+        + '<span style="font-weight:600">Free Plan</span>'
+        + '<span style="color:' + limitColor + ';font-weight:700">' + used + ' / ' + HB_FREE_LIMIT + ' used</span>'
+        + '</div>'
+        + '<div style="height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-bottom:6px">'
+        + '<div style="height:100%;width:' + pct + '%;background:' + barColor + ';border-radius:3px;transition:width 0.4s"></div>'
+        + '</div>'
+        + '<div style="font-size:11px;color:var(--muted);margin-bottom:10px">' + statusHtml + '</div>'
+        + '<button onclick="closeSettingsModal();showUpgradeModal()" style="width:100%;padding:9px;background:linear-gradient(90deg,var(--accent),#7c3aed);border:none;color:#fff;font-size:12px;font-weight:700;border-radius:8px;cursor:pointer;letter-spacing:0.3px">'
+        + '✨ ' + btnText
+        + '</button>';
     }
   }
 
@@ -1185,7 +1186,7 @@ function selectPlan(plan) {
   if (card) card.classList.add('selected');
 
   const names  = { '15d': '15 Days', 'monthly': 'Monthly', 'annual': 'Annual' };
-  const prices = { '15d': 'Rs 250', 'monthly': 'Rs 600', 'annual': '$35 / year' };
+  const prices = { '15d': '$2', 'monthly': '$5', 'annual': '$35 / year' };
 
   // Build payment info from admin config
   const payNum = (typeof adminPayNum !== 'undefined' && adminPayNum) ? adminPayNum : null;
@@ -2378,18 +2379,18 @@ function showHBUpgradeWall() {
       <div class="hb-limit-title">50 Free Messages Used</div>
       <div class="hb-limit-msg">Choose a plan to unlock unlimited Hair Band access.</div>
       <div class="hb-plans-row">
-        <div class="hb-plan-card" onclick="selectHBPlan('15d','Rs 250')">
+        <div class="hb-plan-card" onclick="selectHBPlan('15d','$2')">
           <div class="hb-plan-icon">⚡</div>
           <div class="hb-plan-name">Starter</div>
           <div class="hb-plan-duration">15 Days</div>
-          <div class="hb-plan-price">Rs 250</div>
+          <div class="hb-plan-price">$2</div>
         </div>
-        <div class="hb-plan-card hb-plan-popular" onclick="selectHBPlan('monthly','Rs 600')">
+        <div class="hb-plan-card hb-plan-popular" onclick="selectHBPlan('monthly','$5')">
           <div class="hb-plan-popular-tag">POPULAR</div>
           <div class="hb-plan-icon">💎</div>
           <div class="hb-plan-name">Monthly</div>
           <div class="hb-plan-duration">30 Days</div>
-          <div class="hb-plan-price">Rs 600</div>
+          <div class="hb-plan-price">$5</div>
         </div>
         <div class="hb-plan-card" onclick="selectHBPlan('annual','$35')">
           <div class="hb-plan-icon">🏆</div>
