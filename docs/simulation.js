@@ -350,25 +350,28 @@ class NeurologicalState {
     this.nli = Math.max(0.0, Math.min(1.0, this.nli));
     return this.nli;
   }
-  applyChoice(type, d = 0.055) {
+  applyChoice(type, d = 0.09) {
     if (type === SOFT) {
-      this.pfcLoad   = Math.max(0, this.pfcLoad   - d);
-      this.cortisol  = Math.max(0, this.cortisol  - d * 0.5);
-      this.dopamine  = Math.min(1, this.dopamine  + d);
-      this.amygdala  = Math.max(0, this.amygdala  - d);
-      this.mirrorInt = Math.min(1, this.mirrorInt + d * 0.5);
+      // Soft repairs — but much less than damage accumulates. Presence costs energy too.
+      this.pfcLoad   = Math.max(0, this.pfcLoad   - d * 0.45);
+      this.cortisol  = Math.max(0, this.cortisol  - d * 0.30);
+      this.dopamine  = Math.min(1, this.dopamine  + d * 0.55);
+      this.amygdala  = Math.max(0, this.amygdala  - d * 0.50);
+      this.mirrorInt = Math.min(1, this.mirrorInt + d * 0.40);
     } else if (type === AGGRESSIVE) {
-      this.pfcLoad   = Math.min(1, this.pfcLoad   + d * 1.4);
-      this.cortisol  = Math.min(1, this.cortisol  + d * 1.4);
-      this.dopamine  = Math.max(0, this.dopamine  - d * 0.8);
-      this.amygdala  = Math.min(1, this.amygdala  + d * 1.6);
-      this.mirrorInt = Math.max(0, this.mirrorInt - d * 0.8);
+      // Aggressive causes severe neurological damage
+      this.pfcLoad   = Math.min(1, this.pfcLoad   + d * 2.8);
+      this.cortisol  = Math.min(1, this.cortisol  + d * 2.8);
+      this.dopamine  = Math.max(0, this.dopamine  - d * 1.8);
+      this.amygdala  = Math.min(1, this.amygdala  + d * 2.5);
+      this.mirrorInt = Math.max(0, this.mirrorInt - d * 1.6);
     } else {
-      this.pfcLoad   = Math.min(1, this.pfcLoad   + d * 0.7);
-      this.cortisol  = Math.min(1, this.cortisol  + d * 0.9);
-      this.dopamine  = Math.max(0, this.dopamine  - d * 0.4);
-      this.amygdala  = Math.min(1, this.amygdala  + d * 0.4);
-      this.mirrorInt = Math.max(0, this.mirrorInt - d * 1.2);
+      // Silent is deeply damaging — absence is not neutral
+      this.pfcLoad   = Math.min(1, this.pfcLoad   + d * 1.6);
+      this.cortisol  = Math.min(1, this.cortisol  + d * 2.0);
+      this.dopamine  = Math.max(0, this.dopamine  - d * 1.2);
+      this.amygdala  = Math.min(1, this.amygdala  + d * 1.0);
+      this.mirrorInt = Math.max(0, this.mirrorInt - d * 2.0);
     }
     this.computeNLI();
   }
@@ -404,7 +407,7 @@ class CollisionStack {
   }
   pop(nli) {
     if (this.items.length === 0) return false;
-    if (nli >= 0.50) { this.popRejections++; return false; }
+    if (nli >= 0.35) { this.popRejections++; return false; } // need to be very calm to resolve
     this.items.pop();
     this.totalPops++;
     return true;
@@ -478,8 +481,10 @@ class FriendshipDAG {
     // Simple priority queue with array (small graph, acceptable)
     const pq = [{d:0, u:0}];
     while (pq.length) {
-      pq.sort((a,b)=>a.d-b.d);
-      const {d, u} = pq.shift();
+      // O(n) min extraction — faster than full sort for this tiny graph
+      let minI = 0;
+      for (let k = 1; k < pq.length; k++) if (pq[k].d < pq[minI].d) minI = k;
+      const {d, u} = pq[minI]; pq.splice(minI, 1);
       if (d > dist[u] || this.locked[u]) continue;
       for (const e of this.adj[u]) {
         if (this.locked[e.to]) continue;
@@ -529,31 +534,31 @@ class HaniChessEngine {
   }
   minimax(base, depth, maximizing) {
     if (depth === 0) return base;
-    return maximizing ? this.minimax(base+0.12, depth-1, false) : this.minimax(base-0.10, depth-1, true);
+    return maximizing ? this.minimax(base+0.18, depth-1, false) : this.minimax(base-0.16, depth-1, true);
   }
   respond(choiceType, nli, stackPenalty) {
     this.totalMoves++;
     let eff = choiceType;
-    if (nli >= 0.85) { eff = AGGRESSIVE; this.amygdalaOverrides++; }
+    if (nli >= 0.72) { eff = AGGRESSIVE; this.amygdalaOverrides++; } // override triggers earlier
     const idx = Math.min(this.moveIndex, 22);
     const mv = this.game[idx];
     let base = this.positionEval;
     let wr = '';
     if (eff === SOFT) {
       wr = 'controlled, deliberate'; this.softCount++;
-      this.positionEval = this.minimax(base+0.10, 2, false) + stackPenalty;
+      this.positionEval = this.minimax(base+0.06, 2, false) + stackPenalty; // softer gains
     } else if (eff === AGGRESSIVE) {
       wr = 'sharp, tactical'; this.aggressiveCount++;
-      this.positionEval = this.minimax(base-0.22-(nli>=0.85?0.30:0), 2, true) + stackPenalty;
+      this.positionEval = this.minimax(base-0.55-(nli>=0.72?0.60:0), 2, true) + stackPenalty; // much heavier penalty
     } else {
       wr = 'passive, tempo loss'; this.silentCount++;
-      this.positionEval = this.minimax(base-0.08, 2, false) + stackPenalty;
+      this.positionEval = this.minimax(base-0.28, 2, false) + stackPenalty; // silence hurts more
     }
     this.positionEval = Math.max(-9.99, Math.min(9.99, this.positionEval));
     this.moveIndex++;
     return { ...mv, wr, eval: this.positionEval };
   }
-  isCheckmate() { return this.positionEval <= -7.5; }
+  isCheckmate() { return this.positionEval <= -3.5; } // triggers much sooner
   evalLabel() {
     if (this.positionEval > 2.0)  return 'comfortable';
     if (this.positionEval > 0.5)  return 'slight edge';
@@ -570,9 +575,9 @@ const TC_NONE=0, TC_SALVATION=1, TC_CHECKMATE=2, TC_AMYGDALA=3,
 
 function checkTerminal(cards, chess, ns, stack, trust, move) {
   if (cards.allLost())             return TC_ALL_CARDS_LOST;
-  if (ns.nli >= 0.85)              return TC_AMYGDALA;
+  if (ns.nli >= 0.75)              return TC_AMYGDALA;   // triggers at 0.75 not 0.80
   if (stack.overflow())            return TC_STACK_OVERFLOW;
-  if (trust < 0.10)                return TC_TRUST_FLOOR;
+  if (trust < 0.28)                return TC_TRUST_FLOOR; // higher floor
   if (chess.isCheckmate())         return TC_CHECKMATE;
   if (move >= 23)                  return cards.lostCount() === 0 ? TC_SALVATION : TC_MAX_MOVES;
   return TC_NONE;
@@ -590,9 +595,11 @@ class LostCardSim {
     this.chess  = new HaniChessEngine();
     this.trust  = 0.80;
     this.move   = 0;
-    this.silentTotal     = 0;
+    this.silentTotal      = 0;
+    this.softTotal        = 0;
+    this.softConsec       = 0;
     this.aggressiveConsec = 0;
-    this.highNliConsec   = 0;
+    this.highNliConsec    = 0;
     this.phaseLog        = ['HARMONY'];
     this.terminalCondition = TC_NONE;
     this.lostMemories    = [];
@@ -635,12 +642,18 @@ class LostCardSim {
     this.dag.lockNodes(this.ns.pfcLoad);
     this.dag.dijkstra();
 
-    // Trust
-    if (choiceType === SOFT)          this.trust = Math.min(1, this.trust + 0.03);
-    else if (choiceType===AGGRESSIVE) this.trust = Math.max(0, this.trust - 0.05);
-    else                              this.trust = Math.max(0, this.trust - 0.02);
+    // Trust — drops hard, barely repairs
+    if (choiceType === SOFT)          this.trust = Math.min(1, this.trust + 0.01);
+    else if (choiceType===AGGRESSIVE) this.trust = Math.max(0, this.trust - 0.14);
+    else                              this.trust = Math.max(0, this.trust - 0.08);
 
-    // Stack
+    // Passive neurological cost — compounds with each move (relationship strain is cumulative)
+    const passiveMult = 1 + (this.move * 0.04); // gets worse each move
+    this.ns.pfcLoad  = Math.min(1, this.ns.pfcLoad  + 0.022 * passiveMult);
+    this.ns.cortisol = Math.min(1, this.ns.cortisol + 0.018 * passiveMult);
+    this.ns.computeNLI();
+
+    // Stack — silent moves also push conflict
     if (choiceType === AGGRESSIVE || choiceType === SILENT) this.stack.push(sc.conflict);
     else this.stack.pop(this.ns.nli);
 
@@ -648,59 +661,86 @@ class LostCardSim {
     this.ns.applyChoice(choiceType);
 
     // Counters
-    if (choiceType === SILENT)     this.silentTotal++;
-    if (choiceType === AGGRESSIVE) this.aggressiveConsec++;
-    else                           this.aggressiveConsec = 0;
-    if (this.ns.nli > 0.75)        this.highNliConsec++;
-    else                           this.highNliConsec = 0;
+    if (choiceType === SOFT) {
+      this.softConsec++;
+      this.softTotal++;
+      this.aggressiveConsec = 0;
+    } else if (choiceType === AGGRESSIVE) {
+      this.aggressiveConsec++;
+      this.softConsec = 0;
+    } else {
+      this.silentTotal++;
+      this.softConsec = 0;
+      this.aggressiveConsec = 0;
+    }
+    if (this.ns.nli > 0.62)  this.highNliConsec++;
+    else                      this.highNliConsec = 0;
 
     // FSM phase
     const prevLabel = this.phaseLog[this.phaseLog.length-1];
     const newLabel  = this.ns.getStateLabel();
     if (newLabel !== prevLabel) this.phaseLog.push(newLabel);
 
-    // Card drop checks
+    // ── Card drop checks ─────────────────────────────────────────────
     if (this.cards.devotionIn) {
-      const d1 = (choiceType === AGGRESSIVE && this.ns.nli < 0.30);
-      const d2 = (this.trust < 0.55 && this.ns.dopamine > 0.70);
-      if (d1 || d2) {
+      // d1: low-NLI aggression = habitual aggression (coldest form)
+      const d1 = (choiceType === AGGRESSIVE && this.ns.nli < 0.55);
+      // d2: trust already eroding while dopamine still high = emotional blindspot
+      const d2 = (this.trust < 0.70 && this.ns.dopamine > 0.48);
+      // d3: over-investment — 5 consecutive soft moves = losing yourself in the relationship
+      const d3 = (this.softConsec >= 5);
+      // d4: staying soft while trust is very low = devotion without foundation
+      const d4 = (choiceType === SOFT && this.trust < 0.45 && this.move >= 4);
+      if (d1 || d2 || d3 || d4) {
         this.cards.devotionIn = false;
         this.cards.devotionLost = this.move+1;
         this.dag.lockDevotionNodes();
         this.lostMemories.push(this.dag.labels[3]);
         result.cardDrops.push({
           card:'DEVOTION', color:'#C678DD', move:this.move+1,
-          reason: d1 ? "You became so invested you forgot where you ended and they began."
-                     : "You were emotionally high while trust was already eroding. The blindspot closed."
+          reason: d3 ? "Five consecutive soft moves. You over-invested before the foundation could hold it."
+                     : d4 ? "You kept giving while trust had already collapsed. Devotion without foundation breaks first."
+                     : d1 ? "Low-stress aggression. You hurt without pressure — that is habit, not reaction."
+                           : "Dopamine high while trust eroded. The blindspot closed before you noticed."
         });
       }
     }
     if (this.cards.excitementIn) {
-      const d1 = (this.stack.size() >= 4 && choiceType === AGGRESSIVE);
+      // d1: 2+ unresolved conflicts AND aggression
+      const d1 = (this.stack.size() >= 2 && choiceType === AGGRESSIVE);
+      // d2: consecutive aggression
       const d2 = (this.aggressiveConsec >= 2);
-      if (d1 || d2) {
+      // d3: high NLI aggression — stress turns excitement into reactivity
+      const d3 = (this.ns.nli > 0.55 && choiceType === AGGRESSIVE);
+      if (d1 || d2 || d3) {
         this.cards.excitementIn = false;
         this.cards.excitementLost = this.move+1;
         this.dag.severExcitementBridges();
         this.lostMemories.push(this.dag.labels[4]);
         result.cardDrops.push({
           card:'EXCITEMENT', color:'#56B6C2', move:this.move+1,
-          reason: d1 ? "Four unresolved conflicts in a burst. Excitement became pure reactivity."
-                     : "Two consecutive aggressive moves. Impulse replaced judgment."
+          reason: d2 ? "Two consecutive aggressive moves. Impulse fully replaced judgment."
+                     : d3 ? "Aggression under stress. Excitement became pure reactivity — there was nothing left to engage with."
+                           : "Two unresolved conflicts met another aggressive move. The stack tipped."
         });
       }
     }
     if (this.cards.presenceIn) {
-      const d1 = (this.silentTotal >= 3);
-      const d2 = (this.highNliConsec >= 3);
-      if (d1 || d2) {
+      // d1: 2 silent moves total = withdrawal pattern established
+      const d1 = (this.silentTotal >= 2);
+      // d2: 2 consecutive high-NLI moves = sustained overload kills availability
+      const d2 = (this.highNliConsec >= 2);
+      // d3: NLI above collapse threshold = can't be present when overwhelmed
+      const d3 = (this.ns.nli >= 0.70 && this.move >= 3);
+      if (d1 || d2 || d3) {
         this.cards.presenceIn = false;
         this.cards.presenceLost = this.move+1;
         this.lostMemories.push(this.dag.labels[4]);
         result.cardDrops.push({
           card:'PRESENCE', color:'#98C379', move:this.move+1,
-          reason: d1 ? "Three silences. You were physically there - psychologically gone."
-                     : "Three consecutive moves under extreme neurological load. Presence confirmed absent."
+          reason: d1 ? "Two silences. You were physically there — psychologically you had already left."
+                     : d3 ? "NLI crossed 0.70. When the nervous system is in collapse, presence is physically impossible."
+                           : "Two consecutive moves under extreme neurological load. Presence cannot exist under that weight."
         });
       }
     }
