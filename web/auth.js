@@ -46,12 +46,16 @@ function initAuth() {
     }
 
     // Signed in
+    const docData = (userDoc && userDoc.exists) ? userDoc.data() : {};
     currentUser = {
-      uid:         user.uid,
-      email:       user.email,
-      displayName: user.displayName || user.email.split('@')[0],
-      avatarEmoji: localStorage.getItem('lc_emoji_' + user.uid) || '🎭',
-      isAdmin:     IS_ADMIN(user.uid)
+      uid:              user.uid,
+      email:            user.email,
+      displayName:      user.displayName || user.email.split('@')[0],
+      avatarEmoji:      localStorage.getItem('lc_emoji_' + user.uid) || '🎭',
+      isAdmin:          IS_ADMIN(user.uid),
+      hbCount:          docData.hbCount          || 0,
+      geminiKey:        docData.geminiKey         || null,
+      upgradeRequested: docData.upgradeRequested  || false
     };
 
     // Update last login in background

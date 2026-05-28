@@ -1356,6 +1356,46 @@ body {
 .ai-send-btn:active:not(:disabled) { transform: translateY(0) scale(0.97); }
 .ai-send-btn:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; letter-spacing: 2px; }
 
+/* ── HAIR BAND: Limit Wall ── */
+.hb-limit-wall {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 22px 20px 18px;
+  text-align: center;
+}
+.hb-limit-icon  { font-size: 32px; line-height: 1; }
+.hb-limit-title { font-size: 15px; font-weight: 700; color: var(--text1); }
+.hb-limit-msg   { font-size: 13px; color: var(--text2); max-width: 340px; line-height: 1.55; }
+.hb-limit-btns  { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 4px; }
+.hb-key-btn {
+  padding: 9px 18px;
+  border-radius: 8px;
+  border: 1px solid var(--border1);
+  background: var(--bg2);
+  color: var(--text1);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.hb-key-btn:hover { background: var(--bg3); }
+.hb-upgrade-btn {
+  padding: 9px 20px;
+  border-radius: 8px;
+  border: none;
+  background: linear-gradient(135deg, #58A6FF 0%, #1a7fd4 100%);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.3px;
+  transition: opacity 0.15s;
+}
+.hb-upgrade-btn:hover:not(:disabled) { opacity: 0.88; }
+.hb-upgrade-btn:disabled { opacity: 0.5; cursor: default; }
+
 /* ── RIGHT SIDEBAR: Stats Panels ── */
 .conv-right-sidebar {
   width: 200px;

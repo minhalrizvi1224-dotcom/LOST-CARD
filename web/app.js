@@ -20,6 +20,17 @@ let patternInterruptUsed = false; // once per session special move
 let lastThresholdAlert   = 0;     // NLI band last alerted (0=none, 1=fracture, 2=collapse, 3=override)
 let gottmanLogCurrent    = null;  // Gottman tone for current move
 
+// ── Hair Band limit tracking ───────────────────────────────────────────
+let hbCountLocal    = 0;      // synced from Firestore on login
+let hbLimitBypassed = false;  // true when user clicks "Use My API Key"
+const HB_LIMIT      = 1000;
+
+document.addEventListener('authReady', (e) => {
+  if (e && e.detail) {
+    hbCountLocal = e.detail.hbCount || 0;
+  }
+});
+
 // ══════════════════════════════════════════════════════════════════════
 // METADATA
 // ══════════════════════════════════════════════════════════════════════
@@ -2078,7 +2089,11 @@ function startAIAssistant() {
   avatarEl.textContent = meta.avatarText;
   avatarEl.style.background = meta.avatarGrad;
   document.getElementById('cchName').textContent = meta.name;
-  document.getElementById('cchSub').textContent  = meta.sub;
+  const hasGemini = currentUser && currentUser.geminiKey;
+  const subLabel  = hasGemini
+    ? 'Unlimited · Upgraded ✨'
+    : `${hbCountLocal.toLocaleString()} / ${HB_LIMIT.toLocaleString()} messages`;
+  document.getElementById('cchSub').textContent  = subLabel;
   document.getElementById('moveBadge').textContent = 'AI Mode';
 
   const badge = document.getElementById('headerStatusBadge');
@@ -2094,17 +2109,14 @@ function startAIAssistant() {
   const leftSidebar = document.querySelector('.conv-left-sidebar');
   if (leftSidebar) leftSidebar.style.display = 'none';
 
-  // Build AI input with emoji picker
+  // Build AI input — check limit first
   const choicesArea = document.getElementById('choicesArea');
-  choicesArea.innerHTML = `
-    <div class="ai-input-row" style="position:relative">
-      <div id="emojiPickerAI" class="emoji-picker"></div>
-      <button class="emoji-btn" onclick="toggleEmojiPicker('aiChatInput','emojiPickerAI')" title="Emoji">😊</button>
-      <textarea class="ai-input" id="aiChatInput" placeholder="Ask anything about LOST CARD…" rows="1"
-        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAIMessage();}"></textarea>
-      <button class="ai-send-btn" onclick="sendAIMessage()">Send</button>
-    </div>`;
-  buildEmojiPicker('emojiPickerAI', 'aiChatInput');
+  const _hasGeminiNow = currentUser && currentUser.geminiKey;
+  if (!_hasGeminiNow && !hbLimitBypassed && hbCountLocal >= HB_LIMIT) {
+    showHBLimitWall();
+  } else {
+    _buildHBInput();
+  }
 
   // Welcome message
   addMessage('them', 'Hair Band',
@@ -2119,39 +2131,164 @@ async function sendAIMessage() {
   const text = input.value.trim();
   if (!text) return;
 
-  // Prefer whatever key is available
-  let provider = 'groq', key = getAPIKey('groq');
-  if (!key) { provider = 'deepseek'; key = getAPIKey('deepseek'); }
-  if (!key) {
-    showToast('Add an API key in Settings (⚙) to use the AI assistant.', 'error');
-    // Show settings icon is at the top of chat list
-    return;
+  // Check for admin-allocated Gemini key first (unlimited tier)
+  const geminiKey = currentUser && currentUser.geminiKey;
+  let provider = 'groq', key = null, useGemini = false;
+
+  if (geminiKey) {
+    useGemini = true;
+  } else {
+    key = getAPIKey('groq'); provider = 'groq';
+    if (!key) { key = getAPIKey('deepseek'); provider = 'deepseek'; }
+    if (!key) {
+      showToast('Add an API key in Settings (⚙) to use Hair Band.', 'error');
+      return;
+    }
+    // Enforce limit unless user bypassed with their own key
+    if (!hbLimitBypassed && hbCountLocal >= HB_LIMIT) {
+      showHBLimitWall();
+      return;
+    }
   }
 
   input.value = '';
   addMessage('you', 'You', text);
-  // NOTE: do NOT push to history yet - callAI appends userMsg itself.
-  // Pushing here + passing as userMsg would duplicate the message and cause API errors.
 
   const typingEl = addTypingIndicator('Hair Band');
   isAITyping = true;
 
   try {
-    const reply = await callAI(provider, key, aiAssistantHistory, AI_SYSTEM_PROMPT, text, 700);
+    let reply;
+    if (useGemini) {
+      reply = await callGemini(geminiKey, aiAssistantHistory, AI_SYSTEM_PROMPT, text, 700);
+    } else {
+      reply = await callAI(provider, key, aiAssistantHistory, AI_SYSTEM_PROMPT, text, 700);
+    }
     typingEl.remove();
     isAITyping = false;
-    // Save both turns to history AFTER successful call
     aiAssistantHistory.push({ role: 'user', content: text });
     aiAssistantHistory.push({ role: 'assistant', content: reply });
     addMessage('them', 'Hair Band', reply);
     scrollMessages();
-    // Log query for admin (only app-related, not personal info)
+    // Increment usage counter (Gemini users are unlimited — no counting)
+    if (!useGemini) incrementHBCount();
     logHairBandQuery(text, reply);
   } catch(err) {
     typingEl.remove();
     isAITyping = false;
-    addMessage('them', 'Hair Band', `Sorry, I couldn't reach the API. ${err.message || 'Check your API key and connection.'}`);
+    addMessage('them', 'Hair Band', `Sorry, I couldn't reach the API. ${err.message || 'Check your key and connection.'}`);
   }
+}
+
+// ── Hair Band: build input UI ─────────────────────────────────────────
+function _buildHBInput() {
+  const choicesArea = document.getElementById('choicesArea');
+  choicesArea.innerHTML = `
+    <div class="ai-input-row" style="position:relative">
+      <div id="emojiPickerAI" class="emoji-picker"></div>
+      <button class="emoji-btn" onclick="toggleEmojiPicker('aiChatInput','emojiPickerAI')" title="Emoji">😊</button>
+      <textarea class="ai-input" id="aiChatInput" placeholder="Ask anything about LOST CARD…" rows="1"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAIMessage();}"></textarea>
+      <button class="ai-send-btn" onclick="sendAIMessage()">Send</button>
+    </div>`;
+  buildEmojiPicker('emojiPickerAI', 'aiChatInput');
+}
+
+// ── Hair Band: limit wall ─────────────────────────────────────────────
+function showHBLimitWall() {
+  const choicesArea = document.getElementById('choicesArea');
+  const hasOwnKey = !!(getAPIKey('groq') || getAPIKey('deepseek'));
+  const alreadyRequested = currentUser && currentUser.upgradeRequested;
+  choicesArea.innerHTML = `
+    <div class="hb-limit-wall">
+      <div class="hb-limit-icon">🔒</div>
+      <div class="hb-limit-title">Hair Band Limit Reached</div>
+      <div class="hb-limit-msg">You've used all ${HB_LIMIT.toLocaleString()} free messages.<br>
+        Use your own API key to continue, or upgrade for unlimited access.</div>
+      <div class="hb-limit-btns">
+        ${hasOwnKey
+          ? `<button class="hb-key-btn" onclick="bypassHBLimit()">Continue with My Key</button>`
+          : `<button class="hb-key-btn" onclick="openApiSetup()">Add API Key</button>`
+        }
+        ${alreadyRequested
+          ? `<button class="hb-upgrade-btn" disabled>Request Sent ✓</button>`
+          : `<button class="hb-upgrade-btn" onclick="requestHBUpgrade()">⬆ Upgrade</button>`
+        }
+      </div>
+    </div>`;
+}
+
+function bypassHBLimit() {
+  hbLimitBypassed = true;
+  _buildHBInput();
+  showToast('Continuing with your own API key.', 'success');
+}
+
+async function requestHBUpgrade() {
+  if (!firebaseDB || !currentUser || !currentUser.uid) {
+    showToast('Sign in to request an upgrade.', 'error');
+    return;
+  }
+  try {
+    await firebaseDB.collection('users').doc(currentUser.uid).update({
+      upgradeRequested:   true,
+      upgradeRequestedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    currentUser.upgradeRequested = true;
+    // Show confirmation in wall
+    const choicesArea = document.getElementById('choicesArea');
+    choicesArea.innerHTML = `
+      <div class="hb-limit-wall">
+        <div class="hb-limit-icon">✅</div>
+        <div class="hb-limit-title">Upgrade Requested!</div>
+        <div class="hb-limit-msg">Your request has been sent. We'll reach out to you at
+          <strong>${currentUser.email || 'your email'}</strong> soon with unlimited access.</div>
+      </div>`;
+    showToast('Upgrade request sent!', 'success');
+  } catch(e) {
+    showToast('Could not send request. Try again.', 'error');
+  }
+}
+
+// ── Increment Firestore HB count ──────────────────────────────────────
+function incrementHBCount() {
+  hbCountLocal++;
+  // Update sub-header live
+  const subEl = document.getElementById('cchSub');
+  if (subEl && currentChatId === 'ai_assistant') {
+    subEl.textContent = `${hbCountLocal.toLocaleString()} / ${HB_LIMIT.toLocaleString()} messages`;
+  }
+  if (!firebaseDB || !currentUser || !currentUser.uid) return;
+  firebaseDB.collection('users').doc(currentUser.uid).update({
+    hbCount: firebase.firestore.FieldValue.increment(1)
+  }).catch(() => {});
+}
+
+// ── Gemini API call (for upgraded users) ──────────────────────────────
+async function callGemini(apiKey, history, systemPrompt, userMsg, maxTokens = 700) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  const contents = [];
+  const trimmed  = history.slice(-10);
+  for (const m of trimmed) {
+    contents.push({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] });
+  }
+  if (userMsg) contents.push({ role: 'user', parts: [{ text: userMsg }] });
+
+  const resp = await fetch(url, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify({
+      contents,
+      systemInstruction: { parts: [{ text: systemPrompt }] },
+      generationConfig:  { maxOutputTokens: maxTokens, temperature: 0.9 }
+    })
+  });
+  if (!resp.ok) {
+    const errData = await resp.json().catch(() => ({}));
+    throw new Error(errData?.error?.message || `HTTP ${resp.status}`);
+  }
+  const data = await resp.json();
+  return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '[No response]';
 }
 
 // ── Log Hair Band queries for admin visibility ─────────────────────────

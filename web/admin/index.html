@@ -611,7 +611,7 @@ function renderUsersTable(users) {
   if(!users.length){el.innerHTML='<div class="empty"><div class="empty-icon">👤</div>No users found.</div>';return;}
   let html=`<table class="data-table"><thead><tr>
     <th>#</th><th>Name</th><th>Email</th><th>Location</th>
-    <th>Sessions</th><th>Status</th><th>Archetype</th><th>Platform</th><th>Joined</th><th>Last Active</th>
+    <th>Sessions</th><th>Hair Band</th><th>Status</th><th>Archetype</th><th>Platform</th><th>Joined</th><th>Last Active</th>
   </tr></thead><tbody>`;
   users.forEach((u,i)=>{
     const joined =u.createdAt  ? fmtDate(u.createdAt.seconds)  : '-';
@@ -621,6 +621,14 @@ function renderUsersTable(users) {
     const statusBadge=susp?'<span class="badge badge-red">SUSPENDED</span>':
       warns>0?`<span class="badge badge-orange">⚠ ${warns}/3</span>`:
       '<span class="badge badge-green">Active</span>';
+    const hbCnt=u.hbCount||0;
+    const hasGemini=!!u.geminiKey;
+    const wantsUpgrade=u.upgradeRequested&&!hasGemini;
+    const hbBadge=hasGemini
+      ?'<span class="badge badge-purple" title="Using admin Gemini key">∞ Upgraded</span>'
+      :wantsUpgrade
+        ?`<span class="badge badge-orange" title="Upgrade requested">🔔 ${hbCnt}/1000</span>`
+        :`<span class="badge ${hbCnt>=1000?'badge-red':hbCnt>=750?'badge-orange':'badge-gray'}">${hbCnt}/1000</span>`;
     html+=`<tr onclick="showUserDetail(${i})">
       <td style="color:var(--muted);font-size:11px">${i+1}</td>
       <td><div style="font-weight:700">${esc(u.displayName||'—')}</div>
@@ -628,6 +636,7 @@ function renderUsersTable(users) {
       <td style="color:var(--muted);font-size:11px">${esc(u.email||'—')}</td>
       <td style="font-size:11px">${u.location?'📍 '+esc(u.location):'<span style="color:var(--muted)">—</span>'}</td>
       <td><span class="badge badge-blue">${u.totalSessions||0}</span></td>
+      <td>${hbBadge}</td>
       <td>${statusBadge}</td>
       <td style="color:var(--purple);font-size:11px">${esc(u.archetype||'—')}</td>
       <td><span class="badge ${(u.platform||'')===('mobile')?'badge-green':'badge-blue'}">${esc(u.platform||'desktop')}</span></td>
@@ -674,6 +683,26 @@ function showUserDetail(idx) {
     <div class="d-row"><div class="d-key">Warnings</div><div class="d-val" style="color:${u.warnings>=3?'var(--red)':u.warnings>0?'var(--accent2)':'var(--green)'}">${u.warnings||0} / 3${u.suspended?' — SUSPENDED':''}</div></div>
     <div class="d-sect">Recent Sessions</div>
     ${sessHtml}
+    <div class="d-sect">Hair Band Usage</div>
+    <div class="d-row"><div class="d-key">Messages Used</div>
+      <div class="d-val" style="color:${(u.hbCount||0)>=1000?'var(--red)':(u.hbCount||0)>=750?'var(--accent2)':'var(--accent)'}">
+        ${(u.hbCount||0).toLocaleString()} / 1,000</div></div>
+    <div class="d-row"><div class="d-key">Upgrade Request</div>
+      <div class="d-val">${u.upgradeRequested
+        ?`<span style="color:var(--accent2)">🔔 Requested${u.upgradeRequestedAt?' — '+fmtDateTime(u.upgradeRequestedAt.seconds):''}</span>`
+        :'<span style="color:var(--muted)">None</span>'}</div></div>
+    <div class="d-row"><div class="d-key">Gemini Key</div>
+      <div class="d-val">${u.geminiKey
+        ?`<span style="color:var(--green)">✅ Allocated</span> <span style="font-size:10px;color:var(--muted);font-family:monospace">${u.geminiKey.substring(0,12)}…</span>`
+        :'<span style="color:var(--muted)">Not allocated</span>'}</div></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 4px;align-items:center">
+      <input id="geminiKeyInput_${u.id}" type="text" placeholder="Paste Gemini API key (AIza…)"
+        style="flex:1;min-width:200px;padding:7px 10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:11px;font-family:monospace;outline:none"/>
+      <button class="btn-sm" style="border-color:var(--purple);color:var(--purple);flex-shrink:0"
+        onclick="allocateGeminiKey('${u.id}',${idx})">✨ Allocate Key</button>
+      ${u.geminiKey?`<button class="btn-sm btn-danger" style="flex-shrink:0" onclick="revokeGeminiKey('${u.id}',${idx})">Revoke</button>`:''}
+    </div>
+    <div style="font-size:10px;color:var(--muted);margin-bottom:4px">After allocating, the user gets unlimited Hair Band using this key — they see it as "Upgraded".</div>
     <div class="d-sect">Admin Actions</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
       <button class="btn-sm" style="border-color:var(--accent2);color:var(--accent2)" onclick="warnUser('${u.id}','${esc(u.displayName||'User')}',${idx})">⚠ Issue Warning</button>
@@ -1023,6 +1052,44 @@ function analyzeUserWithHB(idx) {
     const input=document.getElementById('hbInput');
     if(input) input.value='Give me a full psychological profile and analysis for this user based on their session data.';
   },300);
+}
+
+// ── Gemini Key Allocation ─────────────────────────────────────────────
+async function allocateGeminiKey(uid, idx) {
+  const input = document.getElementById('geminiKeyInput_' + uid);
+  const key = input ? input.value.trim() : '';
+  if (!key) { alert('Paste the Gemini API key first.'); return; }
+  if (!key.startsWith('AIza')) { alert('Invalid key — Gemini keys start with AIza.'); return; }
+  try {
+    await adDB.collection('users').doc(uid).update({
+      geminiKey:        key,
+      upgradeRequested: false,
+      upgradedAt:       firebase.firestore.FieldValue.serverTimestamp()
+    });
+    // Update local user object
+    if (allUsers[idx]) {
+      allUsers[idx].geminiKey = key;
+      allUsers[idx].upgradeRequested = false;
+    }
+    alert(`✅ Gemini key allocated to ${allUsers[idx]?.displayName||uid}. They now have unlimited Hair Band access.`);
+    closeDetail();
+    renderUsersTable(allUsers);
+  } catch(e) {
+    alert('Error: ' + e.message);
+  }
+}
+
+async function revokeGeminiKey(uid, idx) {
+  if (!confirm('Revoke this user\'s Gemini key? They will go back to the 1,000 message limit.')) return;
+  try {
+    await adDB.collection('users').doc(uid).update({ geminiKey: null });
+    if (allUsers[idx]) allUsers[idx].geminiKey = null;
+    alert('Key revoked.');
+    closeDetail();
+    renderUsersTable(allUsers);
+  } catch(e) {
+    alert('Error: ' + e.message);
+  }
 }
 
 // ── Admin Actions ──────────────────────────────────────────────────────
