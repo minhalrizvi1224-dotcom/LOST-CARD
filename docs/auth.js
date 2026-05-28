@@ -346,32 +346,37 @@ function clearProfilePic() {
 }
 
 // ── Save session to Firestore ─────────────────────────────────────────
-async function saveSessionToFirestore(sessionData) {
+async function saveSessionToFirestore(sessionData, chatId, displayNameOverride) {
   if (!firebaseDB || !currentUser || !currentUser.uid) return;
 
   try {
     const uid = currentUser.uid;
 
-    // Save session document
+    // Save session document — sessionData is already fully formed by saveSession() in app.js
     await firebaseDB.collection('sessions').add({
-      uid:            uid,
-      email:          currentUser.email || null,
-      displayName:    currentUser.displayName || null,
-      timestamp:      firebase.firestore.FieldValue.serverTimestamp(),
-      chatType:       sessionData.chatType       || 'default',
-      finalNLI:       sessionData.finalNLI       || 0,
-      cardsLost:      sessionData.cardsLost      || [],
-      cardsLostCount: (sessionData.cardsLost || []).length,
-      totalMoves:     sessionData.totalMoves     || 0,
-      endReason:      sessionData.endReason      || 'completed',
-      archetype:      sessionData.archetype      || null,
-      healthScore:    sessionData.healthScore    || 0,
-      letterGrade:    sessionData.letterGrade    || null,
-      softMoves:      sessionData.softMoves      || 0,
-      aggressiveMoves:sessionData.aggressiveMoves|| 0,
-      silentMoves:    sessionData.silentMoves    || 0,
-      finalState:     sessionData.finalState     || 'HARMONY',
-      platform:       navigator.userAgent.includes('Mobile') ? 'mobile' : 'desktop'
+      uid:             uid,
+      email:           currentUser.email || null,
+      displayName:     currentUser.displayName || null,
+      timestamp:       firebase.firestore.FieldValue.serverTimestamp(),
+      chatType:        sessionData.chatType          || chatId  || 'default',
+      finalNLI:        sessionData.finalNLI          ?? 0,
+      finalTrust:      sessionData.finalTrust        ?? 0,
+      finalState:      sessionData.finalState        || 'HARMONY',
+      cardsLost:       Array.isArray(sessionData.cardsLost) ? sessionData.cardsLost : [],
+      cardsLostCount:  sessionData.cardsLostCount    ?? 0,
+      totalMoves:      sessionData.totalMoves        ?? 0,
+      endReason:       sessionData.endReason         || 'completed',
+      terminalCondition: sessionData.terminalCondition ?? 0,
+      archetype:       sessionData.archetype         || null,
+      healthScore:     sessionData.healthScore       ?? null,
+      letterGrade:     sessionData.letterGrade       || null,
+      softMoves:       sessionData.softMoves         ?? 0,
+      aggressiveMoves: sessionData.aggressiveMoves   ?? 0,
+      silentMoves:     sessionData.silentMoves       ?? 0,
+      stackMaxDepth:   sessionData.stackMaxDepth     ?? 0,
+      chessEval:       sessionData.chessEval         ?? 0,
+      amygdalaOverrides: sessionData.amygdalaOverrides ?? 0,
+      platform:        /Mobi|Android/i.test(navigator.userAgent) ? 'mobile' : 'desktop'
     });
 
     // Update user stats

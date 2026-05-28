@@ -4523,9 +4523,46 @@ function saveSession(summary, chatId) {
   sessions.unshift(record);
   if (sessions.length > 50) sessions.length = 50;
   localStorage.setItem('lc_sessions', JSON.stringify(sessions));
+
   // Save to Firestore if Firebase is configured
   if (typeof saveSessionToFirestore === 'function') {
-    saveSessionToFirestore(summary, chatId, displayName);
+    // Build cards lost as an array of names (admin panel expects array, not count)
+    const cardsLostArray = [];
+    if (summary.devotion   && !summary.devotion.startsWith('RETAINED'))   cardsLostArray.push('DEVOTION');
+    if (summary.excitement && !summary.excitement.startsWith('RETAINED')) cardsLostArray.push('EXCITEMENT');
+    if (summary.presence   && !summary.presence.startsWith('RETAINED'))   cardsLostArray.push('PRESENCE');
+
+    // Compute derived metrics (they need the raw summary)
+    const healthData   = calculateHealthScore(summary);
+    const archetypeData = getRelationalArchetype(summary);
+
+    // Count moves by type from moveLog
+    const moveLog        = summary.moveLog || [];
+    const softMoves      = moveLog.filter(m => m.type === 'SOFT').length;
+    const aggressiveMoves = moveLog.filter(m => m.type === 'AGGRESSIVE').length;
+    const silentMoves    = moveLog.filter(m => m.type === 'SILENT').length;
+
+    const firestoreData = {
+      chatType:          chatId || 'default',
+      finalNLI:          parseFloat(summary.finalNLI)   || 0,
+      finalTrust:        parseFloat(summary.finalTrust) || 0,
+      finalState:        summary.finalState     || 'HARMONY',
+      cardsLost:         cardsLostArray,
+      cardsLostCount:    cardsLostArray.length,
+      totalMoves:        summary.moves           || 0,
+      endReason:         summary.outcome         || 'completed',
+      terminalCondition: summary.terminalCondition || 0,
+      archetype:         archetypeData?.name     || null,
+      healthScore:       healthData?.score       ?? null,
+      letterGrade:       healthData?.grade       || null,
+      softMoves,
+      aggressiveMoves,
+      silentMoves,
+      stackMaxDepth:     summary.stackMaxDepth   || 0,
+      chessEval:         parseFloat(summary.chessEval) || 0,
+      amygdalaOverrides: summary.amygdalaOverrides || 0,
+    };
+    saveSessionToFirestore(firestoreData, chatId, displayName);
   }
 }
 
