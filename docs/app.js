@@ -1392,12 +1392,23 @@ function getAPIKey(provider) {
   return '';
 }
 
-// ── Pool key (admin's key) — used for all AI calls ────────────────────
-// Falls back to user's own localStorage key if pool key not set yet
+// ── Pool key rotation ─────────────────────────────────────────────────
+let _poolKeyIdx = 0;  // round-robin pointer; advances on every successful or rotated call
+
+function _getKeyPool() {
+  // Use the full pool loaded from Firestore (auth.js populates poolGroqKeys)
+  if (typeof poolGroqKeys !== 'undefined' && poolGroqKeys.length) return poolGroqKeys;
+  // Backward compat: single key
+  if (typeof poolGroqKey !== 'undefined' && poolGroqKey) return [poolGroqKey];
+  // Last resort: user's own saved key
+  const local = localStorage.getItem('lc_groq_key') || localStorage.getItem('lc_deepseek_key') || '';
+  return local ? [local] : [];
+}
+
 function getPoolOrUserKey() {
-  if (typeof poolGroqKey !== 'undefined' && poolGroqKey) return poolGroqKey;
-  // Fallback: user's own key (backward compat / no-pool fallback)
-  return localStorage.getItem('lc_groq_key') || localStorage.getItem('lc_deepseek_key') || '';
+  const pool = _getKeyPool();
+  if (!pool.length) return '';
+  return pool[_poolKeyIdx % pool.length];
 }
 
 function isUpgraded() {
@@ -2975,21 +2986,59 @@ async function callAI(provider, key, history, systemPrompt, userMsg, maxTokens =
   for (const m of trimmed) messages.push(m);
   if (userMsg) messages.push({ role: 'user', content: userMsg });
 
-  const _doFetch = () => fetch(url, {
+  const _doFetch = (useKey) => fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${useKey}` },
     body: JSON.stringify({ model, messages, max_tokens: maxTokens, temperature: 0.9 })
   });
 
-  let resp = await _doFetch();
+  // Build key rotation order: start from current pool index, try each key once
+  const pool = _getKeyPool();
+  const keys = pool.length ? pool : [key];  // fallback to passed key if pool empty
+  const startIdx = _poolKeyIdx % keys.length;
 
-  // Auto-retry once on rate limit (wait 3 s then try again silently)
-  if (!resp.ok && resp.status === 429) {
-    await new Promise(r => setTimeout(r, 3000));
-    resp = await _doFetch();
+  let resp        = null;
+  let lastErrMsg  = `HTTP error`;
+  let allWere429  = true;  // track if EVERY key returned 429 (vs other errors)
+
+  for (let i = 0; i < keys.length; i++) {
+    const tryKey = keys[(startIdx + i) % keys.length];
+    resp = await _doFetch(tryKey);
+    if (resp.ok) {
+      _poolKeyIdx = (startIdx + i + 1) % keys.length;
+      allWere429  = false;
+      break;
+    }
+    if (resp.status === 429) {
+      // Rate limited — try next key immediately
+      const ed = await resp.json().catch(() => ({}));
+      lastErrMsg = ed?.error?.message || `HTTP 429`;
+      resp = null;
+      continue;
+    }
+    // Non-429 error — stop rotating
+    allWere429 = false;
+    break;
   }
 
-  if (!resp.ok) {
+  // All keys hit 429 → wait 5 seconds then give the pool one final pass
+  // (Groq per-minute window partially resets; this rescues brief spikes)
+  if (!resp && allWere429 && keys.length > 0) {
+    await new Promise(r => setTimeout(r, 5000));
+    for (let i = 0; i < keys.length; i++) {
+      const tryKey = keys[(_poolKeyIdx + i) % keys.length];
+      resp = await _doFetch(tryKey);
+      if (resp.ok) {
+        _poolKeyIdx = (_poolKeyIdx + i + 1) % keys.length;
+        break;
+      }
+      if (resp.status === 429) { resp = null; continue; }
+      break;
+    }
+  }
+
+  if (!resp || !resp.ok) {
+    if (!resp) throw new Error(lastErrMsg);
     const errData = await resp.json().catch(() => ({}));
     const errMsg = errData?.error?.message || `HTTP ${resp.status}`;
     throw new Error(errMsg);
