@@ -50,8 +50,11 @@ function initAuth() {
       return;
     }
 
-    // Block unverified users — sign them out and send back to login
-    if (!user.emailVerified) {
+    // Block unverified users — but allow accounts created before verification was added
+    // (creationTime before 30 May 2026 = pre-verification accounts, let them in)
+    const createdAt = user.metadata?.creationTime;
+    const isOldAccount = createdAt && new Date(createdAt) < new Date('2026-05-30T00:00:00Z');
+    if (!user.emailVerified && !isOldAccount) {
       await firebaseAuth.signOut();
       window.location.href = 'login.html?unverified=1';
       return;
