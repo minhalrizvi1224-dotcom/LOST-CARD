@@ -127,3 +127,93 @@ exports.ai = functions
 
   return { text: result };
 });
+
+// ── Send Verification Email via Resend ────────────────────────────────
+// Called from login.html right after account creation.
+// Admin SDK generates the Firebase verification link,
+// Resend delivers a branded HTML email — goes to inbox, not spam.
+exports.sendVerificationEmail = functions
+  .runWith({ timeoutSeconds: 20, memory: '128MB' })
+  .https.onCall(async (data, context) => {
+
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'Login required.');
+  }
+
+  const { email, displayName } = data || {};
+  if (!email) throw new functions.https.HttpsError('invalid-argument', 'Email required.');
+
+  // Load Resend key from Firestore (admin can update without redeploy)
+  // Falls back to hardcoded key if not set
+  let resendKey = 're_5o8ZbTFe_KtLJLkscyvyjCs6bKiTkFT2V';
+  try {
+    const cfg = await db.collection('adminSettings').doc('config').get();
+    if (cfg.exists && cfg.data().resendKey) resendKey = cfg.data().resendKey;
+  } catch(e) {}
+
+  // Generate Firebase email verification link (Admin SDK)
+  const verificationLink = await admin.auth()
+    .generateEmailVerificationLink(email)
+    .catch(err => { throw new functions.https.HttpsError('internal', 'Could not generate link: ' + err.message); });
+
+  const name = displayName || email.split('@')[0];
+
+  // Beautiful HTML email
+  const html = `<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/></head>
+<body style="margin:0;padding:0;background:#0D1117;font-family:'Segoe UI',system-ui,sans-serif">
+  <div style="max-width:480px;margin:40px auto;background:#161B22;border:1px solid #30363D;border-radius:16px;overflow:hidden">
+    <!-- Header -->
+    <div style="background:linear-gradient(135deg,#C678DD,#56B6C2);padding:32px 36px;text-align:center">
+      <div style="display:inline-block;background:rgba(13,17,23,0.5);border-radius:10px;padding:8px 18px;font-size:20px;font-weight:800;letter-spacing:4px;color:#fff">LOST CARD</div>
+      <div style="color:rgba(255,255,255,0.8);font-size:13px;margin-top:8px;letter-spacing:1px">A Computational Model of Relational Belief Decay</div>
+    </div>
+    <!-- Body -->
+    <div style="padding:36px">
+      <div style="font-size:15px;color:#E6EDF3;line-height:1.7;margin-bottom:28px">
+        Hello <strong>${name}</strong>,<br><br>
+        Welcome to LOST CARD. Verify your email to activate your account.
+      </div>
+      <!-- Button -->
+      <div style="text-align:center;margin-bottom:28px">
+        <a href="${verificationLink}"
+           style="display:inline-block;background:linear-gradient(135deg,#C678DD,#56B6C2);color:#0D1117;font-weight:800;font-size:15px;padding:14px 36px;border-radius:10px;text-decoration:none;letter-spacing:0.5px">
+          ✓ &nbsp;Verify My Email
+        </a>
+      </div>
+      <div style="font-size:12px;color:#8B949E;line-height:1.6;border-top:1px solid #30363D;padding-top:20px">
+        This link expires in <strong style="color:#E6EDF3">24 hours</strong>.<br>
+        If you did not create an account, ignore this email.
+      </div>
+    </div>
+    <!-- Footer -->
+    <div style="padding:16px 36px;background:#0D1117;text-align:center;font-size:11px;color:#8B949E">
+      LOST CARD &nbsp;·&nbsp; S. M. Minhal Abbas Rizvi &nbsp;·&nbsp; 2026
+    </div>
+  </div>
+</body>
+</html>`;
+
+  // Send via Resend
+  const resp = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${resendKey}`,
+      'Content-Type':  'application/json'
+    },
+    body: JSON.stringify({
+      from:    'LOST CARD <onboarding@resend.dev>',
+      to:      [email],
+      subject: 'Verify your LOST CARD account',
+      html
+    })
+  });
+
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new functions.https.HttpsError('internal', 'Email failed: ' + (err.message || resp.status));
+  }
+
+  return { success: true };
+});

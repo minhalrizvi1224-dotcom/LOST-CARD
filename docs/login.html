@@ -340,6 +340,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-functions-compat.js"></script>
 <script src="firebase-config.js"></script>
 <script>if('serviceWorker'in navigator){navigator.serviceWorker.register('./sw.js').catch(function(){});}</script>
 
@@ -471,17 +472,23 @@ async function handleAuth(e) {
       const cred = await auth.createUserWithEmailAndPassword(email, password);
       await cred.user.updateProfile({ displayName: name });
 
-      // Send verification email — if it fails, delete the account and show error
+      // Send verification email via Resend Cloud Function (goes to inbox, not spam)
       try {
-        await cred.user.sendEmailVerification();
+        const sendEmail = firebase.functions().httpsCallable('sendVerificationEmail');
+        await sendEmail({ email, displayName: name });
       } catch (emailErr) {
-        // Can't send email → delete the half-created account and stop
-        await cred.user.delete().catch(() => {});
-        await auth.signOut().catch(() => {});
-        isSigningUp = false;
-        showAuthMsg('Could not send verification email. Check your email address and try again.', 'error');
-        resetBtn(btn);
-        return;
+        // Cloud Function failed → try Firebase built-in as fallback
+        try {
+          await cred.user.sendEmailVerification();
+        } catch (fallbackErr) {
+          // Both failed → delete account and stop
+          await cred.user.delete().catch(() => {});
+          await auth.signOut().catch(() => {});
+          isSigningUp = false;
+          showAuthMsg('Could not send verification email. Please try again.', 'error');
+          resetBtn(btn);
+          return;
+        }
       }
 
       _pendingVerifyUser = cred.user;
