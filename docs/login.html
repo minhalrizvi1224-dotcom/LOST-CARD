@@ -402,8 +402,8 @@ async function handleAuth(e) {
       setTimeout(() => {
         isSigningUp = false;
         switchTab('signin');
-        document.getElementById('authEmail').value = email;
-        document.getElementById('authPassword').value = '';
+        document.getElementById('inputEmail').value = email;
+        document.getElementById('inputPassword').value = '';
         hideAuthMsg();
       }, 1800);
 

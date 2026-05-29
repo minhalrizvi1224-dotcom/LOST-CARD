@@ -25,7 +25,17 @@
 //          return request.auth != null && request.auth.uid == 'gHFlKHBDODOp1zXQ1T304skhITi1';
 //        }
 //        match /users/{uid} {
-//          allow read, write: if request.auth != null && request.auth.uid == uid;
+//          allow read: if request.auth != null && request.auth.uid == uid;
+//          allow create: if request.auth != null && request.auth.uid == uid
+//            && !request.resource.data.keys().hasAny([
+//                 'isAdmin','suspended','hbPlan','planExpiry',
+//                 'upgradePlan','warningCount','warnings','geminiKey'
+//               ]);
+//          allow update: if request.auth != null && request.auth.uid == uid
+//            && !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+//                 'isAdmin','suspended','hbPlan','planExpiry',
+//                 'upgradePlan','warningCount','warnings','geminiKey'
+//               ]);
 //          allow read, write: if isAdmin();
 //        }
 //        match /sessions/{id} {
