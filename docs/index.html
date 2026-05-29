@@ -8,7 +8,7 @@
       // ── MAINTENANCE MODE — set to false when update is done ──
       var MAINTENANCE = true;
       var p = new URLSearchParams(window.location.search);
-      if(p.get('lc_open')==='1') sessionStorage.setItem('lc_preview','1');
+      if(p.get('dev')==='2443141856934ee5') sessionStorage.setItem('lc_preview','1');
       if(MAINTENANCE && sessionStorage.getItem('lc_preview')!=='1'){
         window.location.replace('coming-soon.html');
       }
