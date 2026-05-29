@@ -1857,6 +1857,15 @@ async function generateCustomReply(chatId, setup, userText) {
       showToast('⚠ Boundary violated — trust and NLI severely damaged.', 'error');
     }
 
+    // Auto-warning for explicit / sexually inappropriate content
+    if (isExplicit && userText) {
+      const now = Date.now();
+      if (!window._lastAutoWarnTime || now - window._lastAutoWarnTime > 30000) {
+        window._lastAutoWarnTime = now;
+        _handleViolation('Explicit or sexually inappropriate content in chat');
+      }
+    }
+
     // Count toward the shared 50-message free limit
     if (!isUpgraded()) incrementHBCount();
   } catch(err) {

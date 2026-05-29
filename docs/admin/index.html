@@ -1433,7 +1433,7 @@ Archetype: ${u.archetype||'Not determined'}
 Platform: ${u.platform||'—'}
 Bio: ${u.bio||'—'}
 Location: ${u.location||'—'}
-Warnings: ${u.warnings||0}
+Warnings: ${u.warningCount||0}
 Suspended: ${u.suspended?'Yes':'No'}
 
 THEIR SESSIONS (last 5):
@@ -1890,18 +1890,26 @@ async function revokeGeminiKey(uid, idx) {
 
 // ── Admin Actions ──────────────────────────────────────────────────────
 async function warnUser(uid,name,idx) {
-  if(!confirm(`Issue warning to ${name}? (3 warnings = auto-suspend)`)) return;
+  const reason = prompt(`Issue warning to ${name}?\nEnter reason (leave blank for "Admin warning"):`);
+  if(reason === null) return; // cancelled
   const u=allUsers[idx]; if(!u) return;
-  const newWarnings=(u.warnings||0)+1;
-  const update={warnings:newWarnings,lastWarned:firebase.firestore.FieldValue.serverTimestamp()};
-  if(newWarnings>=3){update.suspended=true;update.suspendedAt=firebase.firestore.FieldValue.serverTimestamp();}
+  const newCount=(u.warningCount||0)+1;
+  const warnEntry={reason:reason.trim()||'Admin warning',chatId:'admin-panel',timestamp:new Date().toISOString()};
+  const update={
+    warningCount: firebase.firestore.FieldValue.increment(1),
+    warnings:     firebase.firestore.FieldValue.arrayUnion(warnEntry),
+    lastWarned:   firebase.firestore.FieldValue.serverTimestamp()
+  };
+  if(newCount>=3){update.suspended=true;update.suspendedAt=firebase.firestore.FieldValue.serverTimestamp();}
   try {
     await adDB.collection('users').doc(uid).update(update);
-    allUsers[idx].warnings=newWarnings;
-    if(newWarnings>=3) allUsers[idx].suspended=true;
+    allUsers[idx].warningCount=newCount;
+    if(!Array.isArray(allUsers[idx].warnings)) allUsers[idx].warnings=[];
+    allUsers[idx].warnings.push(warnEntry);
+    if(newCount>=3) allUsers[idx].suspended=true;
     closeDetail();
     renderUsersTable(allUsers);
-    alert(newWarnings>=3?`${name} has been automatically suspended (3 warnings).`:`Warning ${newWarnings}/3 issued to ${name}.`);
+    alert(newCount>=3?`${name} has been automatically suspended (3 warnings).`:`Warning ${newCount}/3 issued to ${name}.`);
   } catch(e) { alert('Error: '+e.message); }
 }
 
@@ -1918,8 +1926,8 @@ async function suspendUser(uid,name,idx) {
 async function unsuspendUser(uid,name,idx) {
   if(!confirm(`Restore ${name}'s account?`)) return;
   try {
-    await adDB.collection('users').doc(uid).update({suspended:false,warnings:0});
-    allUsers[idx].suspended=false; allUsers[idx].warnings=0;
+    await adDB.collection('users').doc(uid).update({suspended:false,warningCount:0,warnings:[]});
+    allUsers[idx].suspended=false; allUsers[idx].warningCount=0; allUsers[idx].warnings=[];
     closeDetail(); renderUsersTable(allUsers);
     alert(`${name}'s account has been restored.`);
   } catch(e) { alert('Error: '+e.message); }
@@ -1957,7 +1965,7 @@ function exportCSV(type) {
   let rows,headers,filename;
   if(type==='users'){
     headers=['UID','Name','Email','Bio','Phone','Location','Sessions','Archetype','Platform','Warnings','Suspended','Joined'];
-    rows=allUsers.map(u=>[u.id,u.displayName||'',u.email||'',u.bio||'',u.phone||'',u.location||'',u.totalSessions||0,u.archetype||'',u.platform||'',u.warnings||0,u.suspended?'Yes':'No',u.createdAt?fmtDate(u.createdAt.seconds):'']);
+    rows=allUsers.map(u=>[u.id,u.displayName||'',u.email||'',u.bio||'',u.phone||'',u.location||'',u.totalSessions||0,u.archetype||'',u.platform||'',u.warningCount||0,u.suspended?'Yes':'No',u.createdAt?fmtDate(u.createdAt.seconds):'']);
     filename='lostcard_users.csv';
   } else {
     headers=['ID','User','Email','ChatType','FinalNLI','CardsLost','HealthScore','Archetype','FinalState','Moves','Soft','Aggressive','Silent','Platform','Date'];
