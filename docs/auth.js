@@ -15,6 +15,7 @@ let authReady     = false;
 let poolGroqKey      = null;   // first key in pool (backward compat)
 let poolGroqKeys     = [];     // Groq key pool — up to 10 keys
 let poolGeminiKeys   = [];     // Gemini key pool — up to 10 keys
+let poolCerebrasKeys = [];     // Cerebras key pool — up to 10 keys
 let adminPayNum      = '';     // JazzCash number shown in upgrade modal
 let adminWANum       = '';     // WhatsApp number shown in upgrade modal
 let stripeLink15d    = '';     // Stripe payment link — 15 Days plan
@@ -130,6 +131,8 @@ function initAuth() {
       poolGroqKey     = poolGroqKeys[0] || null;
       poolGeminiKeys  = Array.isArray(c.geminiPoolKeys) && c.geminiPoolKeys.length
                           ? c.geminiPoolKeys : [];
+      poolCerebrasKeys = Array.isArray(c.cerebrasPoolKeys) && c.cerebrasPoolKeys.length
+                          ? c.cerebrasPoolKeys : [];
       adminPayNum       = c.paymentNumber    || '';
       adminWANum        = c.whatsappNumber   || '';
       stripeLink15d     = c.stripeLink15d    || '';

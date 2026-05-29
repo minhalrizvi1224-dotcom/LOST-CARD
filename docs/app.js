@@ -28,6 +28,15 @@ document.addEventListener('authReady', (e) => {
   if (e && e.detail) {
     hbCountLocal = e.detail.hbCount || 0;
   }
+
+  // Show admin mail button only for admins
+  const mailBtn = document.getElementById('adminMailBtn');
+  if (mailBtn) mailBtn.style.display = (e && e.detail && e.detail.isAdmin) ? 'flex' : 'none';
+
+  // Check for unread admin messages (non-admin users only)
+  if (e && e.detail && !e.detail.isAdmin) {
+    _checkAdminMessagesBadge();
+  }
 });
 
 // ── Firebase Cloud Function proxy (Step 11) ───────────────────────────
@@ -832,8 +841,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const hasGroq = !!localStorage.getItem('lc_groq_key');
-  const hasDeep = !!localStorage.getItem('lc_deepseek_key');
-  if (!hasGroq && !hasDeep) localStorage.setItem('lc_visited', '1');
+  if (!hasGroq) localStorage.setItem('lc_visited', '1');
 });
 
 // ══════════════════════════════════════════════════════════════════════
@@ -972,9 +980,6 @@ function initScrollAnimations() {
   }, 500);
 }
 
-// Re-run the animation every time user visits the landing page
-const _origShowSection = typeof showSection === 'function' ? showSection : null;
-
 // ══════════════════════════════════════════════════════════════════════
 // CARD DROP SOUND (Web Audio API - no external files needed)
 // ══════════════════════════════════════════════════════════════════════
@@ -1073,14 +1078,14 @@ function selectComplaintCat(btn) {
 
 function openComplaintsPanel() {
   showSection('chatApp');
-  // Hide other panels, show complaints
   document.getElementById('chatWelcome').style.display  = 'none';
   document.getElementById('chatConv').style.display     = 'none';
   document.getElementById('complaintsPanel').style.display = 'flex';
-  // Highlight in chat list
   document.querySelectorAll('.chat-item').forEach(el => el.classList.remove('active'));
   const el = document.querySelector('[data-id="complaints"]');
   if (el) el.classList.add('active');
+  // Load & display admin messages, mark them read
+  _loadAdminMessages();
 }
 
 function closeComplaintsPanel() {
@@ -1137,6 +1142,150 @@ async function submitComplaint() {
 
   btn.disabled = false;
   btn.textContent = 'Send';
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// ADMIN MESSAGES — received from admin (shown in Complaints panel)
+// ══════════════════════════════════════════════════════════════════════
+
+let _adminMsgsLoaded = false;
+
+async function _loadAdminMessages() {
+  if (!firebaseDB || !currentUser || !currentUser.uid) return;
+  const msgs = document.getElementById('complaintsMsgs');
+  if (!msgs) return;
+
+  try {
+    const snap = await firebaseDB
+      .collection('users').doc(currentUser.uid)
+      .collection('adminMessages')
+      .orderBy('createdAt', 'asc')
+      .get();
+
+    if (snap.empty) return;
+
+    // Remove old admin message bubbles to avoid duplicates on re-open
+    msgs.querySelectorAll('.admin-msg-bubble').forEach(el => el.remove());
+
+    snap.forEach(doc => {
+      const d = doc.data();
+      const bubble = document.createElement('div');
+      bubble.className = 'admin-msg-bubble';
+      const isResolved = d.type === 'complaint_resolved';
+      bubble.style.cssText = 'background:var(--bg2,#0D1117);border:1px solid var(--border);border-radius:12px;padding:14px 16px;font-size:13px;color:var(--text);line-height:1.7;max-width:90%;align-self:flex-start';
+      const icon  = isResolved ? '✅' : '📩';
+      const label = isResolved ? '<strong>Complaint Resolved</strong>' : '<strong>Message from LOST CARD Team</strong>';
+      bubble.innerHTML = `${icon} ${label}<br><span style="color:var(--muted);font-size:12px">${_escHtml(d.message || '')}</span>`;
+      msgs.appendChild(bubble);
+
+      // Mark as read
+      if (!d.read) {
+        doc.ref.update({ read: true }).catch(() => {});
+      }
+    });
+
+    msgs.scrollTop = msgs.scrollHeight;
+
+    // Clear badge
+    _updateAdminMsgBadge(0);
+    const preview = document.getElementById('complaintsPanelPreview');
+    if (preview) preview.textContent = 'Send a message to the developer';
+
+  } catch(e) { /* non-critical */ }
+}
+
+// Called on auth ready — check for unread admin messages and show badge
+async function _checkAdminMessagesBadge() {
+  if (!firebaseDB || !currentUser || !currentUser.uid) return;
+  try {
+    const snap = await firebaseDB
+      .collection('users').doc(currentUser.uid)
+      .collection('adminMessages')
+      .where('read', '==', false)
+      .get();
+    _updateAdminMsgBadge(snap.size);
+  } catch(e) { /* non-critical */ }
+}
+
+function _updateAdminMsgBadge(count) {
+  const badge   = document.getElementById('adminMsgBadge');
+  const preview = document.getElementById('complaintsPanelPreview');
+  if (badge) {
+    badge.textContent    = count > 9 ? '9+' : count;
+    badge.style.display  = count > 0 ? 'inline-block' : 'none';
+  }
+  if (preview && count > 0) {
+    preview.textContent = `${count} new message${count > 1 ? 's' : ''} from the team`;
+  }
+}
+
+function _escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// ADMIN MAIL MODAL (admin sends message to any user from main app)
+// ══════════════════════════════════════════════════════════════════════
+
+let _amTargetUid = null;
+
+function openAdminMailModal() {
+  _amTargetUid = null;
+  document.getElementById('amEmailInput').value   = '';
+  document.getElementById('amMessageInput').value = '';
+  document.getElementById('amSearchResult').textContent = '';
+  document.getElementById('adminMailModal').style.display = 'flex';
+}
+
+function closeAdminMailModal() {
+  document.getElementById('adminMailModal').style.display = 'none';
+  _amTargetUid = null;
+}
+
+async function searchAMUser() {
+  const email    = document.getElementById('amEmailInput').value.trim().toLowerCase();
+  const resultEl = document.getElementById('amSearchResult');
+  if (!email) { resultEl.style.color = 'var(--red)'; resultEl.textContent = 'Enter an email first.'; return; }
+  resultEl.style.color = 'var(--muted)'; resultEl.textContent = 'Searching…';
+  try {
+    const snap = await firebaseDB.collection('users').where('email', '==', email).limit(1).get();
+    if (snap.empty) {
+      resultEl.style.color = 'var(--red)';
+      resultEl.textContent = 'No user found with that email.';
+      _amTargetUid = null;
+      return;
+    }
+    _amTargetUid = snap.docs[0].id;
+    const name = snap.docs[0].data().displayName || email;
+    resultEl.style.color = 'var(--green)';
+    resultEl.textContent = '✓ Found: ' + name;
+  } catch(e) {
+    resultEl.style.color = 'var(--red)';
+    resultEl.textContent = 'Error: ' + e.message;
+  }
+}
+
+async function sendAdminMail() {
+  if (!_amTargetUid) { showToast('Find a user first.', 'error'); return; }
+  const msg = document.getElementById('amMessageInput').value.trim();
+  if (!msg) { showToast('Write a message first.', 'error'); return; }
+  const btn = document.getElementById('amSendBtn');
+  btn.disabled = true; btn.textContent = 'Sending…';
+  try {
+    await firebaseDB.collection('users').doc(_amTargetUid)
+      .collection('adminMessages').add({
+        type:      'admin_message',
+        message:   msg,
+        fromAdmin: true,
+        read:      false,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    closeAdminMailModal();
+    showToast('Message sent ✓', 'success');
+  } catch(e) {
+    showToast('Failed: ' + e.message, 'error');
+  }
+  btn.disabled = false; btn.textContent = 'Send ✓';
 }
 
 // ══════════════════════════════════════════════════════════════════════
@@ -1595,7 +1744,6 @@ function closeSetupModal() {
 function selectProvider(name, silent) {
   selectedProvider = name;
   document.getElementById('pt_groq').classList.toggle('active', name === 'groq');
-  document.getElementById('pt_deepseek').classList.toggle('active', name === 'deepseek');
   if (!silent && pendingChatId) {
     localStorage.setItem(`lc_provider_${pendingChatId}`, name);
   }
@@ -1892,8 +2040,7 @@ async function confirmUpgradeRequest() {
 }
 
 function getAPIKey(provider) {
-  if (provider === 'groq')     return localStorage.getItem('lc_groq_key') || '';
-  if (provider === 'deepseek') return localStorage.getItem('lc_deepseek_key') || '';
+  if (provider === 'groq') return localStorage.getItem('lc_groq_key') || '';
   return '';
 }
 
@@ -2016,31 +2163,30 @@ window.addEventListener('lc-pool-updated', () => {
   Object.keys(_keyCooldowns).forEach(k => delete _keyCooldowns[k]);
 });
 
-// Returns [{key, provider}, ...] — Groq keys FIRST, Gemini as overflow.
-// Custom chats use small prompts (~1.5k tokens). Groq handles those easily.
-// Gemini is reserved for HB (10k-15k tokens). Exhausting all Groq keys
-// before touching Gemini keeps HB's 3M TPM budget intact.
+// ── Unified pool: Groq → Gemini → Cerebras (chain order) ─────────────
+// If all Groq keys fail → try all Gemini → try all Cerebras → error
+// Each provider is exhausted before moving to the next.
 function _getUnifiedPool() {
-  const groqList = (typeof poolGroqKeys !== 'undefined' && poolGroqKeys.length)
-    ? poolGroqKeys
-    : (typeof poolGroqKey !== 'undefined' && poolGroqKey ? [poolGroqKey] : []);
+  const groqList     = (typeof poolGroqKeys     !== 'undefined' && poolGroqKeys.length)
+    ? poolGroqKeys : (typeof poolGroqKey !== 'undefined' && poolGroqKey ? [poolGroqKey] : []);
+  const geminiList   = (typeof poolGeminiKeys   !== 'undefined' && poolGeminiKeys.length)   ? poolGeminiKeys   : [];
+  const cerebrasList = (typeof poolCerebrasKeys !== 'undefined' && poolCerebrasKeys.length) ? poolCerebrasKeys : [];
 
-  const geminiList = (typeof poolGeminiKeys !== 'undefined' && poolGeminiKeys.length)
-    ? poolGeminiKeys : [];
-
-  // Groq first, then Gemini as spillover — NOT interleaved
   const unified = [
-    ...groqList.map(k   => ({ key: k, provider: 'groq'   })),
-    ...geminiList.map(k => ({ key: k, provider: 'gemini' }))
+    ...groqList.map(k     => ({ key: k, provider: 'groq'     })),
+    ...geminiList.map(k   => ({ key: k, provider: 'gemini'   })),
+    ...cerebrasList.map(k => ({ key: k, provider: 'cerebras' }))
   ];
   if (unified.length) return unified;
 
   // localStorage fallback
-  const localGroq   = localStorage.getItem('lc_groq_key');
-  const localGemini = localStorage.getItem('lc_gemini_key');
-  const fallback    = [];
-  if (localGroq)   fallback.push({ key: localGroq,   provider: 'groq' });
-  if (localGemini) fallback.push({ key: localGemini, provider: 'gemini' });
+  const fallback = [];
+  const lGroq   = localStorage.getItem('lc_groq_key');
+  const lGemini = localStorage.getItem('lc_gemini_key');
+  const lCerebr = localStorage.getItem('lc_cerebras_key');
+  if (lGroq)   fallback.push({ key: lGroq,   provider: 'groq'     });
+  if (lGemini) fallback.push({ key: lGemini, provider: 'gemini'   });
+  if (lCerebr) fallback.push({ key: lCerebr, provider: 'cerebras' });
   return fallback;
 }
 
@@ -2750,16 +2896,7 @@ function classifyMessageHeuristic(text) {
   const raw = text.trim();
   const t   = raw.toLowerCase();
 
-  // ── SILENT: very short, minimal, one-word replies ───────────────────
-  if (raw.length < 6) return 2;
-  const silentExact = ['ok','okay','yeah','yep','no','yes','sure','fine','k','hmm',
-    'mm','idk','lol','haha','oh','ah','ugh','mhm','yup','nah','nope','wow','hm',
-    'ok.','k.','ok!','nah.','yep.','fine.','sure.','seen'];
-  const stripped = t.replace(/[.!?…]+$/, '').trim();
-  if (silentExact.includes(stripped)) return 2;
-  if (raw.split(/\s+/).length <= 2 && raw.length < 14) return 2;
-
-  // ── AGGRESSIVE scoring ───────────────────────────────────────────────
+  // ── AGGRESSIVE check first — short hostile msgs must not become SILENT ─
   let aggrScore = 0;
 
   // Hard phrase patterns
@@ -2814,6 +2951,15 @@ function classifyMessageHeuristic(text) {
   if (/are you (serious|kidding|joking)/i.test(raw)) aggrScore += 1;
 
   if (aggrScore >= 2) return 1;
+
+  // ── SILENT: very short / minimal replies (checked after aggression) ──
+  if (raw.length < 6) return 2;
+  const silentExact = ['ok','okay','yeah','yep','no','yes','sure','fine','k','hmm',
+    'mm','idk','lol','haha','oh','ah','ugh','mhm','yup','nah','nope','wow','hm',
+    'ok.','k.','ok!','nah.','yep.','fine.','sure.','seen'];
+  const stripped = t.replace(/[.!?…]+$/, '').trim();
+  if (silentExact.includes(stripped)) return 2;
+  if (raw.split(/\s+/).length <= 2 && raw.length < 14) return 2;
 
   // ── SOFT scoring ─────────────────────────────────────────────────────
   let softScore = 0;
@@ -4069,9 +4215,12 @@ async function callAI(provider, key, history, systemPrompt, userMsg, maxTokens =
   const pool      = poolOverride || _getUnifiedPool();
   const entries   = pool.length ? pool : [{ key, provider }];
   // HB uses its own rotation index so it doesn't interfere with custom-chat index
-  const isHBCall  = !!poolOverride;
-  const idxPtr    = isHBCall ? _hbKeyIdx : _poolKeyIdx;
-  const startIdx  = idxPtr % entries.length;
+  const isHBCall = !!poolOverride;
+  // Grab and advance the index atomically (before any await) so concurrent
+  // calls each get a unique starting slot instead of both landing on the same key.
+  const startIdx = (isHBCall ? _hbKeyIdx : _poolKeyIdx) % entries.length;
+  if (isHBCall) _hbKeyIdx = (startIdx + 1) % entries.length;
+  else          _poolKeyIdx = (startIdx + 1) % entries.length;
 
   // Key-level errors: skip this key and try the next one
   // 429 = rate limited, 402 = out of credits, 401/403 = invalid/forbidden key
@@ -4092,12 +4241,20 @@ async function callAI(provider, key, history, systemPrompt, userMsg, maxTokens =
       if (sys) body.systemInstruction = { parts: [{ text: sys.content }] };
       return fetch(gUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
     }
-    // Groq-HB fallback — llama-3.1-8b-instant has 20k TPM (handles large HB prompt)
+    // Groq-HB fallback — llama-3.1-8b-instant has 20k TPM
     if (entry.provider === 'groq-hb') {
       return fetch('https://api.groq.com/openai/v1/chat/completions', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${entry.key}` },
         body:    JSON.stringify({ model: 'llama-3.1-8b-instant', messages, max_tokens: maxTokens, temperature: 0.9 })
+      });
+    }
+    // Cerebras — OpenAI-compatible, llama-3.3-70b, very fast free tier
+    if (entry.provider === 'cerebras') {
+      return fetch('https://api.cerebras.ai/v1/chat/completions', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${entry.key}` },
+        body:    JSON.stringify({ model: 'llama-3.3-70b', messages, max_tokens: maxTokens, temperature: 0.9 })
       });
     }
     // Groq — OpenAI-compatible
@@ -4121,9 +4278,6 @@ async function callAI(provider, key, history, systemPrompt, userMsg, maxTokens =
 
     resp = await _fetchEntry(entry);
     if (resp.ok) {
-      // Advance the correct index for next call
-      const nextIdx = (startIdx + i + 1) % entries.length;
-      if (isHBCall) _hbKeyIdx = nextIdx; else _poolKeyIdx = nextIdx;
       allSkipped = false;
       break;
     }
@@ -4151,18 +4305,12 @@ async function callAI(provider, key, history, systemPrompt, userMsg, maxTokens =
     const waitMs = soonest === Infinity ? 3000 : Math.min(Math.max(soonest - Date.now(), 500), 8000);
     if (waitMs >= 7000) throw new Error('HTTP 429'); // all keys on long cooldown — surface immediately
     await new Promise(r => setTimeout(r, waitMs));
-    const now2   = Date.now();
-    const retryStart = isHBCall ? (_hbKeyIdx % entries.length) : (_poolKeyIdx % entries.length);
+    const now2 = Date.now();
     for (let i = 0; i < entries.length; i++) {
-      const entry = entries[(retryStart + i) % entries.length];
-      // Skip keys still on cooldown (same check as first pass)
+      const entry = entries[(startIdx + i) % entries.length];
       if (_keyCooldowns[entry.key] && now2 < _keyCooldowns[entry.key]) continue;
       resp = await _fetchEntry(entry);
-      if (resp.ok) {
-        const nxt = (retryStart + i + 1) % entries.length;
-        if (isHBCall) _hbKeyIdx = nxt; else _poolKeyIdx = nxt;
-        break;
-      }
+      if (resp.ok) { break; }
       if (_isKeyErr(resp.status)) {
         _keyCooldowns[entry.key] = now2 + (resp.status === 429 ? 65000 : 300000);
         resp = null; continue;

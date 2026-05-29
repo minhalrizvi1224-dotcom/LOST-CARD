@@ -219,3 +219,79 @@ exports.sendVerificationEmail = functions
 
   return { success: true };
 });
+
+// ── Server-side login lockout ─────────────────────────────────────────
+// Lockout state lives in Firestore lockouts/{base64(email)} — only the
+// Admin SDK (via these functions) can write it, so it cannot be bypassed
+// by clearing localStorage or editing DevTools.
+
+const MAX_LOGIN_ATTEMPTS = 5;
+const LOGIN_LOCK_MS      = 24 * 60 * 60 * 1000; // 24 hours
+
+function _lockDocId(email) {
+  return Buffer.from(email.toLowerCase().trim()).toString('base64');
+}
+
+// Called before Firebase sign-in to check if email is locked out.
+// No auth required — this runs before the user can authenticate.
+exports.checkLock = functions
+  .runWith({ timeoutSeconds: 10, memory: '128MB' })
+  .https.onCall(async (data) => {
+  const email = (data.email || '').toLowerCase().trim();
+  if (!email) return { locked: false, attempts: 0 };
+
+  const snap = await db.collection('lockouts').doc(_lockDocId(email)).get().catch(() => null);
+  if (!snap || !snap.exists) return { locked: false, attempts: 0 };
+
+  const d = snap.data();
+  if (d.lockUntil && d.lockUntil.toMillis() > Date.now()) {
+    const hrs = Math.ceil((d.lockUntil.toMillis() - Date.now()) / 3600000);
+    return { locked: true, hrs };
+  }
+  return { locked: false, attempts: d.attempts || 0 };
+});
+
+// Called after a failed sign-in attempt. Atomically increments counter.
+// No auth required — called on wrong-password before login succeeds.
+exports.recordFailedAttempt = functions
+  .runWith({ timeoutSeconds: 10, memory: '128MB' })
+  .https.onCall(async (data) => {
+  const email = (data.email || '').toLowerCase().trim();
+  if (!email) return { locked: false, attemptsLeft: MAX_LOGIN_ATTEMPTS };
+
+  // Only track emails that exist in our users collection (prevents locking strangers)
+  const userQ = await db.collection('users').where('email', '==', email).limit(1).get().catch(() => null);
+  if (!userQ || userQ.empty) return { locked: false, attemptsLeft: MAX_LOGIN_ATTEMPTS };
+
+  const ref = db.collection('lockouts').doc(_lockDocId(email));
+  let attempts = 1;
+  let locked   = false;
+
+  await db.runTransaction(async t => {
+    const snap = await t.get(ref);
+    const cur  = snap.exists ? (snap.data().attempts || 0) : 0;
+    attempts   = cur + 1;
+    locked     = attempts >= MAX_LOGIN_ATTEMPTS;
+    const lockUntil = locked
+      ? admin.firestore.Timestamp.fromDate(new Date(Date.now() + LOGIN_LOCK_MS))
+      : null;
+    t.set(ref, {
+      email, attempts, lockUntil,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+  });
+
+  return { locked, attemptsLeft: Math.max(0, MAX_LOGIN_ATTEMPTS - attempts) };
+});
+
+// Called after a successful login to reset the counter.
+// Requires auth (user just logged in successfully).
+exports.clearLock = functions
+  .runWith({ timeoutSeconds: 10, memory: '128MB' })
+  .https.onCall(async (data, context) => {
+  if (!context.auth) throw new functions.https.HttpsError('unauthenticated', 'Login required.');
+  const email = (data.email || '').toLowerCase().trim();
+  if (!email) return { ok: true };
+  await db.collection('lockouts').doc(_lockDocId(email)).delete().catch(() => {});
+  return { ok: true };
+});
