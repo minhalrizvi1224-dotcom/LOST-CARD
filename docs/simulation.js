@@ -796,7 +796,8 @@ class HaniChessEngine {
 
 // ─── Terminal Conditions ─────────────────────────────────────────────────────
 const TC_NONE=0, TC_SALVATION=1, TC_CHECKMATE=2, TC_AMYGDALA=3,
-      TC_STACK_OVERFLOW=4, TC_TRUST_FLOOR=5, TC_ALL_CARDS_LOST=6, TC_MAX_MOVES=7;
+      TC_STACK_OVERFLOW=4, TC_TRUST_FLOOR=5, TC_ALL_CARDS_LOST=6, TC_MAX_MOVES=7,
+      TC_FLATLINE=8; // Conversation died from silence/disengagement — not conflict
 
 function checkTerminal(cards, chess, ns, stack, trust, move) {
   if (cards.allLost())             return TC_ALL_CARDS_LOST;

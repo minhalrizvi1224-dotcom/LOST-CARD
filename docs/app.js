@@ -384,7 +384,7 @@ EXCITEMENT: stack depth ≥ 4 + AGGRESSIVE, OR 2 consecutive AGGRESSIVE moves
 PRESENCE: 3+ SILENT moves total, OR 3 consecutive high-NLI moves (> 0.75)
 
 TERMINAL CONDITIONS:
-TC_SALVATION, TC_CHECKMATE, TC_AMYGDALA, TC_STACK_OVERFLOW, TC_TRUST_FLOOR, TC_ALL_CARDS_LOST, TC_MAX_MOVES
+TC_SALVATION, TC_CHECKMATE, TC_AMYGDALA, TC_STACK_OVERFLOW, TC_TRUST_FLOOR, TC_ALL_CARDS_LOST, TC_MAX_MOVES, TC_FLATLINE (silence/disengagement — custom chats only)
 
 MOVE TYPES:
 SOFT → repair, warmth, vulnerability - PFC↓ Cortisol↓ Dopamine↑
@@ -1994,6 +1994,10 @@ function startCustomMode(chatId, setup) {
   // Always navigate to the chat section — user may have clicked from landing page
   showSection('chatApp');
 
+  // Reset per-session custom chat state trackers
+  window._customChatState = { silentStreak: 0, totalSilent: 0, softStreak: 0 };
+  if (chatId !== 'ex') window._exState = { lastWarm: false }; // clear ex state for non-ex chats
+
   document.getElementById('chatWelcome').style.display = 'none';
   document.getElementById('chatConv').style.display    = 'flex';
 
@@ -2389,20 +2393,83 @@ function sendCustomMessage() {
 
   const result = sim.processMove(classifiedType);
 
-  // Ex chat: extra relational damage — old wounds reopen faster
-  // SOFT moves have halved recovery, AGGRESSIVE/SILENT deal bonus cortisol+trust loss
-  if (currentChatId === 'ex' && sim && result && !result.terminal) {
-    if (classifiedType === 0) {
-      // SOFT: even kindness costs something here — they're suspicious of it
-      sim.ns.cortisol = Math.min(1, sim.ns.cortisol + 0.03);
-      sim.ns.computeNLI();
-    } else {
-      // AGGRESSIVE or SILENT: reopens wounds, extra damage on top of normal sim
-      sim.ns.cortisol = Math.min(1, sim.ns.cortisol + 0.06);
-      sim.trust       = Math.max(0, sim.trust       - 0.05);
+  // ── Custom chat difficulty system ─────────────────────────────────────
+  // Custom chats are deliberately harder than default scripted mode.
+  // Goal: most sessions end before move 10 without feeling artificial.
+  if (sim && result && !result.terminal) {
+
+    // Track move streaks for this session
+    const _cs = window._customChatState || { silentStreak:0, totalSilent:0, softStreak:0 };
+    if (classifiedType === 2) { // SILENT
+      _cs.silentStreak++; _cs.totalSilent++; _cs.softStreak = 0;
+    } else if (classifiedType === 0) { // SOFT
+      _cs.softStreak++; _cs.silentStreak = 0;
+    } else { // AGGRESSIVE
+      _cs.silentStreak = 0; _cs.softStreak = 0;
+    }
+    window._customChatState = _cs;
+
+    // ── Part 1: Ex chat extra damage (already defined above, kept separate) ──
+    if (currentChatId === 'ex') {
+      if (classifiedType === 0) {
+        sim.ns.cortisol = Math.min(1, sim.ns.cortisol + 0.03);
+      } else {
+        sim.ns.cortisol = Math.min(1, sim.ns.cortisol + 0.06);
+        sim.trust       = Math.max(0, sim.trust       - 0.05);
+      }
       sim.ns.computeNLI();
     }
-    updateSidebarStats && updateSidebarStats();
+
+    // ── Part 2: All custom chats — base difficulty multiplier ─────────────
+    // Makes all custom chats harder than the default scripted simulation.
+    // Target: terminal by move 8-12 for most play patterns.
+    if (isCustomMode) {
+      if (classifiedType === 1) {        // AGGRESSIVE
+        sim.ns.cortisol = Math.min(1, sim.ns.cortisol + 0.05);
+        sim.trust       = Math.max(0, sim.trust       - 0.03);
+        sim.ns.computeNLI();
+      } else if (classifiedType === 2) { // SILENT
+        sim.ns.cortisol = Math.min(1, sim.ns.cortisol + 0.03);
+        sim.ns.computeNLI();
+      }
+    }
+
+    // ── Part 3: Consecutive SOFT penalty ─────────────────────────────────
+    // 2 SOFT in a row: the other person grows suspicious of "too much niceness"
+    // (psychologically: in a damaged relationship, repeated softness reads
+    // as manipulation or guilt — not genuine repair)
+    // 2nd consecutive SOFT → small cortisol tick (suspicion cost)
+    // 3rd+ consecutive SOFT → bigger tick (feels forced / desperate)
+    if (isCustomMode && classifiedType === 0 && _cs.softStreak >= 2) {
+      const softPenalty = _cs.softStreak === 2 ? 0.03 : 0.05;
+      sim.ns.cortisol = Math.min(1, sim.ns.cortisol + softPenalty);
+      sim.ns.computeNLI();
+      if (_cs.softStreak === 2) {
+        showToast('Being too soft too fast — they\'re suspicious of it.', 'info');
+      } else if (_cs.softStreak === 3) {
+        showToast('Repeated softness reads as desperation here.', 'info');
+      }
+    }
+
+    // Update UI to reflect the extra damage before terminal check
+    updateSimUI({ nli: sim.ns.nli, trust: sim.trust, state: sim.ns.getStateLabel(),
+      stateColor: sim.ns.getStateColor(), cards: { ...sim.cards }, stackSize: sim.stack.size(),
+      exitDist: sim.dag?.lastExitDist ?? result.exitDist });
+
+    // ── Part 4: Flatline terminal check ──────────────────────────────────
+    // Fires when the conversation dies from pure disengagement (not conflict).
+    // Condition A: 5 consecutive SILENT moves (pure withdrawal)
+    // Condition B: 7+ total SILENT moves AND trust < 0.30 (chronic flatness)
+    // Guard: not if actively fighting (stack ≥ 3) or extremely activated (NLI ≥ 0.65)
+    const isFlatline = isCustomMode && !result.terminal && (
+      (_cs.silentStreak >= 5) ||
+      (_cs.totalSilent  >= 7 && sim.trust < 0.30)
+    ) && sim.stack.size() <= 2 && sim.ns.nli < 0.65;
+
+    if (isFlatline) {
+      setTimeout(() => _showFlatlineEnding(currentChatSetup), 400);
+      return;
+    }
   }
 
   // Threshold alert check (after NLI updates)
@@ -2824,6 +2891,42 @@ function maybeOnlineFriendDisappear(chatId, setup, userText) {
     }, delay);
   }
   return true;
+}
+
+// ── Flatline Ending — conversation died from silence, not conflict ────────
+function _showFlatlineEnding(setup) {
+  if (!sim) return;
+  const name = setup?.theirName || 'them';
+
+  // Mark the sim as over so no more input is accepted
+  setInputEnabled(false);
+
+  // 1. The other person sends one last "..." — the absence of a reply
+  addMessage('them', name, '…');
+  scrollMessages();
+
+  // 2. Event banner after a beat
+  setTimeout(() => {
+    addEventMessage('FLATLINE — The conversation ended in silence. Not with anger. Not with goodbye. Just nothing.');
+    scrollMessages();
+  }, 900);
+
+  // 3. Build a fake result object and trigger the terminal overlay
+  setTimeout(() => {
+    const fakeResult = {
+      terminal:        TC_FLATLINE,
+      terminalLabel:   'FLATLINE',
+      terminalMessage: 'The conversation reached silence — not after a fight, but instead of one.',
+      state:           'FLATLINE',
+      stateColor:      'var(--muted)',
+      cards:           sim ? { ...sim.cards } : {},
+      move:            sim ? sim.move : 0,
+      cardDrops:       [],
+      exitDist:        999,
+      stackSize:       sim ? sim.stack.size() : 0
+    };
+    showTerminal(fakeResult);
+  }, 2200);
 }
 
 // ── Final Letter - AI writes from the other person's POV at session end ─
@@ -3969,16 +4072,17 @@ function setInner(id, val) {
 // TERMINAL
 // ══════════════════════════════════════════════════════════════════════
 function showTerminal(result) {
-  const isGood = result.terminal === TC_SALVATION;
+  const isGood     = result.terminal === TC_SALVATION;
+  const isFlatline = result.terminal === TC_FLATLINE;
 
   setInner('termTitle', result.terminalLabel || 'SESSION ENDED');
   setInner('termMsg', result.terminalMessage || '');
 
   const titleEl = document.getElementById('termTitle');
-  if (titleEl) titleEl.style.color = isGood ? 'var(--green)' : 'var(--red)';
+  if (titleEl) titleEl.style.color = isGood ? 'var(--green)' : isFlatline ? 'var(--muted)' : 'var(--red)';
 
   const iconEl = document.getElementById('termIcon');
-  if (iconEl) iconEl.textContent = isGood ? '🃏' : '💔';
+  if (iconEl) iconEl.textContent = isGood ? '🃏' : isFlatline ? '💤' : '💔';
 
   // Cards remaining
   if (sim) {
@@ -4012,7 +4116,7 @@ function showTerminal(result) {
   addArchetypeCard();
 
   // Final Letter - custom chats only, on bad endings
-  const badEndings = [TC_CHECKMATE, TC_ALL_CARDS_LOST, TC_TRUST_FLOOR, TC_AMYGDALA, TC_STACK_OVERFLOW];
+  const badEndings = [TC_CHECKMATE, TC_ALL_CARDS_LOST, TC_TRUST_FLOOR, TC_AMYGDALA, TC_STACK_OVERFLOW, TC_FLATLINE];
   if (isCustomMode && currentChatSetup && badEndings.includes(result.terminal)) {
     setTimeout(() => generateFinalLetter(currentChatSetup, lastSessionSummary), 1500);
   }
@@ -4032,6 +4136,7 @@ function addFutureSection(result) {
     5: { icon: '🔓', label: 'TRUST FLOOR',          color: 'var(--orange)',   note: 'Trust dropped below 10%. The exit path is one move. The relationship is structurally over.' },
     6: { icon: '🂠', label: 'HAND EMPTY',           color: 'var(--red)',      note: 'All three cards lost. The game was played. The manual was lost long before the last move.' },
     7: { icon: '⏱',  label: '23 MOVES COMPLETE',    color: 'var(--blue)',     note: `${s.cardsLost ?? 0} card(s) lost across 23 moves. The session is over. The record stands.` },
+    8: { icon: '💤', label: 'FLATLINE',              color: 'var(--muted)',    note: 'This conversation did not end in conflict. It ended in nothing. Silence without resolution is the most common ending in long-term relational decay — not a fight, not a goodbye. Just the absence of a reply that never came.' },
   };
   const end = endings[tc] || { icon: '◆', label: 'SESSION ENDED', color: 'var(--muted)', note: '' };
 
