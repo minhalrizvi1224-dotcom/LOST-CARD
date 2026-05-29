@@ -50,11 +50,13 @@ function initAuth() {
       return;
     }
 
-    // Block unverified users — but allow accounts created before verification was added
-    // (creationTime before 30 May 2026 = pre-verification accounts, let them in)
+    // Block unverified users EXCEPT:
+    // 1. Accounts created before 30 May 2026 (pre-verification era)
+    // 2. Admin accounts (isAdmin: true in Firestore)
     const createdAt = user.metadata?.creationTime;
     const isOldAccount = createdAt && new Date(createdAt) < new Date('2026-05-30T00:00:00Z');
-    if (!user.emailVerified && !isOldAccount) {
+    const isAdminUser = userDoc && userDoc.exists && userDoc.data().isAdmin === true;
+    if (!user.emailVerified && !isOldAccount && !isAdminUser) {
       await firebaseAuth.signOut();
       window.location.href = 'login.html?unverified=1';
       return;
