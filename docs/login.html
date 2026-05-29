@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <!-- ── Coming Soon Gate — auto-removed at 6pm PKT 29 May 2026 ── -->
+  <style>html{background:#0D1117}</style>
   <script>
     (function(){
       // ── MAINTENANCE MODE — set to false when update is done ──
@@ -10,6 +11,7 @@
       var p=new URLSearchParams(window.location.search);
       if(p.get('lc_open')==='1') sessionStorage.setItem('lc_preview','1');
       if(MAINTENANCE && sessionStorage.getItem('lc_preview')!=='1'){
+        document.documentElement.style.visibility='hidden';
         window.location.replace('coming-soon.html');
       }
     })();
