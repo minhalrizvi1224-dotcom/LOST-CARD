@@ -3389,9 +3389,57 @@ async function sendAIMessage() {
   } catch(err) {
     typingEl.remove();
     isAITyping = false;
-    // Admin sees raw error so bugs can be diagnosed without DevTools
-    addMessage('them', 'Hair Band', _friendlyAPIError(err, 'Hair Band'));
+    const isRateErr = /rate.?limit|429|busy|quota|exhaust|too.many/i.test((err && err.message) || '');
+    if (isRateErr) {
+      _hbRateRetry(text);
+    } else {
+      addMessage('them', 'Hair Band', _friendlyAPIError(err, 'Hair Band'));
+    }
   }
+}
+
+function _hbRateRetry(originalText) {
+  const msgs = document.getElementById('chatMessages');
+  if (!msgs) return;
+  const div = document.createElement('div');
+  div.className = 'msg them';
+  let remaining = 70;
+  let fired = false;
+
+  const doRetry = () => {
+    if (fired) return;
+    fired = true;
+    clearInterval(iv);
+    div.remove();
+    const inp = document.getElementById('aiChatInput');
+    if (inp) inp.value = originalText;
+    sendAIMessage._last = 0; // bypass 3s debounce
+    sendAIMessage();
+  };
+
+  const render = () => {
+    div.innerHTML = `
+      <div class="msg-label">Hair Band</div>
+      <div class="msg-bubble" style="background:rgba(240,136,62,.06);border:1px solid rgba(240,136,62,.2);color:#F0883E;font-size:13px;line-height:1.7">
+        ⏳ AI keys are cooling down.<br>
+        <span style="color:#E6EDF3">Auto-retrying in <strong id="hbCdNum">${remaining}s</strong>…</span>
+        <button onclick="this.closest('.msg').remove();(function(){var i=document.getElementById('aiChatInput');if(i)i.value=${JSON.stringify(originalText)};sendAIMessage._last=0;sendAIMessage();})()"
+          style="margin-top:10px;display:block;padding:5px 16px;background:#F0883E;color:#0D1117;border:none;border-radius:6px;cursor:pointer;font-weight:700;font-size:11px">
+          Retry Now
+        </button>
+      </div>`;
+  };
+
+  render();
+  msgs.appendChild(div);
+  if (typeof scrollMessages === 'function') scrollMessages();
+
+  const iv = setInterval(() => {
+    remaining--;
+    const el = document.getElementById('hbCdNum');
+    if (el) el.textContent = remaining + 's';
+    if (remaining <= 0) doRetry();
+  }, 1000);
 }
 
 // ── Hair Band: premium check ──────────────────────────────────────────
