@@ -1,30 +1,50 @@
-// LOST CARD - Service Worker (Self-Destruct + Force Reload)
-// 1. Clears ALL caches (lostcard-v1, lostcard-v2, lostcard-v3, everything)
-// 2. Force-reloads every open tab → browser gets fresh files from Live Server
-// 3. Unregisters itself → after this, NO service worker runs, ever
+'use strict';
+// LOST CARD — Service Worker v2
+// Strategy: stale-while-revalidate for same-origin HTML, JS, CSS
 
+const CACHE = 'lc-static-v2';
+
+// Only cache static assets from same origin
+function isCacheable(req) {
+  if (req.method !== 'GET') return false;
+  try {
+    const url = new URL(req.url);
+    if (url.origin !== self.location.origin) return false;
+    const p = url.pathname;
+    // Skip admin panel — always fetch fresh
+    if (p.includes('/admin/')) return false;
+    return p.endsWith('.html') || p.endsWith('.js') || p.endsWith('.css') || p.endsWith('/');
+  } catch(e) { return false; }
+}
+
+// Install: take control immediately
 self.addEventListener('install', () => self.skipWaiting());
 
-self.addEventListener('activate', (e) => {
+// Activate: delete stale caches, claim all clients
+self.addEventListener('activate', e => {
   e.waitUntil(
-    (async () => {
-      // Nuke every cache
-      const keys = await caches.keys();
-      await Promise.all(keys.map(k => caches.delete(k)));
-
-      // Claim all tabs (controlled + uncontrolled)
-      await self.clients.claim();
-
-      // Force reload every open tab
-      const clients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
-      clients.forEach(client => {
-        try { client.navigate(client.url); } catch(err) {}
-      });
-
-      // Unregister self - no SW = pure network from now on
-      await self.registration.unregister();
-    })()
+    caches.keys()
+      .then(keys => Promise.all(
+        keys.filter(k => k !== CACHE).map(k => caches.delete(k))
+      ))
+      .then(() => self.clients.claim())
   );
 });
 
-// NO fetch handler - every request goes straight to the network
+// Fetch: stale-while-revalidate
+// — Cached copy returned immediately (instant load)
+// — Fresh copy fetched in background and written to cache
+self.addEventListener('fetch', e => {
+  if (!isCacheable(e.request)) return;
+  e.respondWith(
+    caches.open(CACHE).then(cache =>
+      cache.match(e.request).then(cached => {
+        const network = fetch(e.request).then(res => {
+          if (res && res.ok) cache.put(e.request, res.clone());
+          return res;
+        }).catch(() => cached); // offline: fall back to cache
+        return cached || network;
+      })
+    )
+  );
+});

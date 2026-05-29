@@ -31,6 +31,66 @@ document.addEventListener('authReady', (e) => {
 });
 
 // ══════════════════════════════════════════════════════════════════════
+// SCALABILITY UTILITIES
+// ══════════════════════════════════════════════════════════════════════
+
+// ── Firestore write debounce — batch rapid writes into one ────────────
+const _fsDebounce = {};
+function _fsWrite(key, fn, ms) {
+  clearTimeout(_fsDebounce[key]);
+  _fsDebounce[key] = setTimeout(fn, ms || 1500);
+}
+
+// ── Offline / online detection ────────────────────────────────────────
+function _showNetBanner(offline) {
+  let b = document.getElementById('lc-net-banner');
+  if (offline) {
+    if (!b) {
+      b = document.createElement('div');
+      b.id = 'lc-net-banner';
+      b.style.cssText = 'position:fixed;bottom:72px;left:50%;transform:translateX(-50%);z-index:9990;background:#F0883E;color:#0D1117;padding:6px 18px;border-radius:20px;font-size:11px;font-weight:800;letter-spacing:.3px;box-shadow:0 4px 16px rgba(0,0,0,.5);white-space:nowrap;pointer-events:none';
+      b.textContent = '⚡ Offline — changes sync when reconnected';
+      document.body.appendChild(b);
+    }
+    b.style.display = '';
+  } else if (b) {
+    b.style.display = 'none';
+  }
+}
+window.addEventListener('online',  () => {
+  _showNetBanner(false);
+  try { if (typeof firebaseDB !== 'undefined' && firebaseDB) firebaseDB.enableNetwork().catch(()=>{}); } catch(e) {}
+});
+window.addEventListener('offline', () => {
+  _showNetBanner(true);
+  try { if (typeof firebaseDB !== 'undefined' && firebaseDB) firebaseDB.disableNetwork().catch(()=>{}); } catch(e) {}
+});
+
+// ── localStorage session cap — keep last 75, prune silently ──────────
+function _pruneLocalSessions() {
+  try {
+    const sessions = JSON.parse(localStorage.getItem('lc_sessions') || '[]');
+    if (sessions.length > 75) {
+      localStorage.setItem('lc_sessions', JSON.stringify(sessions.slice(0, 75)));
+    }
+  } catch(e) {}
+}
+
+// ── Prune stale setup keys from localStorage (keeps < 20 entries) ─────
+function _pruneOldSetupKeys() {
+  try {
+    const setupKeys = Object.keys(localStorage).filter(k => k.startsWith('lc_setup_'));
+    if (setupKeys.length > 15) {
+      // Remove oldest by simply removing the excess (order not guaranteed, but good enough)
+      setupKeys.slice(15).forEach(k => localStorage.removeItem(k));
+    }
+  } catch(e) {}
+}
+
+// Run maintenance on page load (non-blocking)
+setTimeout(() => { _pruneLocalSessions(); _pruneOldSetupKeys(); }, 5000);
+
+// ══════════════════════════════════════════════════════════════════════
 // METADATA
 // ══════════════════════════════════════════════════════════════════════
 const CHAT_META = {
@@ -1464,11 +1524,13 @@ function getSavedSetup(chatId) {
 function saveSetup(chatId, setup) {
   _setupCache[chatId] = setup;  // in-memory first — instant, always works
   localStorage.setItem(`lc_setup_${chatId}`, JSON.stringify(setup));
-  // Firestore — persists across sign-out and devices
+  // Firestore — persists across sign-out and devices (debounced to 1.5s)
   if (typeof firebaseDB !== 'undefined' && firebaseDB && currentUser?.uid) {
     const patch = {};
     patch[`chatSetups.${chatId}`] = setup;
-    firebaseDB.collection('users').doc(currentUser.uid).update(patch).catch(() => {});
+    _fsWrite('setup_' + chatId, () => {
+      firebaseDB.collection('users').doc(currentUser.uid).update(patch).catch(() => {});
+    }, 1500);
   }
 }
 // Called by "⚙ Setup" button in chat header — clears saved setup and re-opens modal
@@ -1553,11 +1615,13 @@ function saveSettings() {
   localStorage.setItem('lc_set_showhints',  showHints);
   localStorage.setItem('lc_set_showpsych',  showPsych);
   localStorage.setItem('lc_set_shownlibar', showNLIBar);
-  // Also save to Firestore so settings persist across devices and sign-outs
+  // Also save to Firestore (debounced — collapses rapid toggles into one write)
   if (typeof firebaseDB !== 'undefined' && firebaseDB && currentUser?.uid) {
-    firebaseDB.collection('users').doc(currentUser.uid).update({
-      preferences: { autoScroll, showHints, showPsych, showNLIBar }
-    }).catch(() => {});
+    _fsWrite('prefs_' + currentUser.uid, () => {
+      firebaseDB.collection('users').doc(currentUser.uid).update({
+        preferences: { autoScroll, showHints, showPsych, showNLIBar }
+      }).catch(() => {});
+    }, 1500);
   }
   showToast('Settings saved.', 'success');
   closeSettingsModal();
@@ -3008,6 +3072,14 @@ function startAIAssistant() {
 
 async function sendAIMessage() {
   if (isAITyping) return;
+  // Rate limit: 3 seconds between sends to prevent API flooding
+  const _now = Date.now();
+  if (_now - (sendAIMessage._last || 0) < 3000) {
+    showToast('One message at a time — just a moment…', 'info');
+    return;
+  }
+  sendAIMessage._last = _now;
+
   const input = document.getElementById('aiChatInput');
   if (!input) return;
   const text = input.value.trim();

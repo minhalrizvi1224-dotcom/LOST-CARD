@@ -708,6 +708,13 @@ let hbContext=null, hbHistory=[], isHBTyping=false;
 let queriesUnsubscribe=null; // real-time listener handle
 let adPoolKey=null; // pool Groq key — used as fallback for admin Hair Band
 
+// ── Scalability: pagination + cache ───────────────────────────────────
+let _usersLoadedAt = 0;        // ms timestamp of last successful fetch
+let _currentPage   = 0;        // current 0-indexed page
+let _displayUsers  = [];       // active filtered/sorted user set
+let _cachedStats   = null;     // last computed stats object (avoids re-calc on cache hit)
+const PAGE_SIZE    = 30;       // users per page
+
 // ── Init ───────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
   // Load saved training notes
@@ -873,59 +880,105 @@ function switchTab(name) {
   if (name==='settings') loadAdminSettings();
 }
 
-// ── Refresh All ────────────────────────────────────────────────────────
-function refreshAll() { loadStats(); loadUsers(); }
+// ── Refresh All (force re-fetch) ───────────────────────────────────────
+function refreshAll() { loadAll(true); }
 
-// ── Connection test + Stats ────────────────────────────────────────────
-async function loadStats() {
-  setConn('connecting','Connecting...');
+// ── Single load: fetches users + sessions once, populates stats + table ─
+// force=true bypasses the 5-minute cache. Default (false) uses cached data.
+async function loadAll(force) {
+  const now = Date.now();
+  const cacheAge = Math.floor((now - _usersLoadedAt) / 60000);
+  // Use cached data if fresh (< 5 min) and not forced
+  if (!force && allUsers.length > 0 && (now - _usersLoadedAt) < 300000) {
+    _applyStatsDOM();
+    _renderCurrentPage();
+    setConn('ok', `Connected — ${allUsers.length} users (cached · ${cacheAge}m ago)`);
+    return;
+  }
+
+  setConn('connecting', 'Connecting...');
+  const el = document.getElementById('usersTable');
+  el.innerHTML = '<div class="loading"><span class="spinner"></span>Loading users...</div>';
+
   try {
-    const [usersSnap, sessSnap] = await Promise.all([
-      adDB.collection('users').get(),
-      adDB.collection('sessions').orderBy('timestamp','desc').limit(500).get()
-    ]);
-    const realUserCount = usersSnap.docs.filter(d => !d.data().isAdmin).length;
-    setConn('ok', `Connected — ${realUserCount} users, ${sessSnap.size} sessions`);
-    document.getElementById('statUsers').textContent    = realUserCount;
-    document.getElementById('statSessions').textContent = sessSnap.size;
+    // Single parallel fetch — one users read + one sessions read (was 4+ reads before)
+    let usersSnap;
+    try { usersSnap = await adDB.collection('users').orderBy('createdAt','desc').get(); }
+    catch(e) { usersSnap = await adDB.collection('users').get(); }
 
-    if (sessSnap.size > 0) {
-      let totalHealth=0,totalCards=0,totalNLI=0,healthCount=0,collapseCount=0,mobileCount=0;
-      sessSnap.forEach(d => {
-        const s=d.data();
-        if (s.healthScore!=null){totalHealth+=s.healthScore;healthCount++;}
-        const nliVal = parseFloat(s.finalNLI) || 0;
-        if (s.finalNLI!=null) totalNLI += nliVal;
-        totalCards+=(s.cardsLostCount||0);
-        if(s.finalState==='COLLAPSE' || nliVal>0.7) collapseCount++;
-        if((s.platform||'').includes('mobile')) mobileCount++;
-      });
-      const n=sessSnap.size;
-      const _s = (id, v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
-      _s('statAvgHealth',  healthCount>0 ? Math.round(totalHealth/healthCount) : '-');
-      _s('statCollapseRate', Math.round((collapseCount/n)*100)+'%');
-      _s('statAvgNLI',     n>0 ? (totalNLI/n).toFixed(2) : '0.00');
-    }
-    // AI queries count
-    adDB.collection('hairBandLogs').get().then(snap=>{
-      document.getElementById('statAIQueries').textContent = snap.size;
-    }).catch(()=>{});
-    // Upgrade stats
-    const nowSec = Date.now()/1000;
-    let pendingCnt=0, activeCnt=0;
-    usersSnap.forEach(d => {
-      const u=d.data();
+    const sessSnap = await adDB.collection('sessions').orderBy('timestamp','desc').limit(500).get();
+
+    // Build allUsers with stable real indices for click handlers
+    allUsers = [];
+    usersSnap.forEach(d => { if (!d.data().isAdmin) allUsers.push({id:d.id,...d.data()}); });
+    allUsers.forEach((u, i) => { u._idx = i; }); // stable index for showUserDetail()
+
+    // Per-user session counts from the same sessSnap (no extra fetch)
+    const sessionCountMap = {};
+    sessSnap.forEach(d => {
+      const uid = d.data().uid;
+      if (uid) sessionCountMap[uid] = (sessionCountMap[uid]||0) + 1;
+    });
+    allUsers.forEach(u => { u._sessionCount = sessionCountMap[u.id] || 0; });
+
+    _usersLoadedAt = Date.now();
+    document.getElementById('usersCount').textContent = '(' + allUsers.length + ')';
+
+    // Compute stats from loaded data
+    const realUserCount = allUsers.length;
+    let totalHealth=0, totalNLI=0, healthCount=0, collapseCount=0;
+    sessSnap.forEach(d => {
+      const s = d.data();
+      if (s.healthScore != null) { totalHealth += s.healthScore; healthCount++; }
+      const nliVal = parseFloat(s.finalNLI) || 0;
+      if (s.finalNLI != null) totalNLI += nliVal;
+      if (s.finalState === 'COLLAPSE' || nliVal > 0.7) collapseCount++;
+    });
+    const n = sessSnap.size;
+    const nowSec = Date.now() / 1000;
+    let pendingCnt = 0, activeCnt = 0;
+    allUsers.forEach(u => {
       if (u.upgradeRequested && u.hbPlan !== 'upgraded') pendingCnt++;
       if (u.hbPlan === 'upgraded' && u.planExpiry?.seconds > nowSec) activeCnt++;
     });
-    document.getElementById('statUpgrades').textContent = pendingCnt;
-    document.getElementById('statPremium').textContent  = activeCnt;
-    const badge=document.getElementById('upgradesBadge');
-    if (badge) { badge.textContent=pendingCnt; badge.style.display=pendingCnt>0?'inline-block':'none'; }
+
+    _cachedStats = { realUserCount, n, sessSize: n, totalHealth, healthCount, collapseCount, totalNLI, pendingCnt, activeCnt };
+    _applyStatsDOM();
+    setConn('ok', `Connected — ${realUserCount} users, ${n} sessions`);
+
+    // Hair Band log count — async background, non-blocking
+    adDB.collection('hairBandLogs').limit(5000).get().then(s => {
+      document.getElementById('statAIQueries').textContent = s.size >= 5000 ? '5000+' : s.size;
+    }).catch(() => {});
+
+    renderUsersTable(allUsers);
+
   } catch(e) {
-    setConn('err','Firestore error: ' + e.message);
-    console.error('Admin loadStats error:', e);
+    setConn('err', 'Firestore error: ' + e.message);
+    el.innerHTML = `<div class="empty">
+      <div class="empty-icon">⚠️</div>
+      <div style="color:var(--red);font-weight:700">Cannot load users</div>
+      <div class="empty-err"><strong>Error:</strong> ${esc(e.message)}<br><br>
+      <strong>Fix:</strong> Update Firestore Rules in Firebase Console:<br>
+      Add <code>allow read, write: if isAdmin();</code> under <code>match /users/{uid}</code></div>
+    </div>`;
   }
+}
+
+// ── Apply cached stats to DOM (instant re-render without re-fetch) ──────
+function _applyStatsDOM() {
+  if (!_cachedStats) return;
+  const { realUserCount, n, sessSize, totalHealth, healthCount, collapseCount, totalNLI, pendingCnt, activeCnt } = _cachedStats;
+  const _s = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
+  _s('statUsers',       realUserCount);
+  _s('statSessions',    sessSize);
+  _s('statAvgHealth',   healthCount > 0 ? Math.round(totalHealth/healthCount) : '-');
+  _s('statCollapseRate', n > 0 ? Math.round((collapseCount/n)*100)+'%' : '0%');
+  _s('statAvgNLI',      n > 0 ? (totalNLI/n).toFixed(2) : '0.00');
+  _s('statUpgrades',    pendingCnt);
+  _s('statPremium',     activeCnt);
+  const badge = document.getElementById('upgradesBadge');
+  if (badge) { badge.textContent = pendingCnt; badge.style.display = pendingCnt > 0 ? 'inline-block' : 'none'; }
 }
 
 function setConn(state, msg) {
@@ -937,71 +990,54 @@ function setConn(state, msg) {
   txt.textContent=msg;
 }
 
-// ── Users ──────────────────────────────────────────────────────────────
-async function loadUsers() {
-  const el=document.getElementById('usersTable');
-  el.innerHTML='<div class="loading"><span class="spinner"></span>Loading users...</div>';
-  try {
-    let snap;
-    try { snap=await adDB.collection('users').orderBy('createdAt','desc').get(); }
-    catch(e) { snap=await adDB.collection('users').get(); }
-    allUsers=[];
-    snap.forEach(d=>{ if(!d.data().isAdmin) allUsers.push({id:d.id,...d.data()}); });
-    document.getElementById('usersCount').textContent='('+allUsers.length+')';
-
-    // Count sessions per user from sessions collection (reliable, not from user doc field)
-    const sessSnap = await adDB.collection('sessions').get().catch(()=>null);
-    const sessionCountMap = {};
-    if (sessSnap) {
-      sessSnap.forEach(d => {
-        const uid = d.data().uid;
-        if (uid) sessionCountMap[uid] = (sessionCountMap[uid] || 0) + 1;
-      });
-    }
-    allUsers = allUsers.map(u => ({ ...u, _sessionCount: sessionCountMap[u.id] || 0 }));
-
-    renderUsersTable(allUsers);
-  } catch(e) {
-    el.innerHTML=`<div class="empty">
-      <div class="empty-icon">⚠️</div>
-      <div style="color:var(--red);font-weight:700">Cannot load users</div>
-      <div class="empty-err"><strong>Error:</strong> ${esc(e.message)}<br><br>
-      <strong>Fix:</strong> Update Firestore Rules in Firebase Console:<br>
-      Add <code>allow read, write: if isAdmin();</code> under <code>match /users/{uid}</code></div>
-    </div>`;
-  }
+// ── Users — paginated render ───────────────────────────────────────────
+// Sets the active display set and resets to page 0
+function renderUsersTable(users) {
+  _displayUsers = users;
+  _currentPage  = 0;
+  _renderCurrentPage();
 }
 
-function renderUsersTable(users) {
-  const el=document.getElementById('usersTable');
-  if(!users.length){el.innerHTML='<div class="empty"><div class="empty-icon">👤</div>No users found.</div>';return;}
-  let html=`<table class="data-table"><thead><tr>
+// Renders the current page slice of _displayUsers
+function _renderCurrentPage() {
+  const el    = document.getElementById('usersTable');
+  const total = _displayUsers.length;
+  if (!total) { el.innerHTML='<div class="empty"><div class="empty-icon">👤</div>No users found.</div>'; return; }
+
+  const start      = _currentPage * PAGE_SIZE;
+  const end        = Math.min(start + PAGE_SIZE, total);
+  const pageUsers  = _displayUsers.slice(start, end);
+  const totalPages = Math.ceil(total / PAGE_SIZE);
+  const nowMs      = Date.now();
+
+  let html = `<table class="data-table"><thead><tr>
     <th>#</th><th>Name</th><th>Email</th><th>Location</th>
     <th>Sessions</th><th>Hair Band</th><th>Status</th><th>Archetype</th><th>Platform</th><th>Joined</th><th>Last Active</th>
   </tr></thead><tbody>`;
-  users.forEach((u,i)=>{
-    const joined =u.createdAt  ? fmtDate(u.createdAt.seconds)  : '-';
-    const lastAct=u.lastSession? fmtDate(u.lastSession.seconds): u.lastLogin?fmtDate(u.lastLogin.seconds):'-';
-    const warns=u.warningCount||0;
-    const susp=u.suspended?true:false;
-    const nowMs=Date.now();
-    const lastSeenMs=u.lastSeen?(u.lastSeen.seconds*1000):0;
-    const isOnline=u.isOnline===true&&(nowMs-lastSeenMs<5*60*1000);
-    const statusBadge=susp?'<span class="badge badge-red">SUSPENDED</span>':
-      warns>0?`<span class="badge badge-orange">⚠ ${warns}/3</span>`:
-      isOnline?'<span class="badge badge-green">● Online</span>':
-      '<span class="badge badge-gray">Inactive</span>';
-    const hbCnt=u.hbCount||0;
-    const hasGemini=!!u.geminiKey;
-    const wantsUpgrade=u.upgradeRequested&&!hasGemini;
-    const hbLimit=50;
-    const hbBadge=u.hbPlan==='upgraded'
-      ?'<span class="badge badge-purple">✨ Upgraded</span>'
-      :wantsUpgrade
-        ?`<span class="badge badge-orange" title="Upgrade requested">🔔 ${hbCnt}/${hbLimit}</span>`
-        :`<span class="badge ${hbCnt>=hbLimit?'badge-red':hbCnt>=40?'badge-orange':'badge-gray'}">${hbCnt}/${hbLimit}</span>`;
-    html+=`<tr onclick="showUserDetail(${i})">
-      <td style="color:var(--muted);font-size:11px">${i+1}</td>
+
+  pageUsers.forEach((u, i) => {
+    const globalNum = start + i + 1;
+    const joined  = u.createdAt   ? fmtDate(u.createdAt.seconds)   : '-';
+    const lastAct = u.lastSession  ? fmtDate(u.lastSession.seconds) : u.lastLogin ? fmtDate(u.lastLogin.seconds) : '-';
+    const warns   = u.warningCount || 0;
+    const susp    = !!u.suspended;
+    const lastSeenMs = u.lastSeen ? (u.lastSeen.seconds * 1000) : 0;
+    const isOnline   = u.isOnline === true && (nowMs - lastSeenMs < 5 * 60 * 1000);
+    const statusBadge = susp ? '<span class="badge badge-red">SUSPENDED</span>'
+      : warns > 0 ? `<span class="badge badge-orange">⚠ ${warns}/3</span>`
+      : isOnline    ? '<span class="badge badge-green">● Online</span>'
+      : '<span class="badge badge-gray">Inactive</span>';
+    const hbCnt = u.hbCount || 0;
+    const wantsUpgrade = u.upgradeRequested && u.hbPlan !== 'upgraded';
+    const hbLimit = 50;
+    const hbBadge = u.hbPlan === 'upgraded'
+      ? '<span class="badge badge-purple">✨ Upgraded</span>'
+      : wantsUpgrade
+        ? `<span class="badge badge-orange" title="Upgrade requested">🔔 ${hbCnt}/${hbLimit}</span>`
+        : `<span class="badge ${hbCnt>=hbLimit?'badge-red':hbCnt>=40?'badge-orange':'badge-gray'}">${hbCnt}/${hbLimit}</span>`;
+
+    html += `<tr onclick="showUserDetail(${u._idx})">
+      <td style="color:var(--muted);font-size:11px">${globalNum}</td>
       <td><div style="font-weight:700">${esc(u.displayName||'—')}</div>
           ${u.bio?`<div style="font-size:10px;color:var(--muted)">${esc(u.bio.substring(0,30))}…</div>`:''}</td>
       <td style="color:var(--muted);font-size:11px">${esc(u.email||'—')}</td>
@@ -1010,22 +1046,57 @@ function renderUsersTable(users) {
       <td>${hbBadge}</td>
       <td>${statusBadge}</td>
       <td style="color:var(--purple);font-size:11px">${esc(u.archetype||'—')}</td>
-      <td><span class="badge ${(u.platform||'')===('mobile')?'badge-green':'badge-blue'}">${esc(u.platform||'desktop')}</span></td>
+      <td><span class="badge ${(u.platform||'')==='mobile'?'badge-green':'badge-blue'}">${esc(u.platform||'desktop')}</span></td>
       <td style="color:var(--muted);font-size:11px">${joined}</td>
       <td style="color:var(--muted);font-size:11px">${lastAct}</td>
     </tr>`;
   });
-  html+='</tbody></table>';
-  el.innerHTML=html;
+  html += '</tbody></table>';
+
+  // Pagination controls (only shown when needed)
+  if (total > PAGE_SIZE) {
+    const prevOk = _currentPage > 0;
+    const nextOk = end < total;
+    const btnBase = 'padding:5px 14px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;transition:.15s;';
+    const btnOn   = btnBase + 'background:var(--surface2);color:var(--text);';
+    const btnOff  = btnBase + 'background:var(--surface);color:var(--muted);opacity:.4;cursor:default;';
+    html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-top:1px solid var(--border);flex-wrap:wrap;gap:6px">
+      <span style="font-size:12px;color:var(--muted)">Showing ${start+1}–${end} of ${total} users</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button onclick="pagePrev()" ${prevOk?'':'disabled'} style="${prevOk?btnOn:btnOff}">← Prev</button>
+        <span style="font-size:12px;color:var(--muted)">Page ${_currentPage+1} / ${totalPages}</span>
+        <button onclick="pageNext()" ${nextOk?'':'disabled'} style="${nextOk?btnOn:btnOff}">Next →</button>
+      </div>
+    </div>`;
+  }
+
+  el.innerHTML = html;
+}
+
+// ── Pagination controls ────────────────────────────────────────────────
+function pageNext() {
+  if ((_currentPage + 1) * PAGE_SIZE < _displayUsers.length) {
+    _currentPage++;
+    _renderCurrentPage();
+    document.getElementById('usersTable').scrollIntoView({ behavior:'smooth', block:'start' });
+  }
+}
+function pagePrev() {
+  if (_currentPage > 0) {
+    _currentPage--;
+    _renderCurrentPage();
+    document.getElementById('usersTable').scrollIntoView({ behavior:'smooth', block:'start' });
+  }
 }
 
 function filterUsers() {
-  const q=document.getElementById('usersSearch').value.toLowerCase();
-  if(!q){renderUsersTable(allUsers);return;}
-  renderUsersTable(allUsers.filter(u=>
-    (u.displayName||'').toLowerCase().includes(q)||
-    (u.email||'').toLowerCase().includes(q)||
-    (u.archetype||'').toLowerCase().includes(q)||
+  const q = document.getElementById('usersSearch').value.toLowerCase();
+  if (!q) { renderUsersTable(allUsers); return; }
+  // renderUsersTable resets _currentPage to 0 automatically
+  renderUsersTable(allUsers.filter(u =>
+    (u.displayName||'').toLowerCase().includes(q) ||
+    (u.email||'').toLowerCase().includes(q) ||
+    (u.archetype||'').toLowerCase().includes(q) ||
     (u.location||'').toLowerCase().includes(q)
   ));
 }
@@ -1360,8 +1431,8 @@ function clearTrainingNotes() {
 function populateHBUserList() {
   const el=document.getElementById('hbUserList');
   if(!allUsers.length){el.innerHTML='<div style="font-size:11px;color:var(--muted);padding:6px">Load users first.</div>';return;}
-  el.innerHTML=allUsers.slice(0,30).map((u,i)=>`
-    <div class="hb-user-chip" id="hbChip_${i}" onclick="setHBContext(${i})">
+  el.innerHTML=allUsers.slice(0,30).map(u=>`
+    <div class="hb-user-chip" id="hbChip_${u._idx}" onclick="setHBContext(${u._idx})">
       <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--purple));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;flex-shrink:0">${(u.displayName||'U').charAt(0).toUpperCase()}</div>
       <div>
         <div class="hb-chip-name">${esc(u.displayName||'Unknown')}</div>

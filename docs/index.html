@@ -43,18 +43,10 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <script src="firebase-config.js"></script>
-  <!-- Kill ALL service workers immediately - dev mode, always load fresh -->
+  <!-- Service Worker — cache static assets for faster loads -->
   <script>
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(function(regs) {
-        regs.forEach(function(r) { r.unregister(); });
-      });
-      // Also clear all caches
-      if (window.caches) {
-        caches.keys().then(function(keys) {
-          keys.forEach(function(k) { caches.delete(k); });
-        });
-      }
+      navigator.serviceWorker.register('./sw.js').catch(function(){});
     }
   </script>
   <!-- Apply saved theme immediately to prevent flash -->
