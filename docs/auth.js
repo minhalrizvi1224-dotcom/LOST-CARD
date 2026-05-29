@@ -122,7 +122,11 @@ function initAuth() {
     // Real-time listener — whenever admin adds/removes keys, app updates immediately
     // No page reload needed after admin changes the pool
     firebaseDB.collection('adminSettings').doc('config').onSnapshot(cfg => {
-      if (cfg.exists) _applyAdminConfig(cfg.data());
+      if (cfg.exists) {
+        _applyAdminConfig(cfg.data());
+        // Clear cooldown cache so new keys are tried immediately
+        window.dispatchEvent(new CustomEvent('lc-pool-updated'));
+      }
     }, () => {}); // silent error handler
 
     // Update last login + mark online

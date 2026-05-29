@@ -1815,6 +1815,10 @@ let _hbKeyIdx   = Math.floor(Math.random() * 1000); // Hair Band (Gemini only)
 
 // Per-key 429 cooldown map: key → ms timestamp when it becomes usable again
 const _keyCooldowns = {};
+// When admin adds new keys, clear all cooldowns so new keys are tried immediately
+window.addEventListener('lc-pool-updated', () => {
+  Object.keys(_keyCooldowns).forEach(k => delete _keyCooldowns[k]);
+});
 
 // Returns [{key, provider}, ...] — Groq keys FIRST, Gemini as overflow.
 // Custom chats use small prompts (~1.5k tokens). Groq handles those easily.
