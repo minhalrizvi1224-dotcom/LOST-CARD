@@ -971,13 +971,14 @@ body {
   border: none;
   cursor: pointer;
   font-size: 13px;
-  opacity: 0.45;
+  opacity: 0;
   padding: 2px;
   border-radius: 4px;
   transition: opacity .15s, transform .15s;
   line-height: 1;
 }
-.ci-pin-btn:hover { opacity: 0.7; transform: scale(1.15); }
+.chat-item:hover .ci-pin-btn { opacity: 0.6; }
+.chat-item:hover .ci-pin-btn:hover { opacity: 1; transform: scale(1.15); }
 .ci-pin-btn.is-pinned { opacity: 1; }
 .ci-rel-tag {
   font-size: 9px;
