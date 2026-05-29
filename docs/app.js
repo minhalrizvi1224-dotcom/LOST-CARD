@@ -54,25 +54,13 @@ async function callCloudAI(provider, messages, maxTokens) {
   return result.data.text;
 }
 
-// Feature flag: set to true after Cloud Functions are deployed
-// The app auto-detects via a test call on first use — no manual toggle needed
-let _cfAvailable = null; // null = unknown, true = use CF, false = use direct
+// Feature flag: Cloud Functions not yet deployed — always use direct API pool.
+// Set to false until 'firebase deploy --only functions' is run successfully.
+// When CF is deployed, change this to null to enable auto-detection.
+let _cfAvailable = false;
 
 async function _detectCF() {
-  if (_cfAvailable !== null) return _cfAvailable;
-  try {
-    _initCloudFn();
-    if (!_cloudAIFn) { _cfAvailable = false; return false; }
-    // Lightweight check: send empty call — CF will reject with invalid-argument
-    // which means it IS deployed (just rejects bad input, not connection failure)
-    await _cloudAIFn({ provider: 'ping' });
-    _cfAvailable = true;
-  } catch(e) {
-    // 'invalid-argument' or 'failed-precondition' = CF is deployed, just rejected bad input
-    const code = e?.code || '';
-    _cfAvailable = code.includes('invalid-argument') || code.includes('failed-precondition') || code.includes('permission-denied') || code.includes('unauthenticated');
-  }
-  return _cfAvailable;
+  return _cfAvailable; // CF not deployed — skip detection entirely
 }
 
 // ══════════════════════════════════════════════════════════════════════
