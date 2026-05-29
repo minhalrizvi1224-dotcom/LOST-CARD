@@ -240,7 +240,7 @@
     </div>
 
     <!-- Tabs -->
-    <div class="auth-tabs">
+    <div class="auth-tabs" id="authTabs">
       <button class="auth-tab active" id="tabSignin" onclick="switchTab('signin')">Sign In</button>
       <button class="auth-tab" id="tabSignup" onclick="switchTab('signup')">Create Account</button>
     </div>
@@ -272,10 +272,32 @@
       <!-- Submit -->
       <button type="submit" class="auth-btn" id="authSubmitBtn">Sign In</button>
 
+      <!-- Forgot password (sign in only) -->
+      <div id="forgotRow" style="text-align:center;margin-top:-4px">
+        <button type="button" onclick="showForgotForm()" style="background:none;border:none;color:var(--text-muted);font-size:12px;cursor:pointer;text-decoration:underline;padding:0">Forgot password?</button>
+      </div>
+
     </form>
 
+    <!-- ── Forgot Password panel (hidden by default) ── -->
+    <div id="forgotPanel" style="display:none;margin-top:8px">
+      <div style="font-size:13px;color:var(--text-muted);margin-bottom:12px">Enter your email — we'll send a reset link.</div>
+      <input type="email" class="field-input" id="forgotEmail" placeholder="your@email.com" style="margin-bottom:10px"/>
+      <button class="auth-btn" onclick="sendPasswordReset()" id="forgotBtn">Send Reset Link</button>
+      <button type="button" onclick="hideForgotForm()" style="background:none;border:none;color:var(--text-muted);font-size:12px;cursor:pointer;display:block;margin:8px auto 0;text-decoration:underline">Back to Sign In</button>
+    </div>
+
+    <!-- ── Verify email notice (shown after signup) ── -->
+    <div id="verifyPanel" style="display:none;text-align:center;padding:8px 0">
+      <div style="font-size:32px;margin-bottom:12px">📧</div>
+      <div style="font-weight:700;font-size:16px;margin-bottom:8px">Check your email</div>
+      <div style="font-size:13px;color:var(--text-muted);margin-bottom:16px;line-height:1.6">We sent a verification link to <strong id="verifyEmailShown"></strong>.<br>Click it to activate your account.</div>
+      <button class="auth-btn" onclick="resendVerification()" id="resendBtn" style="margin-bottom:8px">Resend Link</button>
+      <button type="button" onclick="backToSignin()" style="background:none;border:none;color:var(--text-muted);font-size:12px;cursor:pointer;text-decoration:underline">Back to Sign In</button>
+    </div>
+
     <!-- Quote -->
-    <div class="auth-quote">
+    <div class="auth-quote" id="authQuote">
       "Every word we speak in a relationship is a card we play.<br>
       We play without knowing we are in a game."
     </div>
@@ -295,8 +317,11 @@
 
 // ── Firebase init ──────────────────────────────────────────────────────
 let auth = null, db = null;
+let isSigningUp = false;
+let _pendingVerifyUser = null; // holds unverified user for resend
 
-let isSigningUp = false; // flag to prevent onAuthStateChanged redirect during signup
+const MAX_ATTEMPTS = 3;
+const LOCK_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 function initFirebase() {
   if (!FIREBASE_ENABLED) {
@@ -304,9 +329,7 @@ function initFirebase() {
     document.getElementById('authSubmitBtn').disabled = true;
     return false;
   }
-  if (!firebase.apps.length) {
-    firebase.initializeApp(FIREBASE_CONFIG);
-  }
+  if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
   auth = firebase.auth();
   db   = firebase.firestore();
   return true;
@@ -314,19 +337,13 @@ function initFirebase() {
 
 // ── On load ────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
-  // Check if suspended
   const params = new URLSearchParams(window.location.search);
   if (params.get('suspended') === '1') {
-    showAuthMsg('Your account has been suspended. Contact the administrator for details.', 'error');
+    showAuthMsg('Your account has been suspended. Contact the administrator.', 'error');
   }
-
   if (!initFirebase()) return;
-
-  // If already signed in, go straight to app
   auth.onAuthStateChanged(user => {
-    if (user && !isSigningUp) {
-      window.location.href = 'index.html';
-    }
+    if (user && !isSigningUp) window.location.href = 'index.html';
   });
 });
 
@@ -335,32 +352,59 @@ let currentTab = 'signin';
 
 function switchTab(tab) {
   currentTab = tab;
-  const box = document.getElementById('authBox');
+  const box       = document.getElementById('authBox');
   const signinTab = document.getElementById('tabSignin');
   const signupTab = document.getElementById('tabSignup');
   const btn       = document.getElementById('authSubmitBtn');
   const nameField = document.getElementById('fieldName');
   const pwdInput  = document.getElementById('inputPassword');
-
   hideAuthMsg();
-
+  hideForgotForm();
   if (tab === 'signup') {
-    signinTab.classList.remove('active');
-    signupTab.classList.add('active');
+    signinTab.classList.remove('active'); signupTab.classList.add('active');
     box.classList.add('mode-signup');
     btn.textContent = 'Create Account';
     nameField.style.display = 'block';
     pwdInput.placeholder = 'Minimum 6 characters';
     pwdInput.setAttribute('autocomplete', 'new-password');
+    document.getElementById('forgotRow').style.display = 'none';
   } else {
-    signupTab.classList.remove('active');
-    signinTab.classList.add('active');
+    signupTab.classList.remove('active'); signinTab.classList.add('active');
     box.classList.remove('mode-signup');
     btn.textContent = 'Sign In';
     nameField.style.display = 'none';
     pwdInput.placeholder = 'Your password';
     pwdInput.setAttribute('autocomplete', 'current-password');
+    document.getElementById('forgotRow').style.display = 'block';
   }
+}
+
+// ── Account lock helpers (localStorage — no auth required) ────────────
+function _lockKey(email) { return 'lc_lock_' + email.toLowerCase().trim(); }
+
+function _checkLock(email) {
+  try {
+    const raw = localStorage.getItem(_lockKey(email));
+    if (!raw) return { locked: false, attempts: 0 };
+    const d = JSON.parse(raw);
+    if (d.lockUntil && d.lockUntil > Date.now()) {
+      const hrs = Math.ceil((d.lockUntil - Date.now()) / 3600000);
+      return { locked: true, hrs };
+    }
+    return { locked: false, attempts: d.attempts || 0 };
+  } catch(e) { return { locked: false, attempts: 0 }; }
+}
+
+function _recordFailedAttempt(email) {
+  const cur  = _checkLock(email);
+  const next = (cur.attempts || 0) + 1;
+  const lockUntil = next >= MAX_ATTEMPTS ? Date.now() + LOCK_MS : null;
+  localStorage.setItem(_lockKey(email), JSON.stringify({ attempts: next, lockUntil }));
+  return next;
+}
+
+function _clearAttempts(email) {
+  localStorage.removeItem(_lockKey(email));
 }
 
 // ── Handle form submit ─────────────────────────────────────────────────
@@ -379,55 +423,161 @@ async function handleAuth(e) {
 
   try {
     if (currentTab === 'signup') {
-      // Create account
       if (!name) { showAuthMsg('Please enter your name.', 'error'); resetBtn(btn); return; }
       isSigningUp = true;
+
       const cred = await auth.createUserWithEmailAndPassword(email, password);
       await cred.user.updateProfile({ displayName: name });
 
-      // Save user to Firestore
+      // Send email verification
+      await cred.user.sendEmailVerification();
+      _pendingVerifyUser = cred.user;
+
+      // Save to Firestore (emailVerified: false until they click the link)
       await db.collection('users').doc(cred.user.uid).set({
-        email:         email,
-        displayName:   name,
-        createdAt:     firebase.firestore.FieldValue.serverTimestamp(),
-        lastLogin:     firebase.firestore.FieldValue.serverTimestamp(),
-        totalSessions: 0,
-        archetype:     null,
-        platform:      navigator.userAgent.includes('Mobile') ? 'mobile' : 'desktop'
+        email, displayName: name,
+        emailVerified:  false,
+        createdAt:      firebase.firestore.FieldValue.serverTimestamp(),
+        lastLogin:      firebase.firestore.FieldValue.serverTimestamp(),
+        totalSessions:  0,
+        archetype:      null,
+        platform:       navigator.userAgent.includes('Mobile') ? 'mobile' : 'desktop'
       });
 
-      // Sign out so user manually signs in (keep isSigningUp=true until tab fully switches)
       await auth.signOut();
-      showAuthMsg('✅ Account created! Now sign in to continue.', 'success');
-      setTimeout(() => {
-        isSigningUp = false;
-        switchTab('signin');
-        document.getElementById('inputEmail').value = email;
-        document.getElementById('inputPassword').value = '';
-        hideAuthMsg();
-      }, 1800);
+      isSigningUp = false;
+
+      // Show verify panel
+      document.getElementById('authForm').style.display = 'none';
+      document.getElementById('authTabs').style.display = 'none';
+      document.getElementById('authQuote').style.display = 'none';
+      document.getElementById('verifyEmailShown').textContent = email;
+      document.getElementById('verifyPanel').style.display = 'block';
+      resetBtn(btn);
 
     } else {
-      // Sign in
-      await auth.signInWithEmailAndPassword(email, password);
+      // ── Sign in ──────────────────────────────────────────────────────
 
-      // Update last login
-      const user = auth.currentUser;
-      if (user) {
-        await db.collection('users').doc(user.uid).update({
-          lastLogin: firebase.firestore.FieldValue.serverTimestamp()
-        }).catch(() => {});
+      // 1. Check account lock FIRST (before hitting Firebase)
+      const lockStatus = await _checkLock(email);
+      if (lockStatus.locked) {
+        showAuthMsg(`🔒 Account locked for ${lockStatus.hrs} hour(s) due to too many failed attempts. Try again later.`, 'error');
+        resetBtn(btn);
+        return;
       }
 
-      window.location.href = 'index.html';
+      // 2. Attempt Firebase sign in
+      try {
+        const cred = await auth.signInWithEmailAndPassword(email, password);
+        const user = cred.user;
+
+        // 3. Block if email not verified
+        if (!user.emailVerified) {
+          await auth.signOut();
+          _pendingVerifyUser = user;
+          showAuthMsg('📧 Please verify your email first. Check your inbox for the verification link.', 'error');
+          resetBtn(btn);
+          return;
+        }
+
+        // 4. Check Firestore suspension
+        const userDoc = await db.collection('users').doc(user.uid).get().catch(() => null);
+        if (userDoc && userDoc.exists && userDoc.data().suspended) {
+          await auth.signOut();
+          showAuthMsg('Your account has been suspended. Contact the administrator.', 'error');
+          resetBtn(btn);
+          return;
+        }
+
+        // 5. Success — clear failed attempts, update login time
+        await _clearAttempts(email);
+        await db.collection('users').doc(user.uid).update({
+          lastLogin:     firebase.firestore.FieldValue.serverTimestamp(),
+          emailVerified: true
+        }).catch(() => {});
+
+        window.location.href = 'index.html';
+
+      } catch (signInErr) {
+        // Wrong password or user not found → record failed attempt
+        const badCodes = ['auth/wrong-password','auth/invalid-credential','auth/user-not-found'];
+        if (badCodes.includes(signInErr.code)) {
+          const attempts = await _recordFailedAttempt(email);
+          const remaining = MAX_ATTEMPTS - attempts;
+          if (attempts >= MAX_ATTEMPTS) {
+            showAuthMsg('🔒 Too many failed attempts. Account locked for 24 hours.', 'error');
+          } else {
+            showAuthMsg(`Incorrect password. ${remaining} attempt${remaining !== 1 ? 's' : ''} remaining before lockout.`, 'error');
+          }
+        } else {
+          showAuthMsg(firebaseErrMsg(signInErr.code), 'error');
+        }
+        resetBtn(btn);
+      }
     }
 
   } catch (err) {
     isSigningUp = false;
-    const msg = firebaseErrMsg(err.code);
-    showAuthMsg(msg, 'error');
+    showAuthMsg(firebaseErrMsg(err.code), 'error');
     resetBtn(btn);
   }
+}
+
+// ── Forgot password ────────────────────────────────────────────────────
+function showForgotForm() {
+  document.getElementById('authForm').style.display = 'none';
+  document.getElementById('forgotPanel').style.display = 'block';
+  document.getElementById('authQuote').style.display = 'none';
+  hideAuthMsg();
+}
+function hideForgotForm() {
+  document.getElementById('forgotPanel').style.display = 'none';
+  document.getElementById('authForm').style.display = 'flex';
+  document.getElementById('authQuote').style.display = 'block';
+}
+
+async function sendPasswordReset() {
+  const email = document.getElementById('forgotEmail').value.trim();
+  if (!email) { showAuthMsg('Enter your email address.', 'error'); return; }
+  const btn = document.getElementById('forgotBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Sending...';
+  try {
+    await auth.sendPasswordResetEmail(email);
+    showAuthMsg('✅ Reset link sent! Check your inbox.', 'success');
+    btn.textContent = 'Sent ✓';
+  } catch(err) {
+    showAuthMsg(firebaseErrMsg(err.code), 'error');
+    btn.disabled = false;
+    btn.textContent = 'Send Reset Link';
+  }
+}
+
+// ── Verify panel helpers ───────────────────────────────────────────────
+async function resendVerification() {
+  if (!_pendingVerifyUser) {
+    showAuthMsg('Please sign up again to resend.', 'error'); return;
+  }
+  const btn = document.getElementById('resendBtn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Sending...';
+  try {
+    // Need to sign in temporarily to resend
+    await _pendingVerifyUser.sendEmailVerification();
+    btn.textContent = 'Sent ✓';
+    showAuthMsg('✅ Verification email resent!', 'success');
+  } catch(err) {
+    btn.disabled = false; btn.textContent = 'Resend Link';
+    showAuthMsg('Could not resend. Try signing up again.', 'error');
+  }
+}
+
+function backToSignin() {
+  document.getElementById('verifyPanel').style.display = 'none';
+  document.getElementById('authForm').style.display = 'flex';
+  document.getElementById('authTabs').style.display = 'flex';
+  document.getElementById('authQuote').style.display = 'block';
+  _pendingVerifyUser = null;
+  switchTab('signin');
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────
@@ -445,14 +595,14 @@ function resetBtn(btn) {
 }
 function firebaseErrMsg(code) {
   const map = {
-    'auth/user-not-found':       'No account found with this email.',
-    'auth/wrong-password':       'Incorrect password. Try again.',
-    'auth/email-already-in-use': 'This email is already registered. Sign in instead.',
-    'auth/invalid-email':        'Please enter a valid email address.',
-    'auth/weak-password':        'Password must be at least 6 characters.',
-    'auth/too-many-requests':    'Too many attempts. Please wait a moment.',
-    'auth/network-request-failed': 'Network error. Check your connection.',
-    'auth/invalid-credential':   'Incorrect email or password.',
+    'auth/user-not-found':        'No account found with this email.',
+    'auth/wrong-password':        'Incorrect password.',
+    'auth/email-already-in-use':  'This email is already registered. Sign in instead.',
+    'auth/invalid-email':         'Please enter a valid email address.',
+    'auth/weak-password':         'Password must be at least 6 characters.',
+    'auth/too-many-requests':     'Too many attempts. Please wait a moment.',
+    'auth/network-request-failed':'Network error. Check your connection.',
+    'auth/invalid-credential':    'Incorrect email or password.',
   };
   return map[code] || 'Something went wrong. Please try again.';
 }
