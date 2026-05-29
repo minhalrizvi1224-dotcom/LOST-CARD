@@ -379,15 +379,15 @@ window.addEventListener('DOMContentLoaded', () => {
   }
   if (!initFirebase()) return;
   auth.onAuthStateChanged(user => {
-    if (user && !isSigningUp && user.emailVerified) {
-      // Verified → go to app
-      window.location.href = 'index.html';
-    } else if (user && !isSigningUp && !user.emailVerified && !_pendingVerifyUser) {
-      // Unverified AND not in our controlled verify flow → force sign out
-      auth.signOut().catch(() => {});
+    if (user && !isSigningUp) {
+      const _ca = user.metadata?.creationTime;
+      const _isOldAcc = _ca && new Date(_ca) < new Date('2026-05-30T00:00:00Z');
+      if (user.emailVerified || _isOldAcc) {
+        window.location.href = 'index.html';
+      } else if (!_pendingVerifyUser) {
+        auth.signOut().catch(() => {});
+      }
     }
-    // If _pendingVerifyUser is set, we are intentionally keeping them signed in
-    // so the polling loop can call user.reload() — do NOT sign out
   });
 });
 
@@ -527,7 +527,10 @@ async function handleAuth(e) {
         const user = cred.user;
 
         // 3. Block if email not verified
-        if (!user.emailVerified) {
+        // Allow: old accounts (before 30 May 2026) + admin accounts
+        const _createdAt = user.metadata?.creationTime;
+        const _isOld = _createdAt && new Date(_createdAt) < new Date('2026-05-30T00:00:00Z');
+        if (!user.emailVerified && !_isOld) {
           await auth.signOut();
           _pendingVerifyUser = user;
           showAuthMsg('📧 Please verify your email first. Check your inbox for the verification link.', 'error');
