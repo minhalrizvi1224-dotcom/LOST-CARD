@@ -3120,6 +3120,32 @@ select.form-input option { background: var(--bg3); }
 [data-theme="light"] .hf-e { background: #fff; }
 [data-theme="light"] .hf-p { background: #fff; }
 
+/* ── Globe: light theme ──────────────────────────────────────────────
+   SVG presentation attributes (inline fill/stroke) have lower CSS
+   specificity, so these rules win cleanly over the hardcoded values. */
+/* Sphere body: pale blue instead of near-black gradient */
+[data-theme="light"] #worldGlobeSvg > circle:first-of-type {
+  fill: #E6EEFA;
+}
+/* Grid lines: light gray instead of dark navy */
+[data-theme="light"] #worldGlobeSvg > g[clip-path] {
+  stroke: #BFC8D6;
+}
+/* Card backgrounds (first rect in each card group): white */
+[data-theme="light"] .globe-card-d rect,
+[data-theme="light"] .globe-card-e rect,
+[data-theme="light"] .globe-card-p rect {
+  fill: #FFFFFF;
+}
+/* Outer ring border: light gray */
+[data-theme="light"] #worldGlobeSvg > circle:last-of-type {
+  stroke: #B8C4D4;
+}
+/* Drop shadow: softer in light mode */
+[data-theme="light"] .world-globe-svg {
+  filter: drop-shadow(0 2px 16px rgba(9,105,218,0.10));
+}
+
 /* Globe reveal: subtle scale-in alongside the opacity fade */
 #worldGlobeSvg {
   transform-origin: center center;
