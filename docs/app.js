@@ -3002,7 +3002,7 @@ function startAIAssistant() {
 
   // Welcome message
   addMessage('them', 'Hair Band',
-    'Hey — I\'m Hair Band 🪢. Ask me anything about LOST CARD, or tell me what\'s going on in a relationship. I know the app inside out, and I know psychology. I\'m here for both.');
+    'Hey. I\'m Hair Band 🪢. I know this app inside out, and I understand what happens between people. Ask me anything, or just tell me what\'s going on.');
   scrollMessages();
 }
 
