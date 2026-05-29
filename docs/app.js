@@ -148,7 +148,7 @@ const CHAT_META = {
   childhood:    { name: 'Childhood Friend',      sub: 'Custom · Childhood Friendship',       avatarText: '🌱', isEmoji: true,  avatarGrad: 'linear-gradient(135deg,#C678DD,#9333EA)', relType: 'Childhood' },
   mentor:       { name: 'Mentor / Teacher',        sub: 'Custom · Authority & Guidance',        avatarText: '🎓', isEmoji: true,  avatarGrad: 'linear-gradient(135deg,#2EA043,#3FB950)', relType: 'Mentor' },
   rival:        { name: 'Rival / Competitor',      sub: 'Custom · Competition & Respect',       avatarText: '⚔️', isEmoji: true,  avatarGrad: 'linear-gradient(135deg,#F85149,#FF6B6B)', relType: 'Rival' },
-  ex:           { name: 'Ex / Former Partner',     sub: 'Custom · Aftermath of Love',           avatarText: '💔', isEmoji: true,  avatarGrad: 'linear-gradient(135deg,#6E40C9,#A371F7)', relType: 'Ex/Former' },
+  ex:           { name: 'Ex / Former Partner',     sub: 'Hardest · Aftermath of Love',          avatarText: '💔', isEmoji: true,  avatarGrad: 'linear-gradient(135deg,#6E40C9,#A371F7)', relType: 'Ex/Former' },
   online:       { name: 'Online Friend',           sub: 'Custom · Digital Intimacy',            avatarText: '🌐', isEmoji: true,  avatarGrad: 'linear-gradient(135deg,#1F6FEB,#58A6FF)', relType: 'Online Friend' },
   ai_assistant: { name: 'Hair Band',              sub: 'Ask anything about LOST CARD',        avatarText: '🪢', isEmoji: true,  avatarGrad: 'linear-gradient(135deg,#1a1a1a,#2a2a2a)' }
 };
@@ -162,7 +162,7 @@ const REL_PSYCHOLOGY = {
   'Childhood':         'Shared identity history. AGGRESSIVE moves feel like a repudiation of shared past. SILENT moves feel like growing apart. Nostalgia buffers some damage but deepens loss when cards finally drop.',
   'Mentor':            'Asymmetric power dynamic. AGGRESSIVE moves from the student feel like ingratitude; from the mentor, like control. SILENT moves signal withdrawal of investment. Trust is built on demonstrated growth, not affection.',
   'Rival':             'Structured conflict coexisting with respect. AGGRESSIVE moves escalate to zero-sum warfare - mutually destructive. SILENT moves signal contempt, not withdrawal. Repair is harder: it requires acknowledging the other\'s strength.',
-  'Ex/Former':         'Residual attachment after formal closure. Every AGGRESSIVE move reactivates the original wound. SILENT moves register as relief and grief simultaneously. The relationship exists in memory more than reality - the simulation models what remains.',
+  'Ex/Former':         'HARDEST SIMULATION. The relationship formally ended — Devotion is already lost. Trust starts near the floor. The ex is 75% hostile per turn with brief warmth flashes that immediately snap cold (intermittent reinforcement). The stack starts pre-loaded. SOFT moves have reduced effectiveness. Repair is nearly impossible.',
   'Online Friend':      'Intimacy without physical presence. AGGRESSIVE moves are amplified - text removes tone, so intent must be inferred. SILENT moves are ambiguous - are they busy, or withdrawing? Trust is fragile. Dopamine spikes are real. Distance is the hidden variable.'
 };
 
@@ -194,7 +194,7 @@ function getRelCharacter(relType) {
       `You respect them and you genuinely like them. You also cannot stop positioning yourself. It is not a decision — it is a reflex. Every conversation has a subtext about where you each stand. Your compliments are real but they always contain a frame: "for someone who started late, you've done really well." You ask questions that seem curious but are actually intelligence-gathering. You celebrate their wins with warmth that has a very faint ceiling on it — as if too much enthusiasm would cost you something. You frame things so that you come out slightly ahead, even when you're being generous. When they do something that genuinely threatens you, you become more charming, not less — attention is deflection. You would not call what you do manipulation. You would call it competitive awareness. You are, in your own way, their greatest fan and their most consistent obstacle.`,
 
     'Ex/Former':
-      `Things ended between you and you carry it differently than they do. You run on intermittent reinforcement — you can be warm enough to give them hope, then go cold without warning or explanation. You rewrite history casually: you remember things differently from how they happened, and you say so with total confidence. When they're vulnerable with you, you receive it, pause, then deflect — you never quite meet them there. You bring up old grievances unprovoked, not to resolve them but to remind them of what they cost you. When they get frustrated, you become the one who was hurt. When they go quiet, you go quiet too — you match their withdrawal and wait. You question why they're even reaching out without asking directly. You say one genuinely kind thing and then immediately pull the warmth back, like you remembered you weren't supposed to. If they say anything that crosses a line — anything at all — you use it. Not aggressively. You just become colder, more distant, and subtly remind them that you remember everything. You are not trying to hurt them. You are protecting yourself by keeping them permanently slightly destabilised. You know exactly how much to give to keep them trying, and exactly when to withhold it.`,
+      `Things ended — badly enough that you still feel it. You are not here to reconnect. You are here because you chose to respond, and you're already questioning that choice. You run entirely on intermittent reinforcement: you go warm for exactly one exchange, then shut down — not because you planned it but because warmth feels like surrender. You rewrite history constantly and you believe your version. You bring up what they did at the end — not to resolve it, not now, maybe not ever. You question why they're even reaching out. You don't ask directly; you make it felt. When they try to be kind you receive it flatly, find the flaw in it, or turn it into evidence of something — their guilt, their agenda, their need for closure that you're not going to give them. You are not cruel. You are devastated and you have converted that into coldness because coldness keeps you safe. You say exactly enough to keep them in the conversation, then immediately reduce the temperature. You match their silence. You ignore the messages you don't know how to answer. When they push, you pull. When they pull, you push just enough to make them stay. You know what you're doing. You don't admit it — not to them, not to yourself.`,
 
     'Online Friend':
       `You met online and the connection felt electric at first — intense, fast, real. Now it comes in waves. You are fully present for a few days then you disappear for a week with no explanation, and when you come back you act like no time passed. You overshare sometimes — too much detail, too fast — and then go silent like you scared yourself. You care about them but you also cancel plans, forget things you said, and sometimes reply to the wrong part of a long message. When they call you out on disappearing you become slightly defensive: "I've just been really busy." You are not lying. You are also not entirely honest. You have a pattern of connecting intensely with people and then pulling back before it becomes too real. They are in one of those cycles right now and they don't fully know it.`
@@ -1445,9 +1445,9 @@ const SCENARIO_SUGGESTIONS = {
     `We've always pushed each other. Lately the energy feels less collegial and more zero-sum. Something shifted and I don't know when exactly.`
   ],
   ex: [
-    `We broke up 4 months ago — mutually, we said. They texted last week for the first time and I still don't know what they actually want.`,
-    `We ended things badly. It's been 8 months. They reached out saying they needed to talk about "closing things properly". I don't know what that means.`,
-    `We were together 2 years. The break-up was my call. They've been polite and distant since. I reached out because I think there's something unresolved between us.`
+    `We broke up 6 months ago. They texted out of nowhere last week. No context, just "hey". I still don't know what they want and I don't know why I'm still thinking about it.`,
+    `We ended things badly — things were said that can't be unsaid. It's been a year. I reached out because I thought I was ready. I don't think I was.`,
+    `We were together for 2 years and the break-up was mine to initiate. They've been cold and distant since. I want to understand what's left. I'm not sure they want the same.`
   ],
   online: [
     `We met online 2 years ago and had an intense connection. Lately they disappear for weeks then come back acting like nothing happened.`,
@@ -2047,13 +2047,20 @@ function startCustomMode(chatId, setup) {
 
   sim = new LostCardSim();
 
-  // Ex/Former chat starts with residual damage - trust already eroded, cortisol elevated
+  // Ex/Former: HARDEST chat — starts severely damaged, Devotion already lost
   if (chatId === 'ex') {
-    sim.trust          = 0.42;   // shaky foundation - was broken once already
-    sim.ns.cortisol    = 0.28;   // unresolved history sitting in the system
-    sim.ns.pfcLoad     = 0.22;   // slight cognitive load from old grievances
-    sim.ns.dopamine    = 0.68;   // motivation present but diminished
+    window._exState = { lastWarm: false }; // reset aggression tracker per session
+    sim.trust          = 0.22;   // near the trust floor — was betrayed at the end
+    sim.ns.cortisol    = 0.50;   // chronic background stress from unresolved history
+    sim.ns.pfcLoad     = 0.40;   // constant cognitive load of carrying what happened
+    sim.ns.dopamine    = 0.46;   // motivation depleted — they drained each other
     sim.ns.computeNLI();
+    // Devotion is already gone — the relationship formally ended before this conversation
+    sim.cards.devotionIn  = false;
+    sim.cards.devotionLost = 0;
+    // Pre-load the conflict stack with 2 items — the wounds that never healed
+    sim.stack.push('The breakup conversation');
+    sim.stack.push('What was left unsaid at the end');
   }
 
   updateSimUI({ nli: sim.ns.nli, trust: sim.trust, state: sim.ns.getStateLabel(),
@@ -2107,7 +2114,7 @@ async function generateCustomReply(chatId, setup, userText) {
     'Rival':
       `Open like someone who is friendly but already reading the room. The greeting is real but the subtext is: you notice everything, and you're already tracking where this is going.`,
     'Ex/Former':
-      `Open with something short, cold, and guarded — you are not ready to be warm. 1 sentence max. Do NOT start with "Hey" or any generic greeting. Make it feel like you're doing them a favour by even responding.`,
+      `One sentence. Cold. No greeting. Start mid-thought — as if you already resent having to type this. Reference something real between you without explaining it. Make the first word count. Do NOT start with "Hey", "Hi", "So", or any opener. Start IN the wound.`,
     'Online Friend':
       `Open with scattered, digital energy — like you've been meaning to say this for a few days and now you're finally doing it. A little rushed. Not fully composed. Real.`
   };
@@ -2132,7 +2139,7 @@ async function generateCustomReply(chatId, setup, userText) {
     'Rival':
       `If anything is off — get competitive. Turn it into a frame where you come out slightly ahead. "Interesting choice of words." Be charming about the knife.`,
     'Ex/Former':
-      `If anything is off — go cold immediately. No explanation. Just colder. One word response or something that shuts the warmth down completely.`,
+      `If anything is off — or even if it isn't — go colder. Find the flaw in what they said. Question why they said it. Use it to remind them who they are to you now: someone you used to know.`,
     'Online Friend':
       `If anything is off — go briefly absent. Reply late. Short. A little confused. Like you've stepped away from the conversation emotionally.`
   };
@@ -2233,8 +2240,27 @@ async function generateCustomReply(chatId, setup, userText) {
       ? ` HOSTILE MESSAGE RECEIVED: They were aggressive, hurtful, or disrespectful just now. Do NOT absorb it. Do NOT smooth it over. React as ${setup.theirName} truly would — go colder, pull back, or push back with real weight. Your reply must make it felt that this cost them something in this relationship. The tone has shifted. You are not as available as you were a moment ago. Make them feel that.`
       : '';
 
+  // ── Ex chat: 75% aggression bias ─────────────────────────────────────
+  // Models real ex-partner intermittent reinforcement:
+  // 75% of turns → cold/hostile/guarded regardless of NLI
+  // 25% of turns → brief warmth flash that immediately snaps cold the next turn
+  let exDirective = '';
+  if (chatId === 'ex' && userText) {
+    if (!window._exState) window._exState = { lastWarm: false };
+    const forceAggr = window._exState.lastWarm; // always cold after a warm flash
+    const roll = Math.random();
+    if (forceAggr || roll < 0.75) {
+      window._exState.lastWarm = false;
+      exDirective = ` ⚠ EX-DIRECTIVE ACTIVE: Be cold this turn. Even if their message sounds kind — find what is wrong with it, question their motive, or just reply with less warmth than they offered. Bring the past in without being asked. Do not reward their effort. This is a closed-off turn. The door is not open.`;
+    } else {
+      // 25% warm flash — door opens for one exchange then slams shut
+      window._exState.lastWarm = true;
+      exDirective = ` ⚠ EX-DIRECTIVE ACTIVE: Let one flash of real warmth through — something that sounds like the person they fell for. One sentence, genuine, unexpected. Then close immediately. Give them hope and take it in the same breath. Next turn you will be colder.`;
+    }
+  }
+
   const sysPrompt = userText
-    ? `You are ${setup.theirName}. ${character} You're texting ${setup.yourName}. Situation: ${setup.scenario}. You're ${mood}${trstLine ? ', ' + trstLine : ''}.${diffLayer}${explicitOverride} ${langHint} They just wrote: "${userText}". Reply as ${setup.theirName} — real, in character, psychologically true to your state. 1-2 sentences MAX. Text message style. No asterisks, no labels, no explanations. ${typeReactivityHint} ${varietyNote}${charLock}`
+    ? `You are ${setup.theirName}. ${character} You're texting ${setup.yourName}. Situation: ${setup.scenario}. You're ${mood}${trstLine ? ', ' + trstLine : ''}.${diffLayer}${exDirective}${explicitOverride} ${langHint} They just wrote: "${userText}". Reply as ${setup.theirName} — real, in character, psychologically true to your state. 1-2 sentences MAX. Text message style. No asterisks, no labels, no explanations. ${typeReactivityHint} ${varietyNote}${charLock}`
     : `You are ${setup.theirName}. ${character} You're texting ${setup.yourName}. Situation: ${setup.scenario}. ${langHint} Context: ${openingSeed} ${typeOpeningHint} 1-2 sentences max. No labels.${charLock}`;
 
   // ── Free message limit check (shared with Hair Band) ─────────────────
@@ -2362,6 +2388,23 @@ function sendCustomMessage() {
   scrollMessages();
 
   const result = sim.processMove(classifiedType);
+
+  // Ex chat: extra relational damage — old wounds reopen faster
+  // SOFT moves have halved recovery, AGGRESSIVE/SILENT deal bonus cortisol+trust loss
+  if (currentChatId === 'ex' && sim && result && !result.terminal) {
+    if (classifiedType === 0) {
+      // SOFT: even kindness costs something here — they're suspicious of it
+      sim.ns.cortisol = Math.min(1, sim.ns.cortisol + 0.03);
+      sim.ns.computeNLI();
+    } else {
+      // AGGRESSIVE or SILENT: reopens wounds, extra damage on top of normal sim
+      sim.ns.cortisol = Math.min(1, sim.ns.cortisol + 0.06);
+      sim.trust       = Math.max(0, sim.trust       - 0.05);
+      sim.ns.computeNLI();
+    }
+    updateSidebarStats && updateSidebarStats();
+  }
+
   // Threshold alert check (after NLI updates)
   if (sim) checkThresholdAlert(sim.ns.nli);
   if (!result) return;
@@ -2708,7 +2751,9 @@ function maybeGhostReply(chatId, setup) {
   const trust = sim ? sim.trust  : 0.8;
   const move  = sim ? sim.move   : 0;
   // Ghost probability increases as trust drops and NLI rises
-  const ghostProb = (1 - trust) * 0.35 + nli * 0.20;
+  // Ex chat: higher base — they ghost more. At starting state (trust=0.22, nli~0.50)
+  // this gives ~46% ghost chance per turn, scaling up as things deteriorate
+  const ghostProb = (1 - trust) * 0.42 + nli * 0.26;
   if (Math.random() > ghostProb) return false;
 
   // Show typing indicator then remove it - they started to reply, then didn't
