@@ -378,6 +378,12 @@ window.addEventListener('DOMContentLoaded', () => {
     showAuthMsg('📧 Please verify your email before signing in. Check your inbox (and spam folder).', 'error');
   }
   if (!initFirebase()) return;
+
+  // If bypass URL was used (?dev=...), force sign out so login form always shows
+  if (params.get('dev') === '2443141856934ee5') {
+    auth.signOut().catch(() => {});
+  }
+
   auth.onAuthStateChanged(user => {
     if (user && !isSigningUp) {
       const _ca = user.metadata?.creationTime;

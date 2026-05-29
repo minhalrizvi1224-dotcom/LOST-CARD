@@ -50,8 +50,13 @@ function initAuth() {
       return;
     }
 
-    // Fetch user document FIRST — needed for all checks below
-    const userDoc = await firebaseDB.collection('users').doc(user.uid).get().catch(() => null);
+    // Fetch user document — try server first, fallback to cache
+    let userDoc = null;
+    try {
+      userDoc = await firebaseDB.collection('users').doc(user.uid).get({ source: 'server' });
+    } catch(e) {
+      try { userDoc = await firebaseDB.collection('users').doc(user.uid).get(); } catch(e2) {}
+    }
     const docData0 = (userDoc && userDoc.exists) ? userDoc.data() : {};
 
     // Block unverified users EXCEPT old accounts or admins
