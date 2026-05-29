@@ -270,7 +270,7 @@
     const diff = LAUNCH - Date.now();
     if (diff <= 0) {
       document.getElementById('launched').classList.add('show');
-      setTimeout(function(){ window.location.replace('login.html'); }, 1800);
+      setTimeout(function(){ window.location.replace('welcome.html'); }, 1800);
       return;
     }
     const h = Math.floor(diff / 3600000);
