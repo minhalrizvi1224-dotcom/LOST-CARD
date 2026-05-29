@@ -614,11 +614,133 @@ const SCENARIOS_MAMA = [
   { hani: "I love you. I know I don't always — I know. But I do.", subtext: "(She finished the sentence. She has never finished this sentence before. She will not say anything after this. She doesn't need to.)", conflict: "Anything that closes the door", salvation: true }
 ];
 
+// ─── Scenario 4: Zain & Baba (Father/Son — Pakistani dynamic) ───────────────
+// Design: Baba never says what he means. Love comes disguised as disappointment.
+// Every soft response reads as weakness. Every silence confirms his fears.
+// Almost nobody reaches move 23 — the damage accumulates before the user understands the pattern.
+const SCENARIOS_BABA = [
+  { hani: "You came. I wasn't sure you would.", subtext: "(He has been sitting in the same chair for two hours. He won't say that. He checks his phone when he hears the door — not because he expected a call, but because he'd stopped expecting you.)", conflict: "Treating it as routine", salvation: false },
+  { hani: "Your uncle's son got posted in Karachi. Big position. Government sector.", subtext: "(He is not talking about your uncle's son. He is talking about you. He will never say he is talking about you.)", conflict: "Responding to the cousin instead of the subtext", salvation: false },
+  { hani: "I'm not saying anything. I'm just telling you what's happening in the family. People ask about you. I don't always know what to say.", subtext: "(He knows exactly what to say. He has been saying it for years. 'He's still figuring things out.' He is tired of that sentence.)", conflict: "Getting defensive about what people say", salvation: false },
+  { hani: "Your mother worries. I tell her not to. But she worries.", subtext: "(He worries. He has been using your mother as a proxy for his own feelings for thirty years. He doesn't know another way.)", conflict: "Addressing Mama instead of him", salvation: false },
+  { hani: "When I was your age I had already — never mind. Different time. Different situation. I understand.", subtext: "(He doesn't understand. He is trying to. The 'never mind' is where the real sentence lives.)", conflict: "Letting the 'never mind' go", salvation: true },
+  { hani: "I'm not asking for much. I just want to know you have a plan. That's all. A plan.", subtext: "(He is asking for much. He is asking for proof that the years he spent were not wasted. He doesn't have the language for that. So he says: a plan.)", conflict: "Defending that you have a plan", salvation: false },
+  { hani: "Your dada used to say — a man who doesn't know where he's going will end up somewhere he didn't choose.", subtext: "(He is telling you something his father told him when he was afraid. He has never been this honest with you. He doesn't know that's what he's doing.)", conflict: "Dismissing the proverb", salvation: true },
+  { hani: "I'm not criticizing. I'm asking. There's a difference.", subtext: "(There is no difference right now. But he believes there is, and that belief is the only thing keeping him from saying what he actually feels.)", conflict: "Pointing out that it feels like criticism", salvation: false },
+  { hani: "You know I never — I didn't have what you have. The opportunities. The time. I had to start working at your age.", subtext: "(He is giving you something he has never given before: context. He is trying to explain himself without saying 'I needed you to do better because I couldn't.' He doesn't finish the sentence because he doesn't know how.)", conflict: "Apologizing for your advantages", salvation: true },
+  { hani: "I'm not angry. I want you to know that. Whatever happens, I'm not angry.", subtext: "(He is not angry. He is something worse than angry. He is resigned. And he is telling you this because he doesn't want you to carry the guilt of his anger — which means, somewhere, he is still protecting you.)", conflict: "Testing whether he really isn't angry", salvation: true },
+  { hani: "Your sister calls every Sunday. Did you know that? Every Sunday without fail.", subtext: "(He is not comparing you to your sister. He is telling you that connection is possible, that people do maintain it, that it is a choice. He doesn't understand why you haven't chosen it.)", conflict: "Defending why you don't call as often", salvation: false },
+  { hani: "I'm getting older, Zain. I don't say this for sympathy. I just — time passes differently now. I notice it.", subtext: "(He has been noticing it for years. The body slows before the mind accepts it. He is telling you this because he wants you to know there is a window and it is moving.)", conflict: "Reassuring him that he's fine", salvation: true },
+  { hani: "I had a dream about you last week. You were young. Maybe eight years old. You used to follow me everywhere. You'd wait by the door when I came home.", subtext: "(He is grieving the version of you that needed him without complication. He is also telling you that he remembers who you were before things became difficult between you. This is the closest he will come to saying: I miss you.)", conflict: "Moving past the memory quickly", salvation: true },
+  { hani: "I know I wasn't always — I worked. That was what I knew. I thought that was enough.", subtext: "(He is apologizing. He will not say the word. But this is the apology. It is the only one he has.)", conflict: "Accepting it too quickly or not at all", salvation: true },
+  { hani: "I don't need you to agree with my choices. I need you to make yours.", subtext: "(He has just released you from something. He doesn't know it. He spent thirty years preparing this sentence and delivered it like it was nothing.)", conflict: "Debating his choices instead of hearing the release", salvation: true },
+  { hani: "You're more like me than you want to admit. That's not a bad thing. That's just — what it is.", subtext: "(He is saying: I see myself in you and I am not ashamed of what I see. This is love in the only dialect he speaks.)", conflict: "Rejecting the comparison", salvation: true },
+  { hani: "I don't ask for things, Zain. You know that about me. But if you could — call your mother more. She doesn't say it but she counts the days.", subtext: "(He is asking for himself. He is routing the request through your mother because asking for himself is not something he knows how to do.)", conflict: "Focusing only on the practical request", salvation: true },
+  { hani: "I told your uncle you're doing well. I hope that's true. I want it to be true.", subtext: "(He has been saying this to everyone. He wants to believe it. The 'I hope' and 'I want' are the crack in the wall he has built. He is letting you see through it.)", conflict: "Correcting what he told uncle", salvation: false },
+  { hani: "When you were small you used to ask me questions about everything. Why is the sky that color. Why do people fight. I didn't always have answers. But I liked that you asked.", subtext: "(He is telling you that he was happiest when you needed him to have answers, even when he didn't. He is telling you that presence was enough once. He wants to know if it still can be.)", conflict: "Making it about the questions not the presence", salvation: true },
+  { hani: "I'm proud of you. I don't know if I say it enough. I'm saying it now.", subtext: "(He has never said this before. He practiced it once, driving home from your cousin's wedding three years ago. He never found the moment. He is creating the moment now because he has decided he will not wait for the right one anymore.)", conflict: "Deflecting or minimizing it", salvation: true },
+  { hani: "I know things haven't always been easy between us. I know that. I'm not — I don't have the words for everything. But I want you to know I tried. In my own way. I tried.", subtext: "(He means it. He is describing his whole life in two sentences. He is not asking for forgiveness. He is asking to be understood — and that is harder.)", conflict: "Evaluating whether he tried enough", salvation: true },
+  { hani: "Come for Eid. Just — come. Don't make it complicated. Just come home.", subtext: "(He is not talking about Eid. He is talking about every time you found a reason not to come. He is letting all of it go and asking for one thing. This is the most he has ever asked.)", conflict: "Making conditions or excuses", salvation: true },
+  { hani: "Okay. Good. Then it's settled. I'll tell your mother.", subtext: "(He is relieved in a way he will never show. He will walk back to the kitchen and say 'he's coming' and your mother will ask 'did you talk to him' and he will say 'a little' and that will be all. But tonight he will sleep a bit better.)", conflict: "Reopening any part of the conversation", salvation: true }
+];
+
+// ─── Scenario 5: Hira & Sara (Sisters — love and jealousy intertwined) ─────
+// Design: Sisters who love each other and can't stop hurting each other.
+// Everything is layered — compliment hidden in wound, wound hidden in joke.
+// The user can never quite find the safe response.
+const SCENARIOS_SARA = [
+  { hani: "You look good. Are you doing something different?", subtext: "(She means it. She also means: I noticed before you noticed that I noticed. Sara has been watching Hira's life the way you watch something you want and tell yourself you don't.)", conflict: "Accepting the compliment simply", salvation: false },
+  { hani: "Mama told me about your promotion. She was so excited. I've never heard her that excited.", subtext: "(She is telling you that Mama told her before you did. She is also telling you she heard the excitement in Mama's voice and it sounded different from the excitement Mama has for her. She will not say either of these things.)", conflict: "Apologizing for not telling her first", salvation: false },
+  { hani: "I'm not jealous. Why would I be jealous? We're sisters. I'm happy for you.", subtext: "(She is jealous. Not the small kind. The kind that has been building since the year you got better grades and Baba framed your report card. She is also genuinely happy. Both are true. She can't hold them both at once.)", conflict: "Accepting 'I'm not jealous' too quickly", salvation: false },
+  { hani: "Do you remember when we were kids and you used to tell Mama everything I did wrong? I was thinking about that the other day.", subtext: "(She has been thinking about this for longer than the other day. This is the first thing she wanted to say when she sat down. She took twenty minutes to get here.)", conflict: "Defending your childhood behavior", salvation: false },
+  { hani: "I'm not bringing up old things. I just — sometimes I wonder if things were always like this between us or if something changed.", subtext: "(Something changed. She knows when. She doesn't want to say when because saying when makes it too specific and too real.)", conflict: "Asking her to name when", salvation: true },
+  { hani: "You were always Baba's favorite. I know you don't think so. But you were.", subtext: "(She has carried this her entire life. She is not saying it to wound you. She is saying it because she has been holding it alone and it has gotten too heavy.)", conflict: "Arguing about who was the favorite", salvation: true },
+  { hani: "I'm not angry about it. That's what I want you to understand. I've worked through it. I just — I needed you to know I know.", subtext: "(She is a little angry about it. She has worked through most of it. But the knowing sits differently once you've said it out loud. She is watching your face right now.)", conflict: "Moving on before she's ready", salvation: false },
+  { hani: "Ahmed thinks you're amazing, by the way. He always talks about how successful you are. Every family dinner.", subtext: "(Her husband talks about you at every family dinner. She laughs it off. She has been laughing it off for two years.)", conflict: "Asking if it bothers her", salvation: true },
+  { hani: "I love my life. I want to be clear about that. I love my life.", subtext: "(She is reminding herself. The repetition is the tell. She loves her life and there are parts of it she would have chosen differently and she has made peace with most of them.)", conflict: "Reassuring her that her life is good", salvation: false },
+  { hani: "Do you ever feel like — in the family, you're the one who succeeded and I'm the one who survived? Not in a bad way. Just — is that how it looks from the outside?", subtext: "(She is asking if that's how it looks from your side. She already knows how it looks from hers. She wants to know if you see it too or if she has been carrying this alone.)", conflict: "Denying the framing entirely", salvation: true },
+  { hani: "I'm proud of you. I want you to know that. I don't say it because — I don't know. It feels complicated. But I am.", subtext: "(It is complicated. She is proud of you the way you are proud of something that also makes you aware of what you don't have. She is saying it anyway because she decided, walking here, that she would.)", conflict: "Making it less complicated than it is", salvation: true },
+  { hani: "We used to talk every day when we were at university. Do you remember? Every day.", subtext: "(She remembers every conversation. She has kept some of the voice notes. She hasn't told you this.)", conflict: "Focusing on why it changed instead of the memory", salvation: true },
+  { hani: "I think I've been waiting for you to notice. That something was off between us. I kept thinking — she'll bring it up. She'll ask.", subtext: "(She has been waiting for two years. She rewrote this conversation in her head so many times she lost count. You never brought it up because you didn't notice, or you noticed and you waited too. She doesn't know which is worse.)", conflict: "Explaining why you didn't bring it up", salvation: false },
+  { hani: "I don't want to fight. I'm so tired of being in my own head about this. I just want it to be normal between us again.", subtext: "(She means this completely. She also doesn't know what normal looks like because normal, for them, was always this — close and slightly wounded. She is asking for something new while calling it something old.)", conflict: "Promising things will go back to how they were", salvation: true },
+  { hani: "Can I tell you something without you making it a whole thing?", subtext: "(She is about to tell you something she has been holding for a long time. The warning is a form of protection — for both of you.)", conflict: "Making it a whole thing before she says it", salvation: true },
+  { hani: "When you got the promotion — my first feeling, before the happiness — was this moment of: why not me. And then immediately after I felt terrible for thinking it. And then I called Mama and said congratulations and I meant it. All three things happened in about four seconds.", subtext: "(She is being more honest with you right now than she has been in years. She is trusting you with the version of herself she usually edits out. This is the most open door she has offered.)", conflict: "Telling her she shouldn't have felt that way", salvation: true },
+  { hani: "I think we got competitive and we never talked about it. It just — became the thing between us.", subtext: "(It became the thing between them because no one named it. She is naming it now. This is the bravest thing she has said today.)", conflict: "Agreeing too clinically or analyzing it", salvation: true },
+  { hani: "I miss you. Is that weird to say? We see each other at every family thing. But I miss you.", subtext: "(It's not weird. She misses the version of their closeness before comparison entered the room. She doesn't know if that version still exists. She is asking if it might.)", conflict: "Explaining why you've been distant", salvation: true },
+  { hani: "Tell me something. Anything. Tell me something you haven't told anyone.", subtext: "(She is trying to start over in the middle of a conversation. She wants the old rhythm back — where you told each other things before you told the world. She's offering to go first if you do.)", conflict: "Telling something safe or surface-level", salvation: true },
+  { hani: "I think you're the person I know best and the person I understand least. Does that make sense?", subtext: "(It makes perfect sense. She has been trying to resolve this paradox her entire adult life. You are her sister. She can read your face across a room. She has no idea why you do half the things you do.)", conflict: "Explaining yourself instead of sitting in it", salvation: true },
+  { hani: "I don't want to fix everything today. I just want to — leave this conversation differently than we came into it. Is that possible?", subtext: "(She walked in holding every grievance like a case file. She has set most of them down. She is asking you to meet her where she has arrived.)", conflict: "Trying to fix everything anyway", salvation: true },
+  { hani: "You know I love you, right? Even when I'm being — whatever I am. I love you.", subtext: "(She is ending the conversation the way she wanted to start it. It took twenty-two moves to get here. She means every word.)", conflict: "Adding conditions or caveats", salvation: true },
+  { hani: "Okay. Good. Let's get tea. And you can tell me about the promotion properly this time — not the version Mama told.", subtext: "(She is ready. She chose tea. She chose you. She is letting the morning become something lighter than it started as.)", conflict: "Bringing up anything unresolved", salvation: true }
+];
+
+// ─── Scenario 6: Daniyal & Colleague (Workplace Betrayal) ───────────────────
+// Design: Professional civility masking real damage. The colleague did something
+// that crossed a line. Now they want to talk. Every response is a political move.
+const SCENARIOS_COLLEAGUE = [
+  { hani: "Thanks for agreeing to meet. I know things have been — I know.", subtext: "(He doesn't finish the sentence because finishing it means naming what he did. He hopes you'll fill in the blank with something softer than the truth.)", conflict: "Filling in the blank for him", salvation: false },
+  { hani: "I want to be upfront. I know the way the project handoff happened wasn't ideal. I should have communicated better.", subtext: "(He is calling what happened a 'communication issue.' What happened was not a communication issue. He knows this. He is measuring how much you know.)", conflict: "Accepting 'communication issue' as the frame", salvation: false },
+  { hani: "I've always respected your work. I want that to be clear. This wasn't about that.", subtext: "(He is trying to separate his respect for your work from what he did. These cannot be separated right now. He knows that too.)", conflict: "Thanking him for the respect", salvation: false },
+  { hani: "The timeline was impossible. I know you know that. I was under pressure from above and I made a call I'm not entirely proud of.", subtext: "(He is introducing 'pressure from above' as a mitigating factor. He made a choice. The pressure was real. The choice was still his.)", conflict: "Letting 'pressure from above' explain it", salvation: false },
+  { hani: "I took credit I shouldn't have. I'm saying that. I'm saying it directly.", subtext: "(He said the word. He is watching what you do with it. This is the first honest thing he has said. He is hoping it ends the conversation.)", conflict: "Moving on because he admitted it", salvation: true },
+  { hani: "I've been doing this a long time. I've made mistakes before. I'm not — I'm not someone who does this as a pattern.", subtext: "(He is asking you to trust that this is an exception. He does not have data for you. He has only his own account of himself, which is the least reliable source available.)", conflict: "Accepting his self-assessment as evidence", salvation: false },
+  { hani: "What would it take. Practically. For us to move forward. I'm asking seriously.", subtext: "(He is not asking what he owes you. He is asking what you need from him in order for this to be over. These are very different questions.)", conflict: "Answering as if they're the same question", salvation: true },
+  { hani: "I value this working relationship. I think we make a good team. I don't want what happened to erase that.", subtext: "(He is trying to remind you of the good parts before you've finished processing the bad part. This is a tactic. He may not know it's a tactic.)", conflict: "Agreeing that the team is good", salvation: false },
+  { hani: "I reported it partially. I want to be honest about that. I reported the outcome but not fully who contributed to it.", subtext: "(He is making a new admission. This one is more specific. He is either genuinely coming clean or he knows you know more than he thought.)", conflict: "Accepting 'partially' as enough honesty", salvation: true },
+  { hani: "If the situation were reversed — and I mean this genuinely — I hope you would have done better than I did. I hope I would have too.", subtext: "(He is trying to place himself on your side by imagining he would have made the same choice. This is not quite an apology. It is closer to a confession.)", conflict: "Telling him what you would have done", salvation: false },
+  { hani: "I should have come to you before the presentation. I knew that. I made a calculation and it was wrong.", subtext: "(He made a calculation. He is using that word deliberately. It is honest in a way that is also alarming — it confirms the decision was considered, not accidental.)", conflict: "Forgiving the calculation", salvation: false },
+  { hani: "I'd like to fix this. I don't know exactly how. But I'd like to.", subtext: "(He wants to fix the relationship so he can stop feeling bad. Whether fixing it is good for you is a different question he hasn't asked.)", conflict: "Helping him figure out how to fix it", salvation: true },
+  { hani: "Have you — have you told anyone else? About what happened?", subtext: "(He is afraid. This question is about him. He is measuring the damage radius.)", conflict: "Answering directly without acknowledging what he's really asking", salvation: true },
+  { hani: "I'm not trying to manage you. I want you to know that. I'm trying to be straight with you.", subtext: "(He is trying to manage you. He is also trying to be straight with you. People contain multitudes. This one contains more than most.)", conflict: "Taking 'I'm not managing you' at face value", salvation: false },
+  { hani: "Look — I know trust is rebuilt slowly. I'm not asking you to trust me today. I'm asking you to give me the opportunity to rebuild it.", subtext: "(He has correctly identified the problem and offered the right-sounding solution. The question is whether the desire to rebuild is genuine or whether he is managing his own reputation.)", conflict: "Granting the opportunity without conditions", salvation: false },
+  { hani: "You're good at this. What you do. Better than me in some areas. That's probably part of what happened.", subtext: "(He is making your competence partly responsible for his choice to take credit for your work. This is a sophisticated reframe. He may not realize how much it reveals.)", conflict: "Accepting this as an explanation", salvation: true },
+  { hani: "I don't want this to affect your career. I'm going to make sure — wherever this goes — that the right people know your contribution.", subtext: "(He is offering to correct the record. This is the most concrete thing he has said. It is also something he should have done without being asked.)", conflict: "Thanking him before it happens", salvation: true },
+  { hani: "I've been thinking about this since the day it happened. I want you to know that. It hasn't been nothing to me.", subtext: "(He has been thinking about the consequences for himself since the day it happened. Some of those thoughts were about you. The proportion is unclear.)", conflict: "Accepting that it meant something to him as equivalent to what it meant to you", salvation: false },
+  { hani: "What do you need from me right now. Not going forward. Right now, in this conversation.", subtext: "(He is narrowing the scope. He wants to solve the conversation, not the problem. He is offering you something small and contained.)", conflict: "Accepting the small frame", salvation: true },
+  { hani: "I owe you more than an apology. I know that. I'm trying to figure out what the more looks like.", subtext: "(He is in the right place, finally. He arrived here at move twenty. It took too long. But he arrived.)", conflict: "Telling him what the more looks like before he figures it out", salvation: true },
+  { hani: "I'm sorry. Properly sorry. Not for the awkwardness, not for the professional fallout. For what I actually did to you.", subtext: "(This is the real apology. He found the right words. It took the entire conversation. He means them now even if he didn't start the meeting meaning them.)", conflict: "Responding to anything other than the apology itself", salvation: true },
+  { hani: "I'd like to buy you lunch. Not to smooth things over. Just — because I think I owe you a proper conversation outside of this room.", subtext: "(He is offering continuity. He is not running. This is more than you expected when you sat down.)", conflict: "Refusing entirely", salvation: true },
+  { hani: "Good. Then we'll talk. Not as colleagues managing a situation. As people.", subtext: "(He got there. Later than he should have, through routes he shouldn't have taken. But he got there. Now you decide if that matters.)", conflict: "Making a final statement about the past", salvation: true }
+];
+
+// ─── Scenario 7: Bilal & Old Friend (Childhood — Reconnecting After Years) ──
+// Design: Two people who were once everything to each other, meeting after years.
+// The warmth is real. So is the distance. Neither knows how to reconcile them.
+const SCENARIOS_OLDFRIEND = [
+  { hani: "You look exactly the same. That's the first thing I thought. Exactly the same.", subtext: "(He doesn't look exactly the same. Neither do you. He is offering you an easy opening because he's nervous and warmth is the only tool he has right now.)", conflict: "Pointing out how much has changed", salvation: false },
+  { hani: "I wasn't sure you'd actually come. I think I sent that message three times before I deleted it and wrote a new one.", subtext: "(He sent it seven times. He wrote it over two days. He is telling you this because he wants you to know the reaching out cost him something, and he didn't want you to think it was casual.)", conflict: "Treating it as casual anyway", salvation: true },
+  { hani: "How long has it been? Four years? Five?", subtext: "(He knows exactly how long it's been. He is giving you the option to also know exactly how long it's been without making either of you say the number out loud.)", conflict: "Not knowing how long it's been", salvation: false },
+  { hani: "A lot happened. For both of us, I imagine. I don't even know where to start.", subtext: "(He knows where he wants to start. He doesn't know if you're ready to go there yet. He is giving you the chance to choose the entry point.)", conflict: "Starting with small talk", salvation: false },
+  { hani: "I thought about reaching out when your father passed. I didn't. I've thought about that a lot — that I didn't.", subtext: "(He has thought about it more than a lot. It is one of the things he is most ashamed of. He is telling you because he decided, coming here, that he would not pretend it didn't happen.)", conflict: "Telling him it's fine", salvation: true },
+  { hani: "We had a falling out. I know we did. I just — I can't remember exactly what it was about. Can you?", subtext: "(He remembers. He is giving you the chance to say it first, or to let it go. He is not sure which he wants. He may want both.)", conflict: "Telling the full story of what it was about", salvation: false },
+  { hani: "It's strange. I know everything about who you were at sixteen. I know almost nothing about who you are now.", subtext: "(He is naming the exact shape of the grief: the precision of old knowledge against the blankness of recent years. He has been thinking about this exact feeling for a long time.)", conflict: "Filling in everything at once", salvation: true },
+  { hani: "Do you still — are you still the same, in the ways that mattered? The things I remember about you — are those still there?", subtext: "(He is asking if the person he loved is still the person in front of him. He doesn't know how to bear it if the answer is no. He is asking anyway.)", conflict: "Giving a comprehensive answer", salvation: true },
+  { hani: "I have this memory of us. We stayed up all night at your house and we talked about everything we were going to do. Everything. We had a whole list.", subtext: "(He still has the list. Not literally. But he remembers it clearly enough that it might as well be written down. He brings it up because he wants to know if you remember it too, and if you do, what you feel about where those things went.)", conflict: "Focusing on what didn't happen from the list", salvation: true },
+  { hani: "I didn't handle things well. When we drifted. I could have tried harder. I know that now.", subtext: "(He is taking responsibility for the drift. This is generous. He is also slightly editing the story. Both things are true.)", conflict: "Sharing responsibility without letting him finish", salvation: false },
+  { hani: "I moved cities three times. My mother got sick. I got married and then — it's a long story. I don't use that as an excuse. I just want you to know things got complicated.", subtext: "(He is giving you context, not excuses. He knows the difference. He is checking if you know the difference.)", conflict: "Evaluating the context as an excuse", salvation: true },
+  { hani: "You were my best friend. I don't think I've had one since. Not like that. I don't know if that's sad or just — what it is.", subtext: "(It's both. He is thirty-something years old and he is telling you that you were the last person who knew him completely. He has been carrying this and he is finally setting it down in front of you.)", conflict: "Rushing to tell him you haven't either", salvation: true },
+  { hani: "I'm not asking for us to go back to how it was. I know that's not possible. I just — I missed you. I wanted to say that to your face.", subtext: "(He means this completely. He drove two hours to sit in this chair and say this sentence. He is not asking for anything in return. He just needed to say it.)", conflict: "Explaining why going back isn't possible", salvation: true },
+  { hani: "Tell me something about your life. Something real. Not the LinkedIn version.", subtext: "(He is ready to receive the real version. He has been offering real things for half this conversation. He is ready for the exchange.)", conflict: "Giving the edited version anyway", salvation: true },
+  { hani: "I think part of why I reached out is — I've been looking at my life lately and asking what actually mattered. And you keep coming up.", subtext: "(He has been doing this inventory for months. Possibly years. The answer surprised him. He is telling you because you deserve to know you made the list.)", conflict: "Minimizing that you came up", salvation: true },
+  { hani: "Are you happy? You don't have to answer if that's too much. But I'm asking genuinely.", subtext: "(He is asking genuinely. He has the kind of care that has survived years of silence and come out intact. This is rare. He is offering it to you now.)", conflict: "Deflecting with 'I'm fine'", salvation: true },
+  { hani: "I got married last year. I wanted to invite you. I didn't know if — I didn't know what we were to each other anymore. So I didn't.", subtext: "(He thought about inviting you for weeks. He almost called twice. He is telling you this because he wants you to know that even at the biggest moment of his year, you were present in his thinking.)", conflict: "Expressing hurt about not being invited", salvation: true },
+  { hani: "My wife knows who you are. I've talked about you. She asked why I lost touch with you and I didn't have a good answer.", subtext: "(He talked about you enough that his wife knows your name. He has no good answer for why you lost touch because the truth is it wasn't necessary — it just happened — and that's the most honest and most painful answer.)", conflict: "Trying to provide the good answer he doesn't have", salvation: false },
+  { hani: "I'd like to not lose touch again. I know that sounds — I know it's not guaranteed. I just want to say that I'd like it.", subtext: "(He is making a low-stakes, honest request. He is not asking for a promise. He is telling you his preference and leaving the door open.)", conflict: "Making a bigger promise than he asked for", salvation: true },
+  { hani: "You know what I remember most? You used to laugh in a way that made everyone else want to laugh too. I haven't thought about that in years and now I can't stop thinking about it.", subtext: "(He is giving you a gift: a specific memory of who you were, held carefully by someone who chose to keep it. This is what it means to be known.)", conflict: "Minimizing the memory", salvation: true },
+  { hani: "I'm really glad I sent that message. However many times I had to write it.", subtext: "(He is ending where he began. He is telling you the cost was worth it. He wants you to know that this — sitting here, talking — was the point.)", conflict: "Focusing on the awkwardness of getting here", salvation: true },
+  { hani: "Same time next month?", subtext: "(He is asking for continuity. He is asking plainly. There is no subtext here. He means exactly what he said.)", conflict: "Making it uncertain", salvation: true },
+  { hani: "Good. I'll be there.", subtext: "(He will be there. He was always going to be there. You both knew that when you sat down. Everything in between was just two people finding their way back to what they already knew.)", conflict: "Adding anything unnecessary", salvation: true }
+];
+
 // ─── Scenario registry ───────────────────────────────────────────────────────
 const ALL_SCENARIOS = {
-  hani:  SCENARIOS,
-  reza:  SCENARIOS_REZA,
-  mama:  SCENARIOS_MAMA
+  hani:       SCENARIOS,
+  reza:       SCENARIOS_REZA,
+  mama:       SCENARIOS_MAMA,
+  baba:       SCENARIOS_BABA,
+  sara:       SCENARIOS_SARA,
+  colleague:  SCENARIOS_COLLEAGUE,
+  oldfriend:  SCENARIOS_OLDFRIEND
 };
 
 const SCENARIO_META = {
@@ -651,6 +773,46 @@ const SCENARIO_META = {
     difficulty: 'Brutal',
     accent: '#98C379',
     emoji: '🌿'
+  },
+  baba: {
+    id: 'baba', character: 'Baba', you: 'Zain',
+    title: 'Zain & Baba',
+    relationship: 'Father / Son',
+    description: 'He has never said he is proud of you. He has said everything else. You have 23 moves to hear what he has always meant.',
+    cardAtRisk: 'DEVOTION',
+    difficulty: 'Hard',
+    accent: '#E5C07B',
+    emoji: '🪔'
+  },
+  sara: {
+    id: 'sara', character: 'Sara', you: 'Hira',
+    title: 'Hira & Sara',
+    relationship: 'Sisters',
+    description: 'She is your sister. She loves you. She has been quietly competing with you for twenty years. You have 23 moves to finally talk about it.',
+    cardAtRisk: 'EXCITEMENT',
+    difficulty: 'Hard',
+    accent: '#C678DD',
+    emoji: '🌸'
+  },
+  colleague: {
+    id: 'colleague', character: 'Colleague', you: 'Daniyal',
+    title: 'Daniyal & Colleague',
+    relationship: 'Workplace Betrayal',
+    description: 'He took credit for your work. Now he wants to fix it. Every sentence he says is a political move. You have 23 moves to decide what you actually want from this.',
+    cardAtRisk: 'PRESENCE',
+    difficulty: 'Hard',
+    accent: '#56B6C2',
+    emoji: '💼'
+  },
+  oldfriend: {
+    id: 'oldfriend', character: 'Old Friend', you: 'Bilal',
+    title: 'Bilal & Old Friend',
+    relationship: 'Childhood — Reconnecting',
+    description: 'He was your best friend. Then years passed without either of you meaning them to. He reached out. You came. You have 23 moves to find out if what you had still exists.',
+    cardAtRisk: 'EXCITEMENT',
+    difficulty: 'Medium',
+    accent: '#58A6FF',
+    emoji: '🕰️'
   }
 };
 
@@ -924,11 +1086,33 @@ class LostCardSim {
     this.chess  = new HaniChessEngine();
     this.trust  = this.scenarioId === 'mama' ? 0.62 : 0.80; // mama: already strained
 
-    // mama: conversation starts mid-tension — cortisol pre-loaded
+    // Scenario-specific starting states — pre-loaded emotional damage
     if (this.scenarioId === 'mama') {
-      this.ns.cortisol  = 0.28;
-      this.ns.pfcLoad   = 0.22;
-      this.ns.dopamine  = 0.62;
+      this.ns.cortisol = 0.28; this.ns.pfcLoad = 0.22; this.ns.dopamine = 0.62;
+      this.ns.computeNLI();
+    }
+    if (this.scenarioId === 'baba') {
+      // Years of unexpressed things — medium pre-load, but very fragile trust
+      this.trust = 0.58;
+      this.ns.cortisol = 0.22; this.ns.pfcLoad = 0.18; this.ns.dopamine = 0.65;
+      this.ns.computeNLI();
+    }
+    if (this.scenarioId === 'sara') {
+      // Sibling competition simmering — cortisol moderate, dopamine lower
+      this.trust = 0.60;
+      this.ns.cortisol = 0.20; this.ns.pfcLoad = 0.15; this.ns.dopamine = 0.60;
+      this.ns.computeNLI();
+    }
+    if (this.scenarioId === 'colleague') {
+      // Professional damage already done — low trust, high cortisol
+      this.trust = 0.45;
+      this.ns.cortisol = 0.32; this.ns.pfcLoad = 0.25; this.ns.dopamine = 0.55;
+      this.ns.computeNLI();
+    }
+    if (this.scenarioId === 'oldfriend') {
+      // Years of distance but no active wound — medium state, fragile warmth
+      this.trust = 0.65;
+      this.ns.cortisol = 0.15; this.ns.pfcLoad = 0.12; this.ns.dopamine = 0.68;
       this.ns.computeNLI();
     }
     this.move   = 0;
@@ -980,13 +1164,22 @@ class LostCardSim {
     this.dag.dijkstra();
 
     // Trust — drops hard, barely repairs
-    if (choiceType === SOFT)          this.trust = Math.min(1, this.trust + (this.scenarioId === 'mama' ? 0.003 : 0.01));
-    else if (choiceType===AGGRESSIVE) this.trust = Math.max(0, this.trust - (this.scenarioId === 'mama' ? 0.20  : 0.14));
-    else                              this.trust = Math.max(0, this.trust - (this.scenarioId === 'mama' ? 0.13  : 0.08));
+    const _softGain = { mama:0.003, baba:0.004, sara:0.005, colleague:0.006, oldfriend:0.012 };
+    const _aggLoss  = { mama:0.20,  baba:0.19,  sara:0.17,  colleague:0.18,  oldfriend:0.13  };
+    const _silLoss  = { mama:0.13,  baba:0.12,  sara:0.11,  colleague:0.12,  oldfriend:0.08  };
+    const sid = this.scenarioId;
+    if (choiceType === SOFT)          this.trust = Math.min(1, this.trust + (_softGain[sid] ?? 0.01));
+    else if (choiceType===AGGRESSIVE) this.trust = Math.max(0, this.trust - (_aggLoss[sid]  ?? 0.14));
+    else                              this.trust = Math.max(0, this.trust - (_silLoss[sid]  ?? 0.08));
 
-    // Passive neurological cost — compounds with each move (relationship strain is cumulative)
-    // mama scenario: 2.2× passive damage — emotional contradiction exhausts PFC fast
-    const scenarioMult = this.scenarioId === 'mama' ? 2.2 : 1.0;
+    // Passive neurological cost per scenario (higher = harder to reach move 23)
+    const scenarioMult =
+      this.scenarioId === 'mama'      ? 2.2 :   // brutal — emotional contradictions
+      this.scenarioId === 'baba'      ? 1.9 :   // hard — decades of silence compound fast
+      this.scenarioId === 'sara'      ? 1.8 :   // hard — sibling competition under every word
+      this.scenarioId === 'colleague' ? 1.7 :   // hard — professional civility = high PFC load
+      this.scenarioId === 'oldfriend' ? 1.3 :   // medium — warmth buffers some damage
+      1.0;
     const passiveMult  = (1 + (this.move * 0.04)) * scenarioMult;
     this.ns.pfcLoad  = Math.min(1, this.ns.pfcLoad  + 0.022 * passiveMult);
     this.ns.cortisol = Math.min(1, this.ns.cortisol + 0.018 * passiveMult);
