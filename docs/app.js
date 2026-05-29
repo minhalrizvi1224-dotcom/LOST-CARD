@@ -1855,15 +1855,19 @@ function _getUnifiedPool() {
 // 3 Gemini keys = 3M TPM/min → ~250 HB requests/min → more than enough.
 function _getHBPool() {
   const geminiList = (typeof poolGeminiKeys !== 'undefined' && poolGeminiKeys.length)
-    ? poolGeminiKeys : [];
+    ? poolGeminiKeys.filter(k => k && k.startsWith('AIza')) : [];
   if (geminiList.length)
     return geminiList.map(k => ({ key: k, provider: 'gemini' }));
 
   // localStorage fallback (user's own Gemini key)
   const localGemini = localStorage.getItem('lc_gemini_key');
-  if (localGemini) return [{ key: localGemini, provider: 'gemini' }];
+  if (localGemini && localGemini.startsWith('AIza')) return [{ key: localGemini, provider: 'gemini' }];
 
-  // No Gemini key — fall back to unified (rare edge case)
+  // No valid Gemini key — fall back to Groq with high-TPM model
+  const groqList = (typeof poolGroqKeys !== 'undefined' && poolGroqKeys.length)
+    ? poolGroqKeys : (typeof poolGroqKey !== 'undefined' && poolGroqKey ? [poolGroqKey] : []);
+  if (groqList.length) return groqList.map(k => ({ key: k, provider: 'groq-hb' }));
+
   return _getUnifiedPool();
 }
 
@@ -3799,6 +3803,14 @@ async function callAI(provider, key, history, systemPrompt, userMsg, maxTokens =
       const body = { contents, generationConfig: { maxOutputTokens: maxTokens, temperature: 0.9 } };
       if (sys) body.systemInstruction = { parts: [{ text: sys.content }] };
       return fetch(gUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    }
+    // Groq-HB fallback — llama-3.1-8b-instant has 20k TPM (handles large HB prompt)
+    if (entry.provider === 'groq-hb') {
+      return fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${entry.key}` },
+        body:    JSON.stringify({ model: 'llama-3.1-8b-instant', messages, max_tokens: maxTokens, temperature: 0.9 })
+      });
     }
     // Groq — OpenAI-compatible
     return fetch('https://api.groq.com/openai/v1/chat/completions', {
