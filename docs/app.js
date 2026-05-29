@@ -30,6 +30,51 @@ document.addEventListener('authReady', (e) => {
   }
 });
 
+// ── Firebase Cloud Function proxy (Step 11) ───────────────────────────
+// When deployed, all AI calls go through the Cloud Function so API keys
+// never reach the browser. Falls back to direct API if CF not available.
+let _cloudAIFn = null;
+function _initCloudFn() {
+  if (_cloudAIFn) return;
+  try {
+    if (typeof firebase !== 'undefined' && firebase.functions) {
+      // Region must match where the function is deployed (asia-south1)
+      const _fn = firebase.app().functions('asia-south1');
+      _cloudAIFn = _fn.httpsCallable('ai', { timeout: 30000 });
+    }
+  } catch(e) {}
+}
+document.addEventListener('DOMContentLoaded', _initCloudFn);
+
+// Call AI via Cloud Function — throws if unavailable
+async function callCloudAI(provider, messages, maxTokens) {
+  _initCloudFn();
+  if (!_cloudAIFn) throw new Error('Cloud function not initialized');
+  const result = await _cloudAIFn({ provider, messages, maxTokens });
+  return result.data.text;
+}
+
+// Feature flag: set to true after Cloud Functions are deployed
+// The app auto-detects via a test call on first use — no manual toggle needed
+let _cfAvailable = null; // null = unknown, true = use CF, false = use direct
+
+async function _detectCF() {
+  if (_cfAvailable !== null) return _cfAvailable;
+  try {
+    _initCloudFn();
+    if (!_cloudAIFn) { _cfAvailable = false; return false; }
+    // Lightweight check: send empty call — CF will reject with invalid-argument
+    // which means it IS deployed (just rejects bad input, not connection failure)
+    await _cloudAIFn({ provider: 'ping' });
+    _cfAvailable = true;
+  } catch(e) {
+    // 'invalid-argument' or 'failed-precondition' = CF is deployed, just rejected bad input
+    const code = e?.code || '';
+    _cfAvailable = code.includes('invalid-argument') || code.includes('failed-precondition') || code.includes('permission-denied') || code.includes('unauthenticated');
+  }
+  return _cfAvailable;
+}
+
 // ══════════════════════════════════════════════════════════════════════
 // SCALABILITY UTILITIES
 // ══════════════════════════════════════════════════════════════════════
@@ -3146,12 +3191,28 @@ async function sendAIMessage() {
 
   try {
     let reply;
-    if (useGemini) {
-      // Legacy personal Gemini key path
-      reply = await callGemini(apiKey, aiAssistantHistory, AI_SYSTEM_PROMPT, text, 500);
-    } else {
-      // Pool path — Gemini-only pool via OpenAI-compatible endpoint
-      reply = await callAI('gemini', '', aiAssistantHistory, AI_SYSTEM_PROMPT, text, 500, hbPool);
+    // Try Cloud Function first for HB (keys hidden server-side)
+    const cfReady = await _detectCF();
+    if (cfReady && !useGemini) {
+      const msgs = [{ role: 'system', content: AI_SYSTEM_PROMPT }];
+      for (const m of aiAssistantHistory.slice(-6)) msgs.push(m);
+      msgs.push({ role: 'user', content: text });
+      try {
+        reply = await callCloudAI('gemini', msgs, 500);
+      } catch(cfErr) {
+        const code = cfErr?.code || '';
+        if (code.includes('permission-denied') || code.includes('unauthenticated')) throw cfErr;
+        // CF failed — fall to direct pool
+      }
+    }
+    if (!reply) {
+      if (useGemini) {
+        // Legacy personal Gemini key path
+        reply = await callGemini(apiKey, aiAssistantHistory, AI_SYSTEM_PROMPT, text, 500);
+      } else {
+        // Gemini-only pool (direct API)
+        reply = await callAI('gemini', '', aiAssistantHistory, AI_SYSTEM_PROMPT, text, 500, hbPool);
+      }
     }
     typingEl.remove();
     isAITyping = false;
@@ -3467,6 +3528,23 @@ function _friendlyAPIError(err) {
 
 // poolOverride: optional [{key, provider}] array — used by HB to force Gemini-only pool
 async function callAI(provider, key, history, systemPrompt, userMsg, maxTokens = 180, poolOverride = null) {
+  // ── Cloud Function path (Step 11) ─────────────────────────────────────
+  // If CF is deployed, proxy through it — keys never reach the browser
+  if (await _detectCF()) {
+    const messages = [{ role: 'system', content: systemPrompt }];
+    for (const m of history.slice(-6)) messages.push(m);
+    if (userMsg) messages.push({ role: 'user', content: userMsg });
+    try {
+      return await callCloudAI(provider || 'groq', messages, maxTokens);
+    } catch(cfErr) {
+      // CF failed — fall through to direct API as safety net
+      const code = cfErr?.code || '';
+      if (code.includes('permission-denied') || code.includes('unauthenticated')) throw cfErr;
+      // For other errors (network, key issues) fall back to direct call
+      console.warn('[CF fallback]', cfErr.message);
+    }
+  }
+  // ── Direct API path (fallback / before CF deployment) ─────────────────
   // ── Token optimization: trim history to last 6 msgs (was 10) ──────────
   // Each extra message pair adds ~200-500 tokens. 6 keeps context while
   // reducing TPM usage by ~40% on long conversations.
