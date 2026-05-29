@@ -3390,10 +3390,7 @@ async function sendAIMessage() {
     typingEl.remove();
     isAITyping = false;
     // Admin sees raw error so bugs can be diagnosed without DevTools
-    const errMsg = currentUser?.isAdmin
-      ? `[Debug] ${err?.message || err?.code || 'unknown error'} | pool: ${JSON.stringify(_getHBPool().map(e=>e.key?.slice(0,8)+'…'))}`
-      : _friendlyAPIError(err, 'Hair Band');
-    addMessage('them', 'Hair Band', errMsg);
+    addMessage('them', 'Hair Band', _friendlyAPIError(err, 'Hair Band'));
   }
 }
 
@@ -3685,7 +3682,7 @@ function logHairBandQuery(userMsg, aiReply) {
 function _friendlyAPIError(err, name) {
   const msg  = (err && err.message) ? err.message : '';
   const who  = name || 'AI';
-  if (/rate.?limit|TPM|tokens.per.minute|too.many.request/i.test(msg))
+  if (/rate.?limit|TPM|tokens.per.minute|too.many.request|HTTP 429|quota.*exceed|resource.?exhaust/i.test(msg))
     return `${who} is busy right now — wait a moment and try again.`;
   if (/invalid.api.key|invalid_api_key|Incorrect API/i.test(msg))
     return `${who} is unavailable right now. Please try again shortly.`;
