@@ -3389,7 +3389,11 @@ async function sendAIMessage() {
   } catch(err) {
     typingEl.remove();
     isAITyping = false;
-    addMessage('them', 'Hair Band', _friendlyAPIError(err, 'Hair Band'));
+    // Admin sees raw error so bugs can be diagnosed without DevTools
+    const errMsg = currentUser?.isAdmin
+      ? `[Debug] ${err?.message || err?.code || 'unknown error'} | pool: ${JSON.stringify(_getHBPool().map(e=>e.key?.slice(0,8)+'…'))}`
+      : _friendlyAPIError(err, 'Hair Band');
+    addMessage('them', 'Hair Band', errMsg);
   }
 }
 
