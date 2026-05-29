@@ -1060,6 +1060,87 @@ const SECTION_ANIM = {
   about:   'sec-enter-bottom'
 };
 
+// ══════════════════════════════════════════════════════════════════════
+// COMPLAINTS & FEEDBACK
+// ══════════════════════════════════════════════════════════════════════
+let _complaintCategory = 'Bug Report';
+
+function selectComplaintCat(btn) {
+  document.querySelectorAll('.cp-cat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  _complaintCategory = btn.dataset.cat;
+}
+
+function openComplaintsPanel() {
+  showSection('chatApp');
+  // Hide other panels, show complaints
+  document.getElementById('chatWelcome').style.display  = 'none';
+  document.getElementById('chatConv').style.display     = 'none';
+  document.getElementById('complaintsPanel').style.display = 'flex';
+  // Highlight in chat list
+  document.querySelectorAll('.chat-item').forEach(el => el.classList.remove('active'));
+  const el = document.querySelector('[data-id="complaints"]');
+  if (el) el.classList.add('active');
+}
+
+function closeComplaintsPanel() {
+  document.getElementById('complaintsPanel').style.display = 'none';
+  document.getElementById('chatWelcome').style.display  = 'flex';
+  document.querySelectorAll('.chat-item').forEach(el => el.classList.remove('active'));
+}
+
+async function submitComplaint() {
+  const input = document.getElementById('complaintInput');
+  const text  = input.value.trim();
+  if (!text) return;
+
+  const btn = document.getElementById('complaintSendBtn');
+  btn.disabled = true;
+  btn.textContent = '...';
+
+  try {
+    // Add user message bubble
+    const msgs = document.getElementById('complaintsMsgs');
+    const bubble = document.createElement('div');
+    bubble.style.cssText = 'align-self:flex-end;background:var(--accent);color:#0D1117;border-radius:12px 12px 2px 12px;padding:10px 14px;font-size:13px;max-width:85%;line-height:1.6;white-space:pre-wrap;word-break:break-word';
+    bubble.textContent = text;
+    msgs.appendChild(bubble);
+    msgs.scrollTop = msgs.scrollHeight;
+    input.value = '';
+
+    // Save to Firestore
+    if (firebaseDB && currentUser) {
+      await firebaseDB.collection('complaints').add({
+        uid:         currentUser.uid || null,
+        email:       currentUser.email || null,
+        displayName: currentUser.displayName || null,
+        category:    _complaintCategory,
+        message:     text,
+        status:      'new',
+        createdAt:   firebase.firestore.FieldValue.serverTimestamp(),
+        platform:    /Mobi|Android/i.test(navigator.userAgent) ? 'mobile' : 'desktop'
+      });
+    }
+
+    // Thank you reply
+    setTimeout(() => {
+      const reply = document.createElement('div');
+      reply.style.cssText = 'background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:12px 14px;font-size:13px;color:var(--text);line-height:1.7;max-width:85%';
+      reply.innerHTML = '✅ <strong>Received!</strong> Thank you — I\'ll read this personally. If it\'s a bug, I\'ll fix it. If it\'s a suggestion, I\'ll consider it.';
+      msgs.appendChild(reply);
+      msgs.scrollTop = msgs.scrollHeight;
+    }, 600);
+
+  } catch(err) {
+    showToast('Could not send. Check your connection.', 'error');
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Send';
+}
+
+// ══════════════════════════════════════════════════════════════════════
+
 function showSection(name) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('#bottomNav .bn-tab').forEach(b => b.classList.remove('active'));
