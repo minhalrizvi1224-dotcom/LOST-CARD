@@ -3288,6 +3288,37 @@ function startAIAssistant() {
   const leftSidebar = document.querySelector('.conv-left-sidebar');
   if (leftSidebar) leftSidebar.style.display = 'none';
 
+  // ── Hair Band: Construction Mode ─────────────────────────────────────
+  const HB_CONSTRUCTION = true; // set false when HB is back online
+  if (HB_CONSTRUCTION) {
+    document.getElementById('choicesArea').innerHTML = '';
+    document.getElementById('chatMessages').innerHTML = `
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;padding:32px 24px;text-align:center;gap:20px">
+        <div style="font-size:52px;animation:hbFloat 3s ease-in-out infinite alternate">🪢</div>
+        <div style="font-size:20px;font-weight:900;color:var(--text,#E6EDF3);letter-spacing:.5px">Hair Band is getting upgraded</div>
+        <div style="font-size:13px;color:var(--muted,#8B949E);line-height:1.8;max-width:360px">
+          We're improving the AI behind Hair Band.<br>
+          It'll be back very soon — better than before.
+        </div>
+        <div style="background:rgba(88,166,255,.06);border:1px solid rgba(88,166,255,.15);border-radius:14px;padding:20px 28px;max-width:380px;width:100%">
+          <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--blue,#58A6FF);margin-bottom:14px">In the meantime — try these</div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <button onclick="openChat('Best Friend')" style="padding:12px 20px;background:rgba(88,166,255,.1);border:1px solid rgba(88,166,255,.25);border-radius:10px;color:var(--text,#E6EDF3);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s" onmouseover="this.style.background='rgba(88,166,255,.2)'" onmouseout="this.style.background='rgba(88,166,255,.1)'">
+              💙 Custom Chats — Simulate real relationships
+            </button>
+            <button onclick="startDefaultMode()" style="padding:12px 20px;background:rgba(198,120,221,.08);border:1px solid rgba(198,120,221,.2);border-radius:10px;color:var(--text,#E6EDF3);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s" onmouseover="this.style.background='rgba(198,120,221,.18)'" onmouseout="this.style.background='rgba(198,120,221,.08)'">
+              💜 Default Mode — Umm-e-Laila & Hani
+            </button>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--muted,#8B949E);opacity:.6">Hair Band will be back shortly ✦</div>
+      </div>
+      <style>@keyframes hbFloat{0%{transform:translateY(0)}100%{transform:translateY(-10px)}}</style>`;
+    scrollMessages();
+    return;
+  }
+  // ─────────────────────────────────────────────────────────────────────
+
   // Build AI input — check premium / limit
   if (!checkHBPremium() && hbCountLocal >= HB_FREE_LIMIT) {
     showHBUpgradeWall();
