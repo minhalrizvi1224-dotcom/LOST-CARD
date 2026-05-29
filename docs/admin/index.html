@@ -1030,7 +1030,7 @@ function filterUsers() {
   ));
 }
 
-function showUserDetail(idx) {
+async function showUserDetail(idx) {
   const u=allUsers[idx]; if(!u) return;
   const userSessions=allSessions.filter(s=>s.uid===u.id);
   const sessHtml=userSessions.length?userSessions.slice(0,5).map(s=>`
@@ -1059,10 +1059,16 @@ function showUserDetail(idx) {
     <div class="d-row"><div class="d-key">Messages Used</div>
       <div class="d-val" style="color:${(u.hbCount||0)>=50?'var(--red)':(u.hbCount||0)>=40?'var(--accent2)':'var(--accent)'}">
         ${(u.hbCount||0).toLocaleString()} / 50</div></div>
+    <div class="d-row"><div class="d-key">Plan</div>
+      <div class="d-val">${u.hbPlan==='upgraded'
+        ?'<span style="color:var(--purple)">✨ Upgraded</span>'
+        :'<span style="color:var(--muted)">Free</span>'}</div></div>
     <div class="d-row"><div class="d-key">Upgrade Request</div>
       <div class="d-val">${u.upgradeRequested
         ?`<span style="color:var(--accent2)">🔔 Requested${u.upgradeRequestedAt?' — '+fmtDateTime(u.upgradeRequestedAt.seconds):''}</span>`
         :'<span style="color:var(--muted)">None</span>'}</div></div>
+    <div class="d-sect">Recent Hair Band Queries</div>
+    <div id="userHBQueries" style="font-size:11px;color:var(--muted)">Loading…</div>
     <div class="d-row"><div class="d-key">Gemini Key</div>
       <div class="d-val">${u.geminiKey
         ?`<span style="color:var(--green)">✅ Allocated</span> <span style="font-size:10px;color:var(--muted);font-family:monospace">${u.geminiKey.substring(0,12)}…</span>`
@@ -1088,6 +1094,35 @@ function showUserDetail(idx) {
     <div style="font-size:10px;color:var(--muted)">Warnings: 1-2 = warning. 3 = auto-suspend.</div>
   `;
   document.getElementById('detailOverlay').style.display='flex';
+
+  // Async: load this user's Hair Band queries
+  try {
+    const hbSnap = await adDB.collection('hairBandLogs')
+      .where('uid','==',u.id)
+      .orderBy('timestamp','desc')
+      .limit(5)
+      .get();
+    const hbDiv = document.getElementById('userHBQueries');
+    if (!hbDiv) return;
+    if (hbSnap.empty) {
+      hbDiv.innerHTML = '<div style="color:var(--muted)">No Hair Band queries yet.</div>';
+    } else {
+      hbDiv.innerHTML = hbSnap.docs.map(d => {
+        const q = d.data();
+        const qText = esc((q.query||'').substring(0,110)) + ((q.query||'').length>110?'…':'');
+        const rText = esc((q.reply||'').substring(0,130)) + ((q.reply||'').length>130?'…':'');
+        const ts = q.timestamp ? fmtDateTime(q.timestamp.seconds) : '—';
+        return `<div style="padding:7px 9px;background:var(--surface2);border-radius:6px;margin-bottom:5px;border:1px solid var(--border)">
+          <div style="color:var(--accent);font-weight:600;margin-bottom:3px">${qText}</div>
+          <div style="color:var(--muted);font-size:10px;line-height:1.5;margin-bottom:3px">${rText}</div>
+          <div style="color:var(--muted);font-size:9px;opacity:.7">${ts}</div>
+        </div>`;
+      }).join('');
+    }
+  } catch(e) {
+    const hbDiv = document.getElementById('userHBQueries');
+    if (hbDiv) hbDiv.innerHTML = '<div style="color:var(--muted);font-size:10px">Could not load queries (check Firestore rules for hairBandLogs).</div>';
+  }
 }
 
 function closeDetail() { document.getElementById('detailOverlay').style.display='none'; }
