@@ -96,6 +96,16 @@ function initAuth() {
       geminiKey:        docData.geminiKey         || null  // legacy compat
     };
 
+    // ── Restore profile data from Firestore into localStorage ────────────
+    const uid = user.uid;
+    if (docData.bio)        localStorage.setItem('lc_bio_'      + uid, docData.bio);
+    if (docData.phone)      localStorage.setItem('lc_phone_'    + uid, docData.phone);
+    if (docData.location)   localStorage.setItem('lc_location_' + uid, docData.location);
+    if (docData.profilePic) localStorage.setItem('lc_pic_'      + uid, docData.profilePic);
+    if (docData.displayName) {
+      localStorage.setItem('lc_emoji_' + uid, docData.avatarEmoji || currentUser.avatarEmoji || '🎭');
+    }
+
     // ── Load saved preferences from Firestore into localStorage ──────────
     if (docData.preferences) {
       const p = docData.preferences;
