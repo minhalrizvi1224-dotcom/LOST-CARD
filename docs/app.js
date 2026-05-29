@@ -3312,9 +3312,32 @@ function startAIAssistant() {
           </div>
         </div>
         <div style="font-size:11px;color:var(--muted,#8B949E);opacity:.6">Hair Band will be back shortly ✦</div>
+        ${currentUser && currentUser.isAdmin ? `
+        <button onclick="window._hbAdminTest()" style="margin-top:8px;padding:8px 18px;background:rgba(240,136,62,.1);border:1px solid rgba(240,136,62,.3);border-radius:8px;color:#F0883E;font-size:11px;font-weight:700;cursor:pointer">
+          🔧 Admin: Test HB API
+        </button>
+        <div id="hbTestResult" style="font-size:11px;color:#F0883E;margin-top:6px;max-width:380px;word-break:break-all"></div>` : ''}
       </div>
       <style>@keyframes hbFloat{0%{transform:translateY(0)}100%{transform:translateY(-10px)}}</style>`;
     scrollMessages();
+
+    // Admin test function — shows raw error
+    window._hbAdminTest = async () => {
+      const el = document.getElementById('hbTestResult');
+      if (el) el.textContent = 'Testing…';
+      const pool = _getHBPool();
+      if (!pool.length) { if (el) el.textContent = 'No keys in pool.'; return; }
+      const entry = pool[0];
+      try {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${entry.key}`;
+        const r = await fetch(url, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: 'Hi' }] }], generationConfig: { maxOutputTokens: 10 } })
+        });
+        const d = await r.json();
+        if (el) el.textContent = `Status ${r.status}: ${JSON.stringify(d).substring(0, 300)}`;
+      } catch(e) { if (el) el.textContent = 'Error: ' + e.message; }
+    };
     return;
   }
   // ─────────────────────────────────────────────────────────────────────
