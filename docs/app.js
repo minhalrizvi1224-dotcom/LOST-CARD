@@ -1862,11 +1862,11 @@ function _getHBPool() {
   const groqList = (typeof poolGroqKeys !== 'undefined' && poolGroqKeys.length)
     ? poolGroqKeys : (typeof poolGroqKey !== 'undefined' && poolGroqKey ? [poolGroqKey] : []);
 
-  // Gemini first, Groq as live fallback in same pool.
-  // When Gemini keys fail they get cooldowns, callAI then tries Groq automatically.
+  // Groq first (llama-3.1-8b-instant, 20k TPM — handles large HB prompt).
+  // Gemini as backup once quotas reset.
   return [
-    ...geminiList.map(k => ({ key: k, provider: 'gemini' })),
-    ...groqList.map(k => ({ key: k, provider: 'groq-hb' }))
+    ...groqList.map(k => ({ key: k, provider: 'groq-hb' })),
+    ...geminiList.map(k => ({ key: k, provider: 'gemini' }))
   ];
 }
 
@@ -3289,7 +3289,7 @@ function startAIAssistant() {
   if (leftSidebar) leftSidebar.style.display = 'none';
 
   // ── Hair Band: Construction Mode ─────────────────────────────────────
-  const HB_CONSTRUCTION = true; // set false when HB is back online
+  const HB_CONSTRUCTION = false; // set false when HB is back online
   if (HB_CONSTRUCTION) {
     document.getElementById('choicesArea').innerHTML = '';
     document.getElementById('chatMessages').innerHTML = `
