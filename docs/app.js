@@ -3848,7 +3848,8 @@ async function callAI(provider, key, history, systemPrompt, userMsg, maxTokens =
       const cd = _keyCooldowns[e.key] || 0;
       return cd > 0 && cd < min ? cd : min;
     }, Infinity);
-    const waitMs = soonest === Infinity ? 3000 : Math.max(soonest - Date.now(), 500);
+    const waitMs = soonest === Infinity ? 3000 : Math.min(Math.max(soonest - Date.now(), 500), 8000);
+    if (waitMs >= 7000) throw new Error('HTTP 429'); // all keys on long cooldown — surface immediately
     await new Promise(r => setTimeout(r, waitMs));
     const now2   = Date.now();
     const retryStart = isHBCall ? (_hbKeyIdx % entries.length) : (_poolKeyIdx % entries.length);
