@@ -1856,19 +1856,18 @@ function _getUnifiedPool() {
 function _getHBPool() {
   const geminiList = (typeof poolGeminiKeys !== 'undefined' && poolGeminiKeys.length)
     ? poolGeminiKeys : [];
-  if (geminiList.length)
-    return geminiList.map(k => ({ key: k, provider: 'gemini' }));
-
-  // localStorage fallback (user's own Gemini key)
   const localGemini = localStorage.getItem('lc_gemini_key');
-  if (localGemini) return [{ key: localGemini, provider: 'gemini' }];
+  if (localGemini && !geminiList.includes(localGemini)) geminiList.push(localGemini);
 
-  // No valid Gemini key — fall back to Groq with high-TPM model
   const groqList = (typeof poolGroqKeys !== 'undefined' && poolGroqKeys.length)
     ? poolGroqKeys : (typeof poolGroqKey !== 'undefined' && poolGroqKey ? [poolGroqKey] : []);
-  if (groqList.length) return groqList.map(k => ({ key: k, provider: 'groq-hb' }));
 
-  return _getUnifiedPool();
+  // Gemini first, Groq as live fallback in same pool.
+  // When Gemini keys fail they get cooldowns, callAI then tries Groq automatically.
+  return [
+    ...geminiList.map(k => ({ key: k, provider: 'gemini' })),
+    ...groqList.map(k => ({ key: k, provider: 'groq-hb' }))
+  ];
 }
 
 // Kept for backward compat — returns just the key string of the current entry
