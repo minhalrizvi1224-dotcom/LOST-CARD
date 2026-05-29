@@ -3,178 +3,198 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>LOST CARD — Launching Tonight</title>
+  <title>LOST CARD — Updating</title>
   <meta name="theme-color" content="#0D1117"/>
   <meta name="robots" content="noindex,nofollow"/>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
 
     html, body {
-      min-height: 100dvh;
-      background: #0D1117;
-      color: #E6EDF3;
-      font-family: 'Segoe UI', system-ui, sans-serif;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
+      min-height:100dvh;
+      background:#0D1117;
+      color:#E6EDF3;
+      font-family:'Segoe UI', system-ui, sans-serif;
+      display:flex; align-items:center; justify-content:center;
+      overflow:hidden;
     }
 
+    /* ── Ambient background ── */
     .bg {
-      position: fixed;
-      inset: 0;
+      position:fixed; inset:0; pointer-events:none;
       background:
-        radial-gradient(ellipse at 15% 50%, rgba(88,166,255,0.06) 0%, transparent 55%),
-        radial-gradient(ellipse at 85% 15%, rgba(198,120,221,0.05) 0%, transparent 50%),
-        radial-gradient(ellipse at 65% 85%, rgba(86,182,194,0.04) 0%, transparent 50%),
-        #0D1117;
-      animation: bgPulse 8s ease-in-out infinite alternate;
+        radial-gradient(ellipse 60% 55% at 20% 30%, rgba(198,120,221,0.07) 0%, transparent 65%),
+        radial-gradient(ellipse 50% 45% at 80% 70%, rgba(86,182,194,0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 35% at 55% 50%, rgba(88,166,255,0.04) 0%, transparent 70%);
+      animation: bgBreath 9s ease-in-out infinite alternate;
     }
-    @keyframes bgPulse { 0%{opacity:.8} 100%{opacity:1} }
+    @keyframes bgBreath { 0%{opacity:.7} 100%{opacity:1} }
 
+    /* ── Stars ── */
     .stars { position:fixed; inset:0; pointer-events:none; }
     .star {
       position:absolute; border-radius:50%;
       background:rgba(230,237,243,0.5);
-      animation: twinkle var(--d,3s) ease-in-out infinite alternate;
-      animation-delay: var(--delay,0s);
+      animation:twinkle var(--d,3s) ease-in-out infinite alternate;
+      animation-delay:var(--delay,0s);
     }
     @keyframes twinkle {
-      0%  { opacity:0.1; transform:scale(0.8); }
-      100%{ opacity:0.8; transform:scale(1.2); }
+      0%  { opacity:0.08; transform:scale(0.8); }
+      100%{ opacity:0.6;  transform:scale(1.2); }
     }
 
-    .container {
+    /* ── Container ── */
+    .wrap {
       position:relative; z-index:10;
       text-align:center;
-      padding:40px 24px;
-      max-width:580px;
+      padding:48px 28px;
+      max-width:520px;
       width:100%;
+      animation:fadeUp .8s ease both;
+    }
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(20px); }
+      to   { opacity:1; transform:none; }
     }
 
-    /* Three card dots */
-    .cards-row { display:flex; justify-content:center; gap:10px; margin-bottom:36px; }
-    .card-dot {
-      width:11px; height:11px; border-radius:50%;
-      animation: dotPulse 2.4s ease-in-out infinite;
+    /* ── Three animated cards D E P ── */
+    .cards-row {
+      display:flex; justify-content:center; align-items:center;
+      gap:12px; margin-bottom:40px;
     }
-    .card-dot:nth-child(1){ background:#C678DD; animation-delay:0s;    box-shadow:0 0 10px rgba(198,120,221,.5); }
-    .card-dot:nth-child(2){ background:#56B6C2; animation-delay:.5s;   box-shadow:0 0 10px rgba(86,182,194,.5);  }
-    .card-dot:nth-child(3){ background:#98C379; animation-delay:1s;    box-shadow:0 0 10px rgba(152,195,121,.5); }
-    @keyframes dotPulse {
-      0%,100%{ opacity:.35; transform:scale(0.85); }
-      50%    { opacity:1;   transform:scale(1.15); }
+    .lc-card {
+      width:44px; height:60px; border-radius:8px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:18px; font-weight:900; letter-spacing:1px;
+      border:1.5px solid;
+      animation:cardFloat 3s ease-in-out infinite;
+    }
+    .lc-card:nth-child(1){
+      color:#C678DD; border-color:rgba(198,120,221,.5);
+      background:rgba(198,120,221,.08);
+      animation-delay:0s;
+    }
+    .lc-card:nth-child(2){
+      color:#56B6C2; border-color:rgba(86,182,194,.5);
+      background:rgba(86,182,194,.08);
+      animation-delay:.4s;
+    }
+    .lc-card:nth-child(3){
+      color:#98C379; border-color:rgba(152,195,121,.5);
+      background:rgba(152,195,121,.08);
+      animation-delay:.8s;
+    }
+    @keyframes cardFloat {
+      0%,100% { transform:translateY(0);   opacity:.7; }
+      50%      { transform:translateY(-8px); opacity:1;  }
     }
 
+    /* ── Logo ── */
     .logo {
-      font-size:clamp(38px,8vw,56px);
-      font-weight:900;
-      letter-spacing:7px;
+      font-size:clamp(36px,9vw,54px);
+      font-weight:900; letter-spacing:8px;
       color:#E6EDF3;
-      text-shadow:0 0 50px rgba(88,166,255,0.25);
-      margin-bottom:10px;
-      animation: logoFade 1.2s ease both;
+      text-shadow:0 0 40px rgba(88,166,255,.2);
+      margin-bottom:8px;
     }
     .logo span { color:#58A6FF; }
-    @keyframes logoFade { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:none} }
 
-    .sub {
-      font-size:11px; font-weight:700; color:#8B949E;
-      text-transform:uppercase; letter-spacing:3px;
-      margin-bottom:52px;
-      animation: logoFade 1.2s .2s ease both;
+    .tagline {
+      font-size:10px; font-weight:700;
+      color:#8B949E; letter-spacing:3px;
+      text-transform:uppercase;
+      margin-bottom:44px;
     }
 
-    .launch-chip {
-      display:inline-flex; align-items:center; gap:6px;
-      background:rgba(88,166,255,.08);
-      border:1px solid rgba(88,166,255,.2);
-      color:#58A6FF; font-size:10px; font-weight:800;
-      padding:5px 14px; border-radius:20px;
+    /* ── Status badge ── */
+    .badge {
+      display:inline-flex; align-items:center; gap:8px;
+      background:rgba(240,136,62,.08);
+      border:1px solid rgba(240,136,62,.25);
+      color:#F0883E; font-size:11px; font-weight:800;
+      padding:6px 18px; border-radius:20px;
       letter-spacing:1.5px; text-transform:uppercase;
-      margin-bottom:20px;
+      margin-bottom:36px;
     }
-    .pulse-dot {
-      width:6px; height:6px; border-radius:50%; background:#58A6FF;
-      animation: pulseDot 1.2s ease-in-out infinite;
+    .pulse {
+      width:7px; height:7px; border-radius:50%;
+      background:#F0883E;
+      animation:pulse 1.4s ease-in-out infinite;
     }
-    @keyframes pulseDot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.7)} }
+    @keyframes pulse {
+      0%,100%{ opacity:1; transform:scale(1); box-shadow:0 0 0 0 rgba(240,136,62,.5); }
+      50%    { opacity:.6; transform:scale(.8); box-shadow:0 0 0 4px rgba(240,136,62,0); }
+    }
 
-    /* Countdown */
-    .countdown {
-      display:flex; justify-content:center; align-items:flex-start;
-      gap:6px; margin-bottom:14px;
+    /* ── Progress bar ── */
+    .progress-wrap {
+      background:#161B22;
+      border:1px solid #21262D;
+      border-radius:10px;
+      height:5px;
+      width:260px;
+      margin:0 auto 12px;
+      overflow:hidden;
     }
-    .cd-block { display:flex; flex-direction:column; align-items:center; }
-    .cd-num {
-      font-size:clamp(52px,13vw,80px);
-      font-weight:900;
-      color:#E6EDF3;
-      font-family:'Courier New',monospace;
-      line-height:1;
-      text-shadow:0 0 30px rgba(88,166,255,.3);
-      min-width:2ch;
-      transition:color .15s;
+    .progress-bar {
+      height:100%;
+      border-radius:10px;
+      background:linear-gradient(90deg,#C678DD,#56B6C2,#98C379);
+      background-size:200% 100%;
+      animation:progressShimmer 2.2s linear infinite;
+      width:100%;
     }
-    .cd-label {
-      font-size:9px; font-weight:700; color:#8B949E;
-      text-transform:uppercase; letter-spacing:2px; margin-top:7px;
+    @keyframes progressShimmer {
+      0%   { background-position:200% 0; }
+      100% { background-position:-200% 0; }
     }
-    .cd-sep {
-      font-size:clamp(44px,10vw,64px);
-      font-weight:900; color:#21262D;
-      line-height:1; padding-top:6px;
-      animation:sepBlink 1s ease-in-out infinite;
+    .progress-label {
+      font-size:11px; color:#8B949E;
+      letter-spacing:.5px; margin-bottom:44px;
     }
-    @keyframes sepBlink { 0%,100%{opacity:1} 50%{opacity:.15} }
 
-    .launch-when {
-      font-size:12px; color:#8B949E; margin-bottom:52px; letter-spacing:.3px;
+    /* ── Message ── */
+    .message {
+      font-size:15px; color:#C6D3E0;
+      line-height:1.85; margin-bottom:36px;
+      max-width:400px; margin-left:auto; margin-right:auto;
     }
-    .launch-when strong { color:#E6EDF3; }
+    .message strong { color:#E6EDF3; }
 
-    /* Quote */
+    /* ── Quote ── */
     .quote-wrap {
-      border-left:2px solid #58A6FF;
+      border-left:2px solid rgba(88,166,255,.4);
       background:rgba(88,166,255,.04);
       border-radius:0 10px 10px 0;
-      padding:18px 22px;
-      margin:0 auto 30px;
-      max-width:500px;
+      padding:16px 20px;
+      margin:0 auto 44px;
+      max-width:420px;
       text-align:left;
     }
     .quote-text {
-      font-size:14.5px; font-style:italic;
-      color:#E6EDF3; line-height:1.75; margin-bottom:10px;
+      font-size:13.5px; font-style:italic;
+      color:#8B949E; line-height:1.75;
+      margin-bottom:8px;
     }
     .quote-attr {
-      font-size:10px; font-weight:700; color:#8B949E;
-      text-transform:uppercase; letter-spacing:1.5px;
+      font-size:10px; font-weight:700;
+      color:#484F58; letter-spacing:1.5px;
+      text-transform:uppercase;
     }
 
-    /* Note */
-    .note {
-      font-size:13px; color:#8B949E; line-height:1.75;
-      max-width:440px; margin:0 auto 44px;
+    /* ── Footer ── */
+    .footer {
+      font-size:10px; color:#21262D;
+      font-weight:700; letter-spacing:2.5px;
+      text-transform:uppercase;
+      display:flex; align-items:center; justify-content:center; gap:10px;
     }
-    .note strong { color:#C6D3E0; }
+    .fdot { width:3px; height:3px; border-radius:50%; background:#21262D; }
 
-    /* Launched overlay */
-    #launched {
-      display:none; position:fixed; inset:0; z-index:999;
-      background:#0D1117;
-      flex-direction:column; align-items:center; justify-content:center; gap:16px;
+    /* ── Mobile ── */
+    @media(max-width:480px){
+      .logo { letter-spacing:5px; }
+      .progress-wrap { width:220px; }
     }
-    #launched.show { display:flex; }
-    .launched-text { font-size:22px; font-weight:800; color:#56D364; }
-    .launched-sub  { font-size:13px; color:#8B949E; }
-
-    .footer-row {
-      display:flex; align-items:center; justify-content:center;
-      gap:8px; font-size:10px; color:#21262D;
-      font-weight:700; letter-spacing:2px; text-transform:uppercase;
-    }
-    .fdot { width:4px; height:4px; border-radius:50%; background:#21262D; }
   </style>
 </head>
 <body>
@@ -182,107 +202,73 @@
 <div class="bg"></div>
 <div class="stars" id="stars"></div>
 
-<div class="container">
+<div class="wrap">
+
+  <!-- Three cards -->
   <div class="cards-row">
-    <div class="card-dot"></div>
-    <div class="card-dot"></div>
-    <div class="card-dot"></div>
+    <div class="lc-card">D</div>
+    <div class="lc-card">E</div>
+    <div class="lc-card">P</div>
   </div>
 
+  <!-- Logo -->
   <div class="logo">LOST <span>CARD</span></div>
-  <div class="sub">A Computational Model of Relational Belief Decay</div>
+  <div class="tagline">A Computational Model of Relational Belief Decay</div>
 
-  <div class="launch-chip">
-    <div class="pulse-dot"></div>
-    Launching Tonight
-  </div>
-
-  <div class="countdown">
-    <div class="cd-block">
-      <div class="cd-num" id="hh">00</div>
-      <div class="cd-label">Hours</div>
-    </div>
-    <div class="cd-sep">:</div>
-    <div class="cd-block">
-      <div class="cd-num" id="mm">00</div>
-      <div class="cd-label">Minutes</div>
-    </div>
-    <div class="cd-sep">:</div>
-    <div class="cd-block">
-      <div class="cd-num" id="ss">00</div>
-      <div class="cd-label">Seconds</div>
+  <!-- Status -->
+  <div style="margin-bottom:36px">
+    <div class="badge">
+      <div class="pulse"></div>
+      Update in Progress
     </div>
   </div>
 
-  <div class="launch-when">
-    <strong>6:00 PM</strong> &nbsp;·&nbsp; Pakistan Standard Time &nbsp;·&nbsp; Friday, 29 May 2026
+  <!-- Progress -->
+  <div class="progress-wrap">
+    <div class="progress-bar"></div>
+  </div>
+  <div class="progress-label">Our team is working on improvements — back very soon</div>
+
+  <!-- Message -->
+  <div class="message">
+    We're fixing a few things to make your experience better.<br>
+    <strong>LOST CARD</strong> will be back shortly.<br><br>
+    Thank you for your patience.
   </div>
 
+  <!-- Quote -->
   <div class="quote-wrap">
     <div class="quote-text">
-      "Every word we speak in a relationship is a card we play. Some hands are built slowly, with patience and presence. Some are lost in a single sentence — spoken too fast, or never spoken at all."
+      "Every word we speak in a relationship is a card we play.
+      We play without knowing we are in a game."
     </div>
     <div class="quote-attr">— The Bet of Belief &nbsp;·&nbsp; S. M. Minhal Abbas Rizvi</div>
   </div>
 
-  <div class="note">
-    We're almost ready.<br><br>
-    <strong>LOST CARD</strong> is not just a simulation — it is a mirror.
-    It shows you the patterns you didn't know you were repeating,
-    the moments where trust quietly left, and the exact weight of every word you chose.<br><br>
-    Come back at <strong>6 PM tonight</strong>. This is worth your time.
-  </div>
-
-  <div class="footer-row">
+  <!-- Footer -->
+  <div class="footer">
     <div class="fdot"></div>
     LOST CARD
     <div class="fdot"></div>
     2026
     <div class="fdot"></div>
   </div>
-</div>
 
-<div id="launched">
-  <div class="launched-text">✦ We're Live</div>
-  <div class="launched-sub">Taking you in…</div>
 </div>
 
 <script>
-  // Stars
+  // Generate stars
   const st = document.getElementById('stars');
-  for (let i = 0; i < 90; i++) {
-    const s = document.createElement('div');
-    const big = Math.random() < 0.18;
+  for (let i = 0; i < 80; i++) {
+    const s  = document.createElement('div');
+    const big = Math.random() < 0.15;
     s.className = 'star';
     s.style.cssText =
       `left:${Math.random()*100}%;top:${Math.random()*100}%;` +
-      `width:${big?3:2}px;height:${big?3:2}px;` +
-      `--d:${2+Math.random()*5}s;--delay:${Math.random()*5}s`;
+      `width:${big?3:1.5}px;height:${big?3:1.5}px;` +
+      `--d:${2+Math.random()*6}s;--delay:${Math.random()*6}s`;
     st.appendChild(s);
   }
-
-  // Launch time: 29 May 2026 18:00 PKT = UTC+5 → 13:00 UTC
-  const LAUNCH = new Date('2026-05-29T13:00:00Z');
-
-  function pad(n){ return String(n).padStart(2,'0'); }
-
-  function tick() {
-    const diff = LAUNCH - Date.now();
-    if (diff <= 0) {
-      document.getElementById('launched').classList.add('show');
-      setTimeout(function(){ window.location.replace('welcome.html'); }, 1800);
-      return;
-    }
-    const h = Math.floor(diff / 3600000);
-    const m = Math.floor((diff % 3600000) / 60000);
-    const s = Math.floor((diff % 60000) / 1000);
-    document.getElementById('hh').textContent = pad(h);
-    document.getElementById('mm').textContent = pad(m);
-    document.getElementById('ss').textContent = pad(s);
-  }
-
-  tick();
-  setInterval(tick, 1000);
 </script>
 </body>
 </html>
