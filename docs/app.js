@@ -1818,16 +1818,20 @@ function getAPIKey(provider) {
   return '';
 }
 
-// ── Unified pool rotation (Groq + DeepSeek interleaved) ──────────────
-// Random start index: 100 users all loading the page start at random positions
-// in the pool instead of everyone hammering pool_key[0] first (thundering herd)
-let _poolKeyIdx = Math.floor(Math.random() * 1000);
+// ── Pool rotation indices ─────────────────────────────────────────────
+// Two separate indices so HB (Gemini-only) and custom chats (Groq-first)
+// rotate independently — HB advancement never skips ahead in the Groq index.
+// Random start = thundering-herd fix (100 users don't all start at key[0]).
+let _poolKeyIdx = Math.floor(Math.random() * 1000); // custom chats
+let _hbKeyIdx   = Math.floor(Math.random() * 1000); // Hair Band (Gemini only)
 
 // Per-key 429 cooldown map: key → ms timestamp when it becomes usable again
-// Prevents retrying a rate-limited key for 60 seconds within this session
 const _keyCooldowns = {};
 
-// Returns [{key, provider}, ...] interleaving Groq and Gemini keys
+// Returns [{key, provider}, ...] — Groq keys FIRST, Gemini as overflow.
+// Custom chats use small prompts (~1.5k tokens). Groq handles those easily.
+// Gemini is reserved for HB (10k-15k tokens). Exhausting all Groq keys
+// before touching Gemini keeps HB's 3M TPM budget intact.
 function _getUnifiedPool() {
   const groqList = (typeof poolGroqKeys !== 'undefined' && poolGroqKeys.length)
     ? poolGroqKeys
@@ -1836,13 +1840,11 @@ function _getUnifiedPool() {
   const geminiList = (typeof poolGeminiKeys !== 'undefined' && poolGeminiKeys.length)
     ? poolGeminiKeys : [];
 
-  // Interleave: groq[0], gemini[0], groq[1], gemini[1], ... for balanced distribution
-  const unified = [];
-  const maxLen = Math.max(groqList.length, geminiList.length);
-  for (let i = 0; i < maxLen; i++) {
-    if (i < groqList.length)   unified.push({ key: groqList[i],   provider: 'groq' });
-    if (i < geminiList.length) unified.push({ key: geminiList[i], provider: 'gemini' });
-  }
+  // Groq first, then Gemini as spillover — NOT interleaved
+  const unified = [
+    ...groqList.map(k   => ({ key: k, provider: 'groq'   })),
+    ...geminiList.map(k => ({ key: k, provider: 'gemini' }))
+  ];
   if (unified.length) return unified;
 
   // localStorage fallback
@@ -1857,8 +1859,8 @@ function _getUnifiedPool() {
 // ── HB-specific pool: Gemini ONLY ────────────────────────────────────
 // Hair Band system prompt is ~10k-15k tokens.
 // Groq free TPM limit = 6,000/min → ONE request exceeds it → instant 429.
-// Gemini free TPM limit = 1,000,000/min → no problem at all.
-// HB MUST use Gemini. Groq is only for custom chats (small prompts).
+// Gemini free TPM limit = 1,000,000/min → handles it with no issues.
+// 3 Gemini keys = 3M TPM/min → ~250 HB requests/min → more than enough.
 function _getHBPool() {
   const geminiList = (typeof poolGeminiKeys !== 'undefined' && poolGeminiKeys.length)
     ? poolGeminiKeys : [];
@@ -1869,8 +1871,7 @@ function _getHBPool() {
   const localGemini = localStorage.getItem('lc_gemini_key');
   if (localGemini) return [{ key: localGemini, provider: 'gemini' }];
 
-  // No Gemini key at all — fall back to unified pool with a warning in console
-  console.warn('[LOST CARD] No Gemini pool key found. HB falling back to Groq — rate limits expected. Add a Gemini key in Admin → Settings.');
+  // No Gemini key — fall back to unified (rare edge case)
   return _getUnifiedPool();
 }
 
@@ -2299,7 +2300,7 @@ async function generateCustomReply(chatId, setup, userText) {
     typingEl.remove();
     // Opening message failure (userText === null): fail silently — just let the user type
     if (userText !== null) {
-      addMessage('them', setup.theirName, _friendlyAPIError(err));
+      addMessage('them', setup.theirName, _friendlyAPIError(err, setup.theirName));
     }
   } finally {
     setInputEnabled(true);
@@ -3226,7 +3227,7 @@ async function sendAIMessage() {
   } catch(err) {
     typingEl.remove();
     isAITyping = false;
-    addMessage('them', 'Hair Band', _friendlyAPIError(err));
+    addMessage('them', 'Hair Band', _friendlyAPIError(err, 'Hair Band'));
   }
 }
 
@@ -3515,15 +3516,18 @@ function logHairBandQuery(userMsg, aiReply) {
 // ══════════════════════════════════════════════════════════════════════
 // AI API CALL
 // ══════════════════════════════════════════════════════════════════════
-function _friendlyAPIError(err) {
-  const msg = (err && err.message) ? err.message : '';
+function _friendlyAPIError(err, name) {
+  const msg  = (err && err.message) ? err.message : '';
+  const who  = name || 'AI';
   if (/rate.?limit|TPM|tokens.per.minute|too.many.request/i.test(msg))
-    return 'Hair Band is busy right now — wait a moment and try again.';
+    return `${who} is busy right now — wait a moment and try again.`;
   if (/invalid.api.key|invalid_api_key|Incorrect API/i.test(msg))
-    return '❌ AI service unavailable right now. Please try again shortly.';
-  if (/connect|network|fetch/i.test(msg))
+    return `${who} is unavailable right now. Please try again shortly.`;
+  if (/connect|network|fetch|Failed to fetch/i.test(msg))
     return '📡 Connection issue — check your internet and try again.';
-  return '⚠️ Could not reach AI — please try again.';
+  if (/resource-exhausted|limit reached/i.test(msg))
+    return `${who} is at capacity right now — try again in a minute.`;
+  return `${who} couldn't respond — please try again.`;
 }
 
 // poolOverride: optional [{key, provider}] array — used by HB to force Gemini-only pool
@@ -3552,13 +3556,16 @@ async function callAI(provider, key, history, systemPrompt, userMsg, maxTokens =
   for (const m of history.slice(-6)) messages.push(m);
   if (userMsg) messages.push({ role: 'user', content: userMsg });
 
-  // Use override pool if provided, otherwise unified (Groq + Gemini)
-  const pool    = poolOverride || _getUnifiedPool();
-  const entries = pool.length ? pool : [{ key, provider }];
-  const startIdx = _poolKeyIdx % entries.length;
+  // Use override pool if provided (HB = Gemini only), otherwise Groq-first unified pool
+  const pool      = poolOverride || _getUnifiedPool();
+  const entries   = pool.length ? pool : [{ key, provider }];
+  // HB uses its own rotation index so it doesn't interfere with custom-chat index
+  const isHBCall  = !!poolOverride;
+  const idxPtr    = isHBCall ? _hbKeyIdx : _poolKeyIdx;
+  const startIdx  = idxPtr % entries.length;
 
   // Key-level errors: skip and try next key
-  // 429 = rate limited, 402 = out of credits, 401 = invalid
+  // 429 = rate limited, 402 = out of credits, 401 = invalid key
   const _isKeyErr = (s) => s === 429 || s === 402 || s === 401;
 
   const _fetchEntry = (entry) => {
@@ -3574,21 +3581,22 @@ async function callAI(provider, key, history, systemPrompt, userMsg, maxTokens =
   };
 
   let resp       = null;
-  let lastErrMsg = 'Rate limited — please try again in a moment.';
+  let lastErrMsg = 'Please try again in a moment.';
   let allSkipped = true;
   const now      = Date.now();
 
-  // ── First pass: try each key, skip rate-limited ones ─────────────────
+  // ── First pass: try each key, skip ones still on cooldown ─────────────
   for (let i = 0; i < entries.length; i++) {
     const entry = entries[(startIdx + i) % entries.length];
 
-    // Skip keys still in their 60-second cooldown window
     if (_keyCooldowns[entry.key] && now < _keyCooldowns[entry.key]) continue;
 
     resp = await _fetchEntry(entry);
     if (resp.ok) {
-      _poolKeyIdx = (startIdx + i + 1) % entries.length;
-      allSkipped  = false;
+      // Advance the correct index for next call
+      const nextIdx = (startIdx + i + 1) % entries.length;
+      if (isHBCall) _hbKeyIdx = nextIdx; else _poolKeyIdx = nextIdx;
+      allSkipped = false;
       break;
     }
     if (_isKeyErr(resp.status)) {
@@ -3599,21 +3607,31 @@ async function callAI(provider, key, history, systemPrompt, userMsg, maxTokens =
       resp = null;
       continue;
     }
-    allSkipped = false; // non-key error (500, etc.) — stop trying
+    allSkipped = false; // server error (500 etc.) — stop trying
     break;
   }
 
-  // ── Second pass: single 4s wait, then one more attempt ──────────────
-  // Short wait lets the rate-limit window start recovering without
-  // making the user stare at a typing indicator for 19 seconds.
+  // ── Second pass: wait until the soonest cooldown expires, then retry ──
+  // Instead of a fixed 4s wait, we wait just long enough for the earliest
+  // key to become available again. This is usually ≤ 1s if a key just got
+  // rate-limited, and never longer than 30s.
   if (!resp && allSkipped && entries.length > 0) {
-    await new Promise(r => setTimeout(r, 4000));
-    const now2 = Date.now();
+    const soonest = entries.reduce((min, e) => {
+      const cd = _keyCooldowns[e.key] || 0;
+      return cd > 0 && cd < min ? cd : min;
+    }, Infinity);
+    const waitMs = soonest === Infinity ? 3000 : Math.min(Math.max(soonest - Date.now(), 500), 8000);
+    await new Promise(r => setTimeout(r, waitMs));
+    const now2   = Date.now();
+    const retryStart = isHBCall ? (_hbKeyIdx % entries.length) : (_poolKeyIdx % entries.length);
     for (let i = 0; i < entries.length; i++) {
-      const entry = entries[(_poolKeyIdx + i) % entries.length];
-      // On the retry pass, ignore cooldowns — give every key one more chance
+      const entry = entries[(retryStart + i) % entries.length];
       resp = await _fetchEntry(entry);
-      if (resp.ok) { _poolKeyIdx = (_poolKeyIdx + i + 1) % entries.length; break; }
+      if (resp.ok) {
+        const nxt = (retryStart + i + 1) % entries.length;
+        if (isHBCall) _hbKeyIdx = nxt; else _poolKeyIdx = nxt;
+        break;
+      }
       if (_isKeyErr(resp.status)) {
         _keyCooldowns[entry.key] = now2 + (resp.status === 429 ? 30000 : 300000);
         resp = null; continue;
