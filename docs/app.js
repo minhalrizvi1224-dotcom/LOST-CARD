@@ -3776,20 +3776,22 @@ async function callAI(provider, key, history, systemPrompt, userMsg, maxTokens =
   }
 
   // ── Second pass: wait until the soonest cooldown expires, then retry ──
-  // Instead of a fixed 4s wait, we wait just long enough for the earliest
-  // key to become available again. This is usually ≤ 1s if a key just got
-  // rate-limited, and never longer than 30s.
+  // We wait exactly until the earliest key becomes available (no cap).
+  // Gemini free-tier RPM window resets every 60s — cap was 12s which
+  // meant second pass always hit still-cooling keys and threw spuriously.
   if (!resp && allSkipped && entries.length > 0) {
     const soonest = entries.reduce((min, e) => {
       const cd = _keyCooldowns[e.key] || 0;
       return cd > 0 && cd < min ? cd : min;
     }, Infinity);
-    const waitMs = soonest === Infinity ? 3000 : Math.min(Math.max(soonest - Date.now(), 500), 12000);
+    const waitMs = soonest === Infinity ? 3000 : Math.max(soonest - Date.now(), 500);
     await new Promise(r => setTimeout(r, waitMs));
     const now2   = Date.now();
     const retryStart = isHBCall ? (_hbKeyIdx % entries.length) : (_poolKeyIdx % entries.length);
     for (let i = 0; i < entries.length; i++) {
       const entry = entries[(retryStart + i) % entries.length];
+      // Skip keys still on cooldown (same check as first pass)
+      if (_keyCooldowns[entry.key] && now2 < _keyCooldowns[entry.key]) continue;
       resp = await _fetchEntry(entry);
       if (resp.ok) {
         const nxt = (retryStart + i + 1) % entries.length;
@@ -3797,7 +3799,7 @@ async function callAI(provider, key, history, systemPrompt, userMsg, maxTokens =
         break;
       }
       if (_isKeyErr(resp.status)) {
-        _keyCooldowns[entry.key] = now2 + (resp.status === 429 ? 30000 : 300000);
+        _keyCooldowns[entry.key] = now2 + (resp.status === 429 ? 65000 : 300000);
         resp = null; continue;
       }
       break;
