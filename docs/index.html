@@ -2,6 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
+  <!-- ── Coming Soon Gate — auto-removed at 6pm PKT 29 May 2026 ── -->
+  <script>
+    (function(){
+      var LAUNCH=new Date('2026-05-29T13:00:00Z'); // 6pm PKT = 13:00 UTC
+      var p=new URLSearchParams(window.location.search);
+      if(p.get('lc_open')==='1') sessionStorage.setItem('lc_preview','1');
+      if(sessionStorage.getItem('lc_preview')!=='1'&&Date.now()<LAUNCH.getTime()){
+        window.location.replace('coming-soon.html');
+      }
+    })();
+  </script>
+  <!-- ─────────────────────────────────────────────────────────────── -->
   <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
   <title>LOST CARD v4 - A Computational Model of Relational Belief Decay</title>
 

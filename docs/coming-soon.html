@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>LOST CARD — Launching Tonight</title>
+  <meta name="theme-color" content="#0D1117"/>
+  <meta name="robots" content="noindex,nofollow"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      min-height: 100dvh;
+      background: #0D1117;
+      color: #E6EDF3;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .bg {
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 15% 50%, rgba(88,166,255,0.06) 0%, transparent 55%),
+        radial-gradient(ellipse at 85% 15%, rgba(198,120,221,0.05) 0%, transparent 50%),
+        radial-gradient(ellipse at 65% 85%, rgba(86,182,194,0.04) 0%, transparent 50%),
+        #0D1117;
+      animation: bgPulse 8s ease-in-out infinite alternate;
+    }
+    @keyframes bgPulse { 0%{opacity:.8} 100%{opacity:1} }
+
+    .stars { position:fixed; inset:0; pointer-events:none; }
+    .star {
+      position:absolute; border-radius:50%;
+      background:rgba(230,237,243,0.5);
+      animation: twinkle var(--d,3s) ease-in-out infinite alternate;
+      animation-delay: var(--delay,0s);
+    }
+    @keyframes twinkle {
+      0%  { opacity:0.1; transform:scale(0.8); }
+      100%{ opacity:0.8; transform:scale(1.2); }
+    }
+
+    .container {
+      position:relative; z-index:10;
+      text-align:center;
+      padding:40px 24px;
+      max-width:580px;
+      width:100%;
+    }
+
+    /* Three card dots */
+    .cards-row { display:flex; justify-content:center; gap:10px; margin-bottom:36px; }
+    .card-dot {
+      width:11px; height:11px; border-radius:50%;
+      animation: dotPulse 2.4s ease-in-out infinite;
+    }
+    .card-dot:nth-child(1){ background:#C678DD; animation-delay:0s;    box-shadow:0 0 10px rgba(198,120,221,.5); }
+    .card-dot:nth-child(2){ background:#56B6C2; animation-delay:.5s;   box-shadow:0 0 10px rgba(86,182,194,.5);  }
+    .card-dot:nth-child(3){ background:#98C379; animation-delay:1s;    box-shadow:0 0 10px rgba(152,195,121,.5); }
+    @keyframes dotPulse {
+      0%,100%{ opacity:.35; transform:scale(0.85); }
+      50%    { opacity:1;   transform:scale(1.15); }
+    }
+
+    .logo {
+      font-size:clamp(38px,8vw,56px);
+      font-weight:900;
+      letter-spacing:7px;
+      color:#E6EDF3;
+      text-shadow:0 0 50px rgba(88,166,255,0.25);
+      margin-bottom:10px;
+      animation: logoFade 1.2s ease both;
+    }
+    .logo span { color:#58A6FF; }
+    @keyframes logoFade { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:none} }
+
+    .sub {
+      font-size:11px; font-weight:700; color:#8B949E;
+      text-transform:uppercase; letter-spacing:3px;
+      margin-bottom:52px;
+      animation: logoFade 1.2s .2s ease both;
+    }
+
+    .launch-chip {
+      display:inline-flex; align-items:center; gap:6px;
+      background:rgba(88,166,255,.08);
+      border:1px solid rgba(88,166,255,.2);
+      color:#58A6FF; font-size:10px; font-weight:800;
+      padding:5px 14px; border-radius:20px;
+      letter-spacing:1.5px; text-transform:uppercase;
+      margin-bottom:20px;
+    }
+    .pulse-dot {
+      width:6px; height:6px; border-radius:50%; background:#58A6FF;
+      animation: pulseDot 1.2s ease-in-out infinite;
+    }
+    @keyframes pulseDot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.7)} }
+
+    /* Countdown */
+    .countdown {
+      display:flex; justify-content:center; align-items:flex-start;
+      gap:6px; margin-bottom:14px;
+    }
+    .cd-block { display:flex; flex-direction:column; align-items:center; }
+    .cd-num {
+      font-size:clamp(52px,13vw,80px);
+      font-weight:900;
+      color:#E6EDF3;
+      font-family:'Courier New',monospace;
+      line-height:1;
+      text-shadow:0 0 30px rgba(88,166,255,.3);
+      min-width:2ch;
+      transition:color .15s;
+    }
+    .cd-label {
+      font-size:9px; font-weight:700; color:#8B949E;
+      text-transform:uppercase; letter-spacing:2px; margin-top:7px;
+    }
+    .cd-sep {
+      font-size:clamp(44px,10vw,64px);
+      font-weight:900; color:#21262D;
+      line-height:1; padding-top:6px;
+      animation:sepBlink 1s ease-in-out infinite;
+    }
+    @keyframes sepBlink { 0%,100%{opacity:1} 50%{opacity:.15} }
+
+    .launch-when {
+      font-size:12px; color:#8B949E; margin-bottom:52px; letter-spacing:.3px;
+    }
+    .launch-when strong { color:#E6EDF3; }
+
+    /* Quote */
+    .quote-wrap {
+      border-left:2px solid #58A6FF;
+      background:rgba(88,166,255,.04);
+      border-radius:0 10px 10px 0;
+      padding:18px 22px;
+      margin:0 auto 30px;
+      max-width:500px;
+      text-align:left;
+    }
+    .quote-text {
+      font-size:14.5px; font-style:italic;
+      color:#E6EDF3; line-height:1.75; margin-bottom:10px;
+    }
+    .quote-attr {
+      font-size:10px; font-weight:700; color:#8B949E;
+      text-transform:uppercase; letter-spacing:1.5px;
+    }
+
+    /* Note */
+    .note {
+      font-size:13px; color:#8B949E; line-height:1.75;
+      max-width:440px; margin:0 auto 44px;
+    }
+    .note strong { color:#C6D3E0; }
+
+    /* Launched overlay */
+    #launched {
+      display:none; position:fixed; inset:0; z-index:999;
+      background:#0D1117;
+      flex-direction:column; align-items:center; justify-content:center; gap:16px;
+    }
+    #launched.show { display:flex; }
+    .launched-text { font-size:22px; font-weight:800; color:#56D364; }
+    .launched-sub  { font-size:13px; color:#8B949E; }
+
+    .footer-row {
+      display:flex; align-items:center; justify-content:center;
+      gap:8px; font-size:10px; color:#21262D;
+      font-weight:700; letter-spacing:2px; text-transform:uppercase;
+    }
+    .fdot { width:4px; height:4px; border-radius:50%; background:#21262D; }
+  </style>
+</head>
+<body>
+
+<div class="bg"></div>
+<div class="stars" id="stars"></div>
+
+<div class="container">
+  <div class="cards-row">
+    <div class="card-dot"></div>
+    <div class="card-dot"></div>
+    <div class="card-dot"></div>
+  </div>
+
+  <div class="logo">LOST <span>CARD</span></div>
+  <div class="sub">A Computational Model of Relational Belief Decay</div>
+
+  <div class="launch-chip">
+    <div class="pulse-dot"></div>
+    Launching Tonight
+  </div>
+
+  <div class="countdown">
+    <div class="cd-block">
+      <div class="cd-num" id="hh">00</div>
+      <div class="cd-label">Hours</div>
+    </div>
+    <div class="cd-sep">:</div>
+    <div class="cd-block">
+      <div class="cd-num" id="mm">00</div>
+      <div class="cd-label">Minutes</div>
+    </div>
+    <div class="cd-sep">:</div>
+    <div class="cd-block">
+      <div class="cd-num" id="ss">00</div>
+      <div class="cd-label">Seconds</div>
+    </div>
+  </div>
+
+  <div class="launch-when">
+    <strong>6:00 PM</strong> &nbsp;·&nbsp; Pakistan Standard Time &nbsp;·&nbsp; Friday, 29 May 2026
+  </div>
+
+  <div class="quote-wrap">
+    <div class="quote-text">
+      "Every word we speak in a relationship is a card we play. Some hands are built slowly, with patience and presence. Some are lost in a single sentence — spoken too fast, or never spoken at all."
+    </div>
+    <div class="quote-attr">— The Bet of Belief &nbsp;·&nbsp; S. M. Minhal Abbas Rizvi</div>
+  </div>
+
+  <div class="note">
+    We're almost ready.<br><br>
+    <strong>LOST CARD</strong> is not just a simulation — it is a mirror.
+    It shows you the patterns you didn't know you were repeating,
+    the moments where trust quietly left, and the exact weight of every word you chose.<br><br>
+    Come back at <strong>6 PM tonight</strong>. This is worth your time.
+  </div>
+
+  <div class="footer-row">
+    <div class="fdot"></div>
+    LOST CARD
+    <div class="fdot"></div>
+    2026
+    <div class="fdot"></div>
+  </div>
+</div>
+
+<div id="launched">
+  <div class="launched-text">✦ We're Live</div>
+  <div class="launched-sub">Taking you in…</div>
+</div>
+
+<script>
+  // Stars
+  const st = document.getElementById('stars');
+  for (let i = 0; i < 90; i++) {
+    const s = document.createElement('div');
+    const big = Math.random() < 0.18;
+    s.className = 'star';
+    s.style.cssText =
+      `left:${Math.random()*100}%;top:${Math.random()*100}%;` +
+      `width:${big?3:2}px;height:${big?3:2}px;` +
+      `--d:${2+Math.random()*5}s;--delay:${Math.random()*5}s`;
+    st.appendChild(s);
+  }
+
+  // Launch time: 29 May 2026 18:00 PKT = UTC+5 → 13:00 UTC
+  const LAUNCH = new Date('2026-05-29T13:00:00Z');
+
+  function pad(n){ return String(n).padStart(2,'0'); }
+
+  function tick() {
+    const diff = LAUNCH - Date.now();
+    if (diff <= 0) {
+      document.getElementById('launched').classList.add('show');
+      setTimeout(function(){ window.location.replace('login.html'); }, 1800);
+      return;
+    }
+    const h = Math.floor(diff / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    document.getElementById('hh').textContent = pad(h);
+    document.getElementById('mm').textContent = pad(m);
+    document.getElementById('ss').textContent = pad(s);
+  }
+
+  tick();
+  setInterval(tick, 1000);
+</script>
+</body>
+</html>
