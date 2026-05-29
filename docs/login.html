@@ -289,11 +289,42 @@
 
     <!-- ── Verify email notice (shown after signup) ── -->
     <div id="verifyPanel" style="display:none;text-align:center;padding:8px 0">
-      <div style="font-size:32px;margin-bottom:12px">📧</div>
-      <div style="font-weight:700;font-size:16px;margin-bottom:8px">Check your email</div>
-      <div style="font-size:13px;color:var(--text-muted);margin-bottom:16px;line-height:1.6">We sent a verification link to <strong id="verifyEmailShown"></strong>.<br>Click it to activate your account.</div>
-      <button class="auth-btn" onclick="resendVerification()" id="resendBtn" style="margin-bottom:8px">Resend Link</button>
-      <button type="button" onclick="backToSignin()" style="background:none;border:none;color:var(--text-muted);font-size:12px;cursor:pointer;text-decoration:underline">Back to Sign In</button>
+      <div style="font-size:32px;margin-bottom:10px">📧</div>
+      <div style="font-weight:700;font-size:16px;margin-bottom:6px">Verify your email</div>
+      <div style="font-size:13px;color:var(--text-muted);margin-bottom:4px;line-height:1.6">
+        We sent a link to <strong id="verifyEmailShown"></strong>.<br>
+        <span style="color:#E5C07B;font-size:12px">Check spam/junk folder if not in inbox.</span>
+      </div>
+
+      <!-- Countdown ring -->
+      <div style="position:relative;width:90px;height:90px;margin:16px auto">
+        <svg width="90" height="90" style="transform:rotate(-90deg)">
+          <circle cx="45" cy="45" r="38" fill="none" stroke="var(--border)" stroke-width="5"/>
+          <circle id="timerRing" cx="45" cy="45" r="38" fill="none"
+            stroke="var(--accent)" stroke-width="5"
+            stroke-dasharray="239" stroke-dashoffset="0"
+            style="transition:stroke-dashoffset 1s linear,stroke .3s"/>
+        </svg>
+        <div id="timerNum" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:var(--accent)">60</div>
+      </div>
+
+      <div id="timerMsg" style="font-size:12px;color:var(--text-muted);margin-bottom:14px">
+        Click the link in your email within <span id="timerSec">60</span>s
+      </div>
+
+      <!-- Success state (hidden) -->
+      <div id="verifySuccess" style="display:none;margin-bottom:14px">
+        <div style="font-size:28px">✅</div>
+        <div style="font-weight:700;color:var(--success);margin-top:6px">Email verified! Signing you in…</div>
+      </div>
+
+      <!-- Expired / resend state -->
+      <div id="verifyExpired" style="display:none;margin-bottom:14px">
+        <div style="font-size:13px;color:var(--error);margin-bottom:10px">⏱ Time's up. Didn't get the email?</div>
+        <button class="auth-btn" onclick="resendVerification()" id="resendBtn">Resend Verification Email</button>
+      </div>
+
+      <button type="button" onclick="backToSignin()" style="background:none;border:none;color:var(--text-muted);font-size:11px;cursor:pointer;text-decoration:underline;margin-top:4px">Cancel — Back to Sign In</button>
     </div>
 
     <!-- Quote -->
@@ -346,12 +377,15 @@ window.addEventListener('DOMContentLoaded', () => {
   }
   if (!initFirebase()) return;
   auth.onAuthStateChanged(user => {
-    // Only redirect if verified — unverified users stay on login page
     if (user && !isSigningUp && user.emailVerified) {
+      // Verified → go to app
       window.location.href = 'index.html';
-    } else if (user && !isSigningUp && !user.emailVerified) {
+    } else if (user && !isSigningUp && !user.emailVerified && !_pendingVerifyUser) {
+      // Unverified AND not in our controlled verify flow → force sign out
       auth.signOut().catch(() => {});
     }
+    // If _pendingVerifyUser is set, we are intentionally keeping them signed in
+    // so the polling loop can call user.reload() — do NOT sign out
   });
 });
 
@@ -452,7 +486,7 @@ async function handleAuth(e) {
 
       _pendingVerifyUser = cred.user;
 
-      // Save to Firestore (emailVerified: false — blocked from app until verified)
+      // Save to Firestore (emailVerified: false — blocked from app until link clicked)
       await db.collection('users').doc(cred.user.uid).set({
         email, displayName: name,
         emailVerified:  false,
@@ -463,16 +497,10 @@ async function handleAuth(e) {
         platform:       navigator.userAgent.includes('Mobile') ? 'mobile' : 'desktop'
       });
 
-      await auth.signOut();
+      // Keep user signed in — polling needs auth.currentUser to call reload()
       isSigningUp = false;
-
-      // Show verify panel — no way to skip this
-      document.getElementById('authForm').style.display = 'none';
-      document.getElementById('authTabs').style.display = 'none';
-      document.getElementById('authQuote').style.display = 'none';
-      document.getElementById('verifyEmailShown').textContent = email;
-      document.getElementById('verifyPanel').style.display = 'block';
       resetBtn(btn);
+      _showVerifyPanel(email);
 
     } else {
       // ── Sign in ──────────────────────────────────────────────────────
@@ -572,30 +600,116 @@ async function sendPasswordReset() {
   }
 }
 
-// ── Verify panel helpers ───────────────────────────────────────────────
+// ── Verify panel — countdown timer + polling ──────────────────────────
+let _timerInterval  = null;
+let _pollInterval   = null;
+let _timerSeconds   = 60;
+const TIMER_TOTAL   = 60;
+const POLL_EVERY_MS = 3000; // check emailVerified every 3 seconds
+
+function _showVerifyPanel(email) {
+  document.getElementById('authForm').style.display    = 'none';
+  document.getElementById('authTabs').style.display    = 'none';
+  document.getElementById('authQuote').style.display   = 'none';
+  document.getElementById('verifyEmailShown').textContent = email;
+  document.getElementById('verifyPanel').style.display = 'block';
+  document.getElementById('verifyExpired').style.display  = 'none';
+  document.getElementById('verifySuccess').style.display  = 'none';
+  _startCountdown();
+  _startPolling();
+}
+
+function _startCountdown() {
+  _timerSeconds = TIMER_TOTAL;
+  _updateRing(TIMER_TOTAL);
+  clearInterval(_timerInterval);
+  _timerInterval = setInterval(() => {
+    _timerSeconds--;
+    _updateRing(_timerSeconds);
+    if (_timerSeconds <= 0) {
+      clearInterval(_timerInterval);
+      clearInterval(_pollInterval);
+      // Show expired UI
+      document.getElementById('timerMsg').style.display     = 'none';
+      document.getElementById('verifyExpired').style.display = 'block';
+    }
+  }, 1000);
+}
+
+function _updateRing(sec) {
+  const circumference = 2 * Math.PI * 38; // r=38
+  const offset = circumference * (1 - sec / TIMER_TOTAL);
+  const ring = document.getElementById('timerRing');
+  const num  = document.getElementById('timerNum');
+  const msg  = document.getElementById('timerSec');
+  if (ring) ring.style.strokeDashoffset = offset;
+  if (ring) ring.style.stroke = sec > 20 ? 'var(--accent)' : sec > 10 ? '#E5C07B' : 'var(--error)';
+  if (num)  { num.textContent = sec; num.style.color = sec > 20 ? 'var(--accent)' : sec > 10 ? '#E5C07B' : 'var(--error)'; }
+  if (msg)  msg.textContent = sec;
+}
+
+function _startPolling() {
+  clearInterval(_pollInterval);
+  _pollInterval = setInterval(async () => {
+    if (!_pendingVerifyUser) return;
+    try {
+      await _pendingVerifyUser.reload();
+      if (_pendingVerifyUser.emailVerified) {
+        clearInterval(_timerInterval);
+        clearInterval(_pollInterval);
+        // Show success state
+        document.getElementById('timerMsg').style.display     = 'none';
+        document.getElementById('verifyExpired').style.display = 'none';
+        document.getElementById('verifySuccess').style.display = 'block';
+        document.querySelector('#verifyPanel svg').style.display = 'none';
+        document.getElementById('timerNum').style.display = 'none';
+
+        // Save verified status to Firestore
+        await db.collection('users').doc(_pendingVerifyUser.uid).update({
+          emailVerified: true,
+          lastLogin:     firebase.firestore.FieldValue.serverTimestamp()
+        }).catch(() => {});
+
+        // Redirect after brief success flash
+        setTimeout(() => { window.location.href = 'index.html'; }, 1500);
+      }
+    } catch(e) { /* network blip — keep polling */ }
+  }, POLL_EVERY_MS);
+}
+
 async function resendVerification() {
-  if (!_pendingVerifyUser) {
-    showAuthMsg('Please sign up again to resend.', 'error'); return;
-  }
+  if (!_pendingVerifyUser) { showAuthMsg('Please sign up again.', 'error'); return; }
   const btn = document.getElementById('resendBtn');
-  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Sending...';
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Sending...';
   try {
-    // Need to sign in temporarily to resend
     await _pendingVerifyUser.sendEmailVerification();
     btn.textContent = 'Sent ✓';
-    showAuthMsg('✅ Verification email resent!', 'success');
+    // Restart timer and polling
+    document.getElementById('timerMsg').style.display    = 'block';
+    document.getElementById('verifyExpired').style.display = 'none';
+    document.querySelector('#verifyPanel svg').style.display = '';
+    document.getElementById('timerNum').style.display = '';
+    setTimeout(() => { btn.disabled = false; btn.textContent = 'Resend Verification Email'; }, 30000);
+    _startCountdown();
+    _startPolling();
   } catch(err) {
-    btn.disabled = false; btn.textContent = 'Resend Link';
-    showAuthMsg('Could not resend. Try signing up again.', 'error');
+    btn.disabled = false;
+    btn.textContent = 'Resend Verification Email';
+    showAuthMsg('Could not resend. Try again in a moment.', 'error');
   }
 }
 
 function backToSignin() {
-  document.getElementById('verifyPanel').style.display = 'none';
-  document.getElementById('authForm').style.display = 'flex';
-  document.getElementById('authTabs').style.display = 'flex';
-  document.getElementById('authQuote').style.display = 'block';
+  clearInterval(_timerInterval);
+  clearInterval(_pollInterval);
+  // Sign out the pending unverified user
+  if (_pendingVerifyUser) auth.signOut().catch(() => {});
   _pendingVerifyUser = null;
+  document.getElementById('verifyPanel').style.display  = 'none';
+  document.getElementById('authForm').style.display     = 'flex';
+  document.getElementById('authTabs').style.display     = 'flex';
+  document.getElementById('authQuote').style.display    = 'block';
   switchTab('signin');
 }
 
