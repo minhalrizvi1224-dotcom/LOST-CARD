@@ -1855,13 +1855,13 @@ function _getUnifiedPool() {
 // 3 Gemini keys = 3M TPM/min → ~250 HB requests/min → more than enough.
 function _getHBPool() {
   const geminiList = (typeof poolGeminiKeys !== 'undefined' && poolGeminiKeys.length)
-    ? poolGeminiKeys.filter(k => k && k.startsWith('AIza')) : [];
+    ? poolGeminiKeys : [];
   if (geminiList.length)
     return geminiList.map(k => ({ key: k, provider: 'gemini' }));
 
   // localStorage fallback (user's own Gemini key)
   const localGemini = localStorage.getItem('lc_gemini_key');
-  if (localGemini && localGemini.startsWith('AIza')) return [{ key: localGemini, provider: 'gemini' }];
+  if (localGemini) return [{ key: localGemini, provider: 'gemini' }];
 
   // No valid Gemini key — fall back to Groq with high-TPM model
   const groqList = (typeof poolGroqKeys !== 'undefined' && poolGroqKeys.length)
