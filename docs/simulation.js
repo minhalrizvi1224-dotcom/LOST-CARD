@@ -556,6 +556,62 @@ const SCENARIOS = [
   { hani: "Then - okay. Let's try. But slowly. I can't do another fall.", subtext: "(He means: I can't survive losing this twice.)", conflict: "Final rejection", salvation: true }
 ];
 
+// ─── Scenario 2: Ayla & Reza (ex-couple trying friendship) ──────────────────
+const SCENARIOS_REZA = [
+  { hani: "Hey. Thanks for agreeing to meet. I wasn't sure you would.", subtext: "(He's been rehearsing this moment for three weeks. He didn't expect her to actually say yes.)", conflict: "Dismissing his gratitude", salvation: false },
+  { hani: "I know this is weird. I'm not going to pretend it isn't.", subtext: "(He's trying to name the awkwardness before she can use it against him.)", conflict: "Weaponizing the awkwardness", salvation: false },
+  { hani: "I've been thinking about a lot of things. Not about us — about how I handled things. I think I owe you an honest conversation.", subtext: "(He's been journaling about this for months. He won't say that.)", conflict: "Dismissing his accountability", salvation: true },
+  { hani: "You were always better at remembering the good parts. I'd get stuck in what wasn't working. I think that was unfair.", subtext: "(He's said this to a therapist already. This is the first time he's said it to her.)", conflict: "Minimizing his acknowledgment", salvation: true },
+  { hani: "I don't want to reopen everything. I just — I missed talking to you. Not the way we were. Just — talking.", subtext: "(He's terrified this sounds like he wants her back. He doesn't. He thinks.)", conflict: "Misreading his intention", salvation: false },
+  { hani: "You were my best friend before everything else. I think I forgot that. I think we both did.", subtext: "(He's not sure she sees it this way. He hopes she does.)", conflict: "Denying the friendship foundation", salvation: true },
+  { hani: "Can I ask you something? And you don't have to answer if you don't want to.", subtext: "(He has a specific question. He's been building to it since they sat down.)", conflict: "Shutting down the question", salvation: false },
+  { hani: "Were you okay? After. Because I told myself you were, and I'm not sure I actually checked.", subtext: "(He didn't check. He knows that. He's saying it because the guilt became too loud.)", conflict: "Dismissing his concern as guilt", salvation: true },
+  { hani: "I think I made myself into the villain in the story because it was easier than admitting I just — stopped knowing how to be with you.", subtext: "(This is the most honest he's been with anyone about this. His hands are steady but his voice isn't.)", conflict: "Using his honesty against him", salvation: true },
+  { hani: "I'm not asking you to forgive me. I'm not even sure that's the right word for what I'm asking.", subtext: "(He went through four different words before this conversation. Forgive. Understand. Release. None of them fit.)", conflict: "Demanding clarity he can't give", salvation: false },
+  { hani: "There were things I should have said while it was still something I could fix. I didn't. That's on me.", subtext: "(He had the conversations in his head a hundred times. They never made it out.)", conflict: "Refusing to acknowledge the gap", salvation: true },
+  { hani: "I'm not the same person who ended things. I don't know if that matters to you. I think it matters to me.", subtext: "(He's been in therapy for seven months. He hasn't told anyone that either.)", conflict: "Dismissing his growth", salvation: false },
+  { hani: "I keep thinking about that drive back from the mountains. We didn't talk the whole two hours and it wasn't uncomfortable. I miss that.", subtext: "(He's shared this memory with no one. He's been protecting it.)", conflict: "Turning the memory into a weapon", salvation: true },
+  { hani: "I'm not trying to make this about what we were. I'm trying to figure out what we could still be.", subtext: "(He means it. He's not romanticizing it. He's genuinely asking.)", conflict: "Collapsing the distinction", salvation: false },
+  { hani: "I think you're still angry. Which is fair. I just want to know if there's space underneath that for something else.", subtext: "(He can read her. He always could. That's part of what made it hard.)", conflict: "Denying the anger or weaponizing it", salvation: true },
+  { hani: "Because I don't want to keep carrying the version of this that ended badly as the only version I have of us.", subtext: "(He's been carrying it. It's heavier than he expected.)", conflict: "Refusing to offer a different version", salvation: true },
+  { hani: "Okay. I hear you. I think what I'm understanding is that maybe I'm not the only one who still needs to figure some things out.", subtext: "(He's not accusing. He's observing. The difference matters to him.)", conflict: "Taking it as an accusation", salvation: false },
+  { hani: "I didn't come here to fight. I came here because I thought we were both tired of the version of this that's been playing on loop.", subtext: "(He's right. He knows he's right. He's waiting to see if she does too.)", conflict: "Continuing the loop", salvation: true },
+  { hani: "I think friendship is possible. But not if one of us is still hoping for something the other one can't give.", subtext: "(He's talking about her. He's also a little bit talking about himself.)", conflict: "Refusing to name what you're hoping for", salvation: true },
+  { hani: "Say it. Whatever you're not saying. I'd rather have the real conversation than this one.", subtext: "(He's been watching her hold something back since they sat down.)", conflict: "Continuing to hold back", salvation: true },
+  { hani: "I think we're both scared of what happens if we're completely honest. But I think we're more scared of staying stuck here.", subtext: "(He made a decision before this meeting: he would rather lose her clearly than keep her vaguely.)", conflict: "Choosing vagueness", salvation: false },
+  { hani: "I still think about you as someone I can call when something important happens. I don't know if that's earned yet. I'm asking if we can earn it back.", subtext: "(He's offering something real. He doesn't know if she'll take it.)", conflict: "Dismissing the offer", salvation: true },
+  { hani: "Then — okay. I'm not going anywhere. Neither are you, apparently. So — let's just see what this actually is.", subtext: "(He's terrified and relieved in equal measure. He doesn't let either show.)", conflict: "Final withdrawal", salvation: true }
+];
+
+// ─── Scenario registry ───────────────────────────────────────────────────────
+const ALL_SCENARIOS = {
+  hani: SCENARIOS,
+  reza: SCENARIOS_REZA
+};
+
+const SCENARIO_META = {
+  hani: {
+    id: 'hani', character: 'Hani', you: 'Umm-e-Laila',
+    title: 'Umm-e-Laila & Hani',
+    relationship: 'Best Friends',
+    description: 'A friendship that slowly lost its footing. You have 23 moves to find it again — or understand why you couldn\'t.',
+    cardAtRisk: 'PRESENCE',
+    difficulty: 'Medium',
+    accent: '#C678DD',
+    emoji: '🫂'
+  },
+  reza: {
+    id: 'reza', character: 'Reza', you: 'Ayla',
+    title: 'Ayla & Reza',
+    relationship: 'Ex-couple → Trying Friendship',
+    description: 'He ended it 8 months ago. Now he wants to be friends. You have 23 moves to decide what this is — and what it costs.',
+    cardAtRisk: 'ROMANCE',
+    difficulty: 'Hard',
+    accent: '#F0883E',
+    emoji: '💔'
+  }
+};
+
 // ─── Move types ─────────────────────────────────────────────────────────────
 const SOFT = 0, AGGRESSIVE = 1, SILENT = 2;
 
@@ -811,7 +867,12 @@ function checkTerminal(cards, chess, ns, stack, trust, move) {
 
 // ─── Main simulation class ───────────────────────────────────────────────────
 class LostCardSim {
-  constructor() { this.reset(); }
+  constructor(scenarioId = 'hani') {
+    this.scenarioId = scenarioId;
+    this._scenes    = ALL_SCENARIOS[scenarioId] || SCENARIOS;
+    this._meta      = SCENARIO_META[scenarioId] || SCENARIO_META.hani;
+    this.reset();
+  }
 
   reset() {
     this.ns     = new NeurologicalState();
@@ -850,11 +911,11 @@ class LostCardSim {
     return choices;
   }
 
-  getCurrentScenario() { return SCENARIOS[Math.min(this.move, 22)]; }
+  getCurrentScenario() { return this._scenes[Math.min(this.move, 22)]; }
 
   processMove(choiceType) {
     if (this.terminalCondition !== TC_NONE) return null;
-    const sc = SCENARIOS[this.move];
+    const sc = this._scenes[this.move];
     const result = { move: this.move+1, choiceType, scenario: sc, events: [], cardDrops: [] };
 
     // Chess engine

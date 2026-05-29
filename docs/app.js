@@ -1289,7 +1289,7 @@ function openChat(id) {
   mobileSwitchToChat();
 
   if (id === 'default') {
-    startDefaultMode();
+    showScenarioPicker();
   } else if (id === 'ai_assistant') {
     startAIAssistant();
   } else {
@@ -1918,19 +1918,55 @@ function showConv(chatId) {
 // ══════════════════════════════════════════════════════════════════════
 // DEFAULT MODE
 // ══════════════════════════════════════════════════════════════════════
-function startDefaultMode() {
+function showScenarioPicker() {
+  showSection('chatApp');
+  showConv('default');
+  const msgs = document.getElementById('chatMessages');
+  const choices = document.getElementById('choicesArea');
+  if (choices) choices.innerHTML = '';
+
+  const scenarios = typeof SCENARIO_META !== 'undefined' ? Object.values(SCENARIO_META) : [];
+  msgs.innerHTML = `
+    <div style="padding:28px 20px 20px;max-width:560px;margin:0 auto">
+      <div style="font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--blue,#58A6FF);margin-bottom:8px">DEFAULT MODE</div>
+      <div style="font-size:20px;font-weight:900;color:var(--text,#E6EDF3);margin-bottom:6px">Choose a simulation</div>
+      <div style="font-size:13px;color:var(--muted,#8B949E);margin-bottom:24px;line-height:1.6">Each scenario is a different relationship. Same engine. Different cards at stake.</div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        ${scenarios.map(m => `
+          <div onclick="startDefaultMode('${m.id}')" style="background:var(--bg2,#161B22);border:1px solid var(--border,#21262D);border-radius:14px;padding:18px 20px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden"
+            onmouseover="this.style.borderColor='${m.accent}';this.style.background='color-mix(in srgb,${m.accent} 6%,var(--bg2,#161B22))'"
+            onmouseout="this.style.borderColor='var(--border,#21262D)';this.style.background='var(--bg2,#161B22)'">
+            <div style="display:flex;align-items:flex-start;gap:14px">
+              <div style="font-size:28px;line-height:1;flex-shrink:0">${m.emoji}</div>
+              <div style="flex:1;min-width:0">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap">
+                  <div style="font-size:15px;font-weight:800;color:var(--text,#E6EDF3)">${m.title}</div>
+                  <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:2px 8px;border-radius:8px;background:color-mix(in srgb,${m.accent} 12%,transparent);color:${m.accent};border:1px solid color-mix(in srgb,${m.accent} 25%,transparent)">${m.difficulty}</div>
+                </div>
+                <div style="font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:${m.accent};margin-bottom:6px">${m.relationship}</div>
+                <div style="font-size:12px;color:var(--muted,#8B949E);line-height:1.6">${m.description}</div>
+                <div style="margin-top:10px;font-size:10px;color:var(--muted,#8B949E);opacity:.7">Card at risk: <strong style="color:${m.accent}">${m.cardAtRisk}</strong> &nbsp;·&nbsp; 23 moves</div>
+              </div>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+}
+
+function startDefaultMode(scenarioId = 'hani') {
   showSection('chatApp');
   const csb = document.getElementById('changeSetupBtn');
   if (csb) csb.style.display = 'none';
   showConv('default');
-  sim = new LostCardSim();
+  sim = new LostCardSim(scenarioId);
+  const meta = sim._meta;
   updateSimUI({ nli: sim.ns.nli, trust: sim.trust, state: sim.ns.getStateLabel(),
     stateColor: sim.ns.getStateColor(), cards: { ...sim.cards }, stackSize: 0,
     exitDist: sim.dag.lastExitDist });
   resetLeftSidebar();
 
   const scenario = sim.getCurrentScenario();
-  addMessage('them', 'Hani', scenario.hani);
+  addMessage('them', meta.character, scenario.hani);
   addSubtext(scenario.subtext);
   renderChoices(sim.getChoices(), handleDefaultChoice);
 }
@@ -1970,7 +2006,7 @@ function handleDefaultChoice(choiceType) {
   }
 
   const next = sim.getCurrentScenario();
-  addMessage('them', 'Hani', next.hani);
+  addMessage('them', sim._meta ? sim._meta.character : 'Hani', next.hani);
   addSubtext(next.subtext);
   renderChoices(sim.getChoices(), handleDefaultChoice);
   scrollMessages();
@@ -3307,7 +3343,7 @@ function startAIAssistant() {
             <button onclick="openChat('Best Friend')" style="padding:12px 20px;background:rgba(88,166,255,.1);border:1px solid rgba(88,166,255,.25);border-radius:10px;color:var(--text,#E6EDF3);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s" onmouseover="this.style.background='rgba(88,166,255,.2)'" onmouseout="this.style.background='rgba(88,166,255,.1)'">
               💙 Custom Chats — Simulate real relationships
             </button>
-            <button onclick="startDefaultMode()" style="padding:12px 20px;background:rgba(198,120,221,.08);border:1px solid rgba(198,120,221,.2);border-radius:10px;color:var(--text,#E6EDF3);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s" onmouseover="this.style.background='rgba(198,120,221,.18)'" onmouseout="this.style.background='rgba(198,120,221,.08)'">
+            <button onclick="showScenarioPicker()" style="padding:12px 20px;background:rgba(198,120,221,.08);border:1px solid rgba(198,120,221,.2);border-radius:10px;color:var(--text,#E6EDF3);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s" onmouseover="this.style.background='rgba(198,120,221,.18)'" onmouseout="this.style.background='rgba(198,120,221,.08)'">
               💜 Default Mode — Umm-e-Laila & Hani
             </button>
           </div>
