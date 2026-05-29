@@ -1809,6 +1809,26 @@ function _getUnifiedPool() {
   return fallback;
 }
 
+// ── HB-specific pool: Gemini ONLY ────────────────────────────────────
+// Hair Band system prompt is ~10k-15k tokens.
+// Groq free TPM limit = 6,000/min → ONE request exceeds it → instant 429.
+// Gemini free TPM limit = 1,000,000/min → no problem at all.
+// HB MUST use Gemini. Groq is only for custom chats (small prompts).
+function _getHBPool() {
+  const geminiList = (typeof poolGeminiKeys !== 'undefined' && poolGeminiKeys.length)
+    ? poolGeminiKeys : [];
+  if (geminiList.length)
+    return geminiList.map(k => ({ key: k, provider: 'gemini' }));
+
+  // localStorage fallback (user's own Gemini key)
+  const localGemini = localStorage.getItem('lc_gemini_key');
+  if (localGemini) return [{ key: localGemini, provider: 'gemini' }];
+
+  // No Gemini key at all — fall back to unified pool with a warning in console
+  console.warn('[LOST CARD] No Gemini pool key found. HB falling back to Groq — rate limits expected. Add a Gemini key in Admin → Settings.');
+  return _getUnifiedPool();
+}
+
 // Kept for backward compat — returns just the key string of the current entry
 function getPoolOrUserKey() {
   const pool = _getUnifiedPool();
@@ -3095,14 +3115,19 @@ async function sendAIMessage() {
   const isPremium = checkHBPremium();
   const geminiKey = currentUser && currentUser.geminiKey; // legacy allocated key
 
-  // Resolve API key: Gemini (legacy) > Pool key > user localStorage fallback
-  let useGemini = false, apiKey = null, apiProvider = 'groq';
+  // ── Key routing for HB ────────────────────────────────────────────────
+  // HB system prompt is ~10k-15k tokens → MUST use Gemini (1M TPM limit).
+  // Groq free tier is only 6k TPM — one HB request exceeds it entirely.
+  // Priority: personal Gemini key → Gemini pool → (Groq fallback if nothing else)
+  let useGemini = false, apiKey = null, hbPool = null;
   if (geminiKey) {
+    // Personal Gemini key (legacy allocation) — uses old Gemini native API
     useGemini = true;
     apiKey    = geminiKey;
   } else {
-    apiKey = getPoolOrUserKey();
-    if (!apiKey) {
+    // Get Gemini-only pool for HB
+    hbPool = _getHBPool();
+    if (!hbPool.length) {
       addMessage('them', 'Hair Band', 'Hair Band is setting up — check back in a moment.');
       return;
     }
@@ -3122,9 +3147,11 @@ async function sendAIMessage() {
   try {
     let reply;
     if (useGemini) {
+      // Legacy personal Gemini key path
       reply = await callGemini(apiKey, aiAssistantHistory, AI_SYSTEM_PROMPT, text, 500);
     } else {
-      reply = await callAI(apiProvider, apiKey, aiAssistantHistory, AI_SYSTEM_PROMPT, text, 500);
+      // Pool path — Gemini-only pool via OpenAI-compatible endpoint
+      reply = await callAI('gemini', '', aiAssistantHistory, AI_SYSTEM_PROMPT, text, 500, hbPool);
     }
     typingEl.remove();
     isAITyping = false;
@@ -3438,7 +3465,8 @@ function _friendlyAPIError(err) {
   return '⚠️ Could not reach AI — please try again.';
 }
 
-async function callAI(provider, key, history, systemPrompt, userMsg, maxTokens = 180) {
+// poolOverride: optional [{key, provider}] array — used by HB to force Gemini-only pool
+async function callAI(provider, key, history, systemPrompt, userMsg, maxTokens = 180, poolOverride = null) {
   // ── Token optimization: trim history to last 6 msgs (was 10) ──────────
   // Each extra message pair adds ~200-500 tokens. 6 keeps context while
   // reducing TPM usage by ~40% on long conversations.
@@ -3446,8 +3474,8 @@ async function callAI(provider, key, history, systemPrompt, userMsg, maxTokens =
   for (const m of history.slice(-6)) messages.push(m);
   if (userMsg) messages.push({ role: 'user', content: userMsg });
 
-  // Unified pool: [{key, provider}, ...] — Groq + Gemini interleaved
-  const pool    = _getUnifiedPool();
+  // Use override pool if provided, otherwise unified (Groq + Gemini)
+  const pool    = poolOverride || _getUnifiedPool();
   const entries = pool.length ? pool : [{ key, provider }];
   const startIdx = _poolKeyIdx % entries.length;
 
