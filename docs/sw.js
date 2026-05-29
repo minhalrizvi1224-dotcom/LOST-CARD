@@ -1,8 +1,8 @@
 'use strict';
-// LOST CARD — Service Worker v2
+// LOST CARD — Service Worker v3
 // Strategy: stale-while-revalidate for same-origin HTML, JS, CSS
 
-const CACHE = 'lc-static-v2';
+const CACHE = 'lc-static-v3';
 
 // Only cache static assets from same origin
 function isCacheable(req) {
