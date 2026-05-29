@@ -50,12 +50,14 @@ function initAuth() {
       return;
     }
 
-    // Block unverified users EXCEPT:
-    // 1. Accounts created before 30 May 2026 (pre-verification era)
-    // 2. Admin accounts (isAdmin: true in Firestore)
+    // Fetch user document FIRST — needed for all checks below
+    const userDoc = await firebaseDB.collection('users').doc(user.uid).get().catch(() => null);
+    const docData0 = (userDoc && userDoc.exists) ? userDoc.data() : {};
+
+    // Block unverified users EXCEPT old accounts or admins
     const createdAt = user.metadata?.creationTime;
     const isOldAccount = createdAt && new Date(createdAt) < new Date('2026-05-30T00:00:00Z');
-    const isAdminUser = userDoc && userDoc.exists && userDoc.data().isAdmin === true;
+    const isAdminUser = docData0.isAdmin === true;
     if (!user.emailVerified && !isOldAccount && !isAdminUser) {
       await firebaseAuth.signOut();
       window.location.href = 'login.html?unverified=1';
@@ -63,15 +65,14 @@ function initAuth() {
     }
 
     // Check suspended status
-    const userDoc = await firebaseDB.collection('users').doc(user.uid).get().catch(() => null);
-    if (userDoc && userDoc.exists && userDoc.data().suspended) {
+    if (docData0.suspended) {
       await firebaseAuth.signOut();
       window.location.href = 'login.html?suspended=1';
       return;
     }
 
-    // Signed in
-    const docData = (userDoc && userDoc.exists) ? userDoc.data() : {};
+    // Signed in — use already-fetched docData
+    const docData = docData0;
     const nowSec  = Date.now() / 1000;
     const expSec  = docData.planExpiry?.seconds || 0;
     const planActive = docData.hbPlan === 'upgraded' && expSec > nowSec;
