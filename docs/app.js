@@ -1815,6 +1815,7 @@ const _CHAT_LIST_DATA = [
   // ── Default scenarios ──────────────────────────────────────────────
   { id:'hani',       type:'default', name:'Umm-e-Laila & Hani',  sub:'Default · Scripted · 23 moves',                emoji:'🃏', grad:'linear-gradient(135deg,#C678DD,#56B6C2)', action:"startDefaultMode('hani')" },
   { id:'reza',       type:'default', name:'Ayla & Reza',          sub:'Default · Scripted · 23 moves',                emoji:'💌', grad:'linear-gradient(135deg,#F0883E,#E06C75)', action:"startDefaultMode('reza')" },
+  { id:'mama',       type:'default', name:'Noor & Mama',           sub:'Default · Scripted · Brutal · 23 moves',       emoji:'🌿', grad:'linear-gradient(135deg,#98C379,#56B6C2)', action:"startDefaultMode('mama')", tag:'BRUTAL', tagStyle:'color:#FF7B72;border-color:rgba(255,123,114,.4);background:rgba(255,123,114,.08)' },
   // ── Custom chats ───────────────────────────────────────────────────
   { id:'bestfriend', type:'custom',  name:'Best Friend',          sub:'Closest friendship · Tap to begin',            emoji:'🤝', grad:'linear-gradient(135deg,#F0883E,#E5C07B)', tag:'Best Friend' },
   { id:'friend',     type:'custom',  name:'Friend',               sub:'Meaningful friendship · Tap to begin',         emoji:'💬', grad:'linear-gradient(135deg,#58A6FF,#79BBFF)', tag:'Friend' },

@@ -583,10 +583,42 @@ const SCENARIOS_REZA = [
   { hani: "Then — okay. I'm not going anywhere. Neither are you, apparently. So — let's just see what this actually is.", subtext: "(He's terrified and relieved in equal measure. He doesn't let either show.)", conflict: "Final withdrawal", salvation: true }
 ];
 
+// ─── Scenario 3: Noor & Mama (Mother/Daughter — BRUTAL difficulty) ──────────
+// Design intent: almost nobody reaches move 23.
+// Mama's dialogue is loaded with emotional contradictions, guilt-tripping,
+// and conditional love that make every response feel wrong.
+// Passive NLI damage is 2× higher for this scenario.
+const SCENARIOS_MAMA = [
+  { hani: "You didn't call last week. I had to hear from your khala that you were sick. Your khala, Noor.", subtext: "(She's been rehearsing this since Tuesday. She won't say that. She'll act like it just came out.)", conflict: "Justifying the absence", salvation: false },
+  { hani: "I'm not angry. I'm just — do you know what it feels like to find out your own daughter is sick through someone else?", subtext: "(She is angry. The 'I'm not angry' is load-bearing. She needs you to argue with it so she can feel right.)", conflict: "Agreeing too quickly or defending", salvation: false },
+  { hani: "I gave up a lot for you. I'm not saying that to make you feel bad. I'm just saying — a phone call. That's all I ask.", subtext: "(She is saying it to make you feel bad. The 'I'm not saying that' is the tell.)", conflict: "Acknowledging the sacrifice directly", salvation: false },
+  { hani: "Your father used to say you'd grow up and forget us. I defended you. Every time.", subtext: "(She is telling you that your father was right. She is using the defense as the accusation.)", conflict: "Defending yourself or validating her", salvation: false },
+  { hani: "I don't want anything from you. I never have. I just — I thought we were close. Maybe I was wrong.", subtext: "(She wants everything. The 'I don't want anything' is the highest-stakes thing she's said so far. There is no right answer here.)", conflict: "Agreeing or disagreeing with the premise", salvation: false },
+  { hani: "Do you know I still make your favourite food? Every Friday. Even when you're not here. Force of habit, I suppose.", subtext: "(This is not about food. This is a seven-year record of showing up that she is presenting as evidence in a case she has already decided.)", conflict: "Making it about the food", salvation: true },
+  { hani: "I'm not asking you to visit every week. I know you're busy. I just — sometimes I wonder if I made you too independent.", subtext: "(She is wondering if raising you was a mistake. She will not say that directly. She just did.)", conflict: "Reassuring her about independence", salvation: false },
+  { hani: "Your sister calls every day. I'm not comparing. I'm just — every day, Noor.", subtext: "(She is comparing. 'I'm not comparing' followed by the comparison is the whole mechanism.)", conflict: "Defending against the comparison", salvation: false },
+  { hani: "I had dreams too, you know. Before everything. I'm not saying I regret my choices. I just — I wonder sometimes.", subtext: "(She is saying she regrets her choices. She is also saying you are one of the consequences. She is also saying she loves you. All three are true. None of them cancel out.)", conflict: "Asking about her dreams or defending your existence", salvation: false },
+  { hani: "You look tired. Are you eating? You never eat properly when I'm not there to watch you.", subtext: "(The conversation just shifted. She has decided the confrontation is too much. She is retreating into care because care is the only language she was taught. This is not a truce. This is a tactical withdrawal.)", conflict: "Accepting the care or pushing through to the real conversation", salvation: true },
+  { hani: "I just want you to be happy. That's all I've ever wanted. If this life makes you happy, then fine.", subtext: "(The 'then fine' is doing all the work. It means: I disapprove. It means: I will not say I disapprove. It means: you will feel my disapproval anyway.)", conflict: "Thanking her or challenging the 'fine'", salvation: false },
+  { hani: "Sometimes I think — you know what, never mind. It doesn't matter.", subtext: "(It does matter. She needs you to ask. She will make you pay for not asking and she will also make you pay for asking. This is the double bind.)", conflict: "Not asking or asking in the wrong way", salvation: false },
+  { hani: "I'm getting old, Noor. I don't say that for sympathy. I just — time goes fast. I notice it more now.", subtext: "(She is telling you she is going to die. She is also telling you she is afraid. She does not have the language for fear, so she is using time.)", conflict: "Dismissing mortality or overcorrecting into panic", salvation: true },
+  { hani: "You know what I prayed for every day when you were little? That you'd find someone good. That you'd be okay when I'm gone. That's still what I pray for.", subtext: "(She is giving you permission to exist without her. She does not know this is what she's doing. It might be the most generous thing she has ever said.)", conflict: "Ignoring the prayer or making it transactional", salvation: true },
+  { hani: "I don't need you to understand everything I did. I just — I tried. I want you to know I tried.", subtext: "(This is an apology. It is the closest she can get. She has never said sorry directly in her life. The architecture of her love does not have that room.)", conflict: "Demanding a clearer apology or dismissing this one", salvation: true },
+  { hani: "I know I'm not easy. Your father always said that. You probably think it too.", subtext: "(She is asking you to tell her she's wrong. She also knows she's not wrong. She will not believe you if you say she's easy. She will believe you if you say something true instead.)", conflict: "Saying she's easy or agreeing harshly", salvation: false },
+  { hani: "I used to think I'd feel it — the moment you didn't need me anymore. I think it already happened and I missed it.", subtext: "(She is grieving a loss that is not a death. She is grieving the end of a particular kind of being needed. This is real grief. It is also being used as a tool. Both things are true.)", conflict: "Reassuring her you still need her or agreeing you don't", salvation: false },
+  { hani: "I'm not going to be here forever, Noor. I know you know that. I just want — I want things to be okay between us before.", subtext: "(She said 'before.' She did not finish the sentence. You both know what comes after 'before.')", conflict: "Avoiding the unfinished sentence or finishing it wrong", salvation: true },
+  { hani: "Do you remember when you were seven and you cried because you thought I was going to leave? I stayed up all night. I never told you that.", subtext: "(She is giving you a memory as a gift. She is also reminding you that she has always stayed. She is also asking you to stay.)", conflict: "Intellectualizing the memory or deflecting", salvation: true },
+  { hani: "I think we're more alike than you want to admit. That's probably why we clash.", subtext: "(This is the truest thing she has said. She is terrified of it. She said it anyway.)", conflict: "Denying the similarity", salvation: true },
+  { hani: "I'm sorry if I ever made you feel like you weren't enough. You were always — you were always more than enough.", subtext: "(She said it. She actually said it. Her voice broke on 'always.' She will not say it again. This is the only time.)", conflict: "Crying and making her comfort you, or not acknowledging it", salvation: true },
+  { hani: "Call me when you get home. Not because I'll worry. I'll worry anyway. Just — so I know.", subtext: "(She is letting you go. She is asking for one small thing in return. The ask is the smallest it has ever been.)", conflict: "Making a promise you won't keep", salvation: true },
+  { hani: "I love you. I know I don't always — I know. But I do.", subtext: "(She finished the sentence. She has never finished this sentence before. She will not say anything after this. She doesn't need to.)", conflict: "Anything that closes the door", salvation: true }
+];
+
 // ─── Scenario registry ───────────────────────────────────────────────────────
 const ALL_SCENARIOS = {
-  hani: SCENARIOS,
-  reza: SCENARIOS_REZA
+  hani:  SCENARIOS,
+  reza:  SCENARIOS_REZA,
+  mama:  SCENARIOS_MAMA
 };
 
 const SCENARIO_META = {
@@ -605,10 +637,20 @@ const SCENARIO_META = {
     title: 'Ayla & Reza',
     relationship: 'Ex-couple → Trying Friendship',
     description: 'He ended it 8 months ago. Now he wants to be friends. You have 23 moves to decide what this is — and what it costs.',
-    cardAtRisk: 'ROMANCE',
+    cardAtRisk: 'DEVOTION',
     difficulty: 'Hard',
     accent: '#F0883E',
     emoji: '💔'
+  },
+  mama: {
+    id: 'mama', character: 'Mama', you: 'Noor',
+    title: 'Noor & Mama',
+    relationship: 'Mother / Daughter',
+    description: 'She loves you completely and makes it impossible to breathe. You have 23 moves to stay in the room without losing yourself.',
+    cardAtRisk: 'DEVOTION',
+    difficulty: 'Brutal',
+    accent: '#98C379',
+    emoji: '🌿'
   }
 };
 
@@ -880,7 +922,15 @@ class LostCardSim {
     this.cards  = new CardState();
     this.dag    = new FriendshipDAG();
     this.chess  = new HaniChessEngine();
-    this.trust  = 0.80;
+    this.trust  = this.scenarioId === 'mama' ? 0.62 : 0.80; // mama: already strained
+
+    // mama: conversation starts mid-tension — cortisol pre-loaded
+    if (this.scenarioId === 'mama') {
+      this.ns.cortisol  = 0.28;
+      this.ns.pfcLoad   = 0.22;
+      this.ns.dopamine  = 0.62;
+      this.ns.computeNLI();
+    }
     this.move   = 0;
     this.silentTotal      = 0;
     this.softTotal        = 0;
@@ -930,12 +980,14 @@ class LostCardSim {
     this.dag.dijkstra();
 
     // Trust — drops hard, barely repairs
-    if (choiceType === SOFT)          this.trust = Math.min(1, this.trust + 0.01);
-    else if (choiceType===AGGRESSIVE) this.trust = Math.max(0, this.trust - 0.14);
-    else                              this.trust = Math.max(0, this.trust - 0.08);
+    if (choiceType === SOFT)          this.trust = Math.min(1, this.trust + (this.scenarioId === 'mama' ? 0.003 : 0.01));
+    else if (choiceType===AGGRESSIVE) this.trust = Math.max(0, this.trust - (this.scenarioId === 'mama' ? 0.20  : 0.14));
+    else                              this.trust = Math.max(0, this.trust - (this.scenarioId === 'mama' ? 0.13  : 0.08));
 
     // Passive neurological cost — compounds with each move (relationship strain is cumulative)
-    const passiveMult = 1 + (this.move * 0.04); // gets worse each move
+    // mama scenario: 2.2× passive damage — emotional contradiction exhausts PFC fast
+    const scenarioMult = this.scenarioId === 'mama' ? 2.2 : 1.0;
+    const passiveMult  = (1 + (this.move * 0.04)) * scenarioMult;
     this.ns.pfcLoad  = Math.min(1, this.ns.pfcLoad  + 0.022 * passiveMult);
     this.ns.cortisol = Math.min(1, this.ns.cortisol + 0.018 * passiveMult);
     this.ns.computeNLI();
