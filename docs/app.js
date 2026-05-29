@@ -3360,8 +3360,18 @@ async function sendAIMessage() {
     }
     if (!reply) {
       if (useGemini) {
-        // Legacy personal Gemini key path
-        reply = await callGemini(apiKey, aiAssistantHistory, AI_SYSTEM_PROMPT, text, 500);
+        // Legacy personal Gemini key — try it, fall back to pool if it fails
+        try {
+          reply = await callGemini(apiKey, aiAssistantHistory, AI_SYSTEM_PROMPT, text, 500);
+        } catch(personalKeyErr) {
+          // Personal key failed — fall through to pool (key may be expired/invalid)
+          const fallbackPool = _getHBPool();
+          if (fallbackPool.length) {
+            reply = await callAI('gemini', '', aiAssistantHistory, AI_SYSTEM_PROMPT, text, 500, fallbackPool);
+          } else {
+            throw personalKeyErr; // no pool either — propagate original error
+          }
+        }
       } else {
         // Gemini-only pool (direct API)
         reply = await callAI('gemini', '', aiAssistantHistory, AI_SYSTEM_PROMPT, text, 500, hbPool);
@@ -3716,9 +3726,10 @@ async function callAI(provider, key, history, systemPrompt, userMsg, maxTokens =
   const idxPtr    = isHBCall ? _hbKeyIdx : _poolKeyIdx;
   const startIdx  = idxPtr % entries.length;
 
-  // Key-level errors: skip and try next key
-  // 429 = rate limited, 402 = out of credits, 401 = invalid key
-  const _isKeyErr = (s) => s === 429 || s === 402 || s === 401;
+  // Key-level errors: skip this key and try the next one
+  // 429 = rate limited, 402 = out of credits, 401/403 = invalid/forbidden key
+  // 400 = bad request (key may be misconfigured), 404 = model/endpoint not found for this key
+  const _isKeyErr = (s) => s === 429 || s === 402 || s === 401 || s === 403 || s === 400 || s === 404;
 
   const _fetchEntry = (entry) => {
     const eUrl   = entry.provider === 'groq'
