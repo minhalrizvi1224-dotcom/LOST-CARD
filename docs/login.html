@@ -479,23 +479,16 @@ async function handleAuth(e) {
       const cred = await auth.createUserWithEmailAndPassword(email, password);
       await cred.user.updateProfile({ displayName: name });
 
-      // Send verification email via Resend Cloud Function (goes to inbox, not spam)
+      // Send verification email via Firebase built-in
       try {
-        const sendEmail = firebase.functions().httpsCallable('sendVerificationEmail');
-        await sendEmail({ email, displayName: name });
+        await cred.user.sendEmailVerification();
       } catch (emailErr) {
-        // Cloud Function failed → try Firebase built-in as fallback
-        try {
-          await cred.user.sendEmailVerification();
-        } catch (fallbackErr) {
-          // Both failed → delete account and stop
-          await cred.user.delete().catch(() => {});
-          await auth.signOut().catch(() => {});
-          isSigningUp = false;
-          showAuthMsg('Could not send verification email. Please try again.', 'error');
-          resetBtn(btn);
-          return;
-        }
+        await cred.user.delete().catch(() => {});
+        await auth.signOut().catch(() => {});
+        isSigningUp = false;
+        showAuthMsg('Could not send verification email. Please try again.', 'error');
+        resetBtn(btn);
+        return;
       }
 
       _pendingVerifyUser = cred.user;
