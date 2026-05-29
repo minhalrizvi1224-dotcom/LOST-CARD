@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>LOST CARD — Updating</title>
+  <title>LOST CARD — Coming Monday</title>
   <meta name="theme-color" content="#0D1117"/>
   <meta name="robots" content="noindex,nofollow"/>
   <style>
@@ -15,21 +15,19 @@
       color:#E6EDF3;
       font-family:'Segoe UI', system-ui, sans-serif;
       display:flex; align-items:center; justify-content:center;
-      overflow:hidden;
+      overflow-x:hidden;
     }
 
-    /* ── Ambient background ── */
     .bg {
       position:fixed; inset:0; pointer-events:none;
       background:
-        radial-gradient(ellipse 60% 55% at 20% 30%, rgba(198,120,221,0.07) 0%, transparent 65%),
-        radial-gradient(ellipse 50% 45% at 80% 70%, rgba(86,182,194,0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 65% 55% at 15% 25%, rgba(198,120,221,0.08) 0%, transparent 65%),
+        radial-gradient(ellipse 55% 45% at 85% 75%, rgba(86,182,194,0.07) 0%, transparent 60%),
         radial-gradient(ellipse 40% 35% at 55% 50%, rgba(88,166,255,0.04) 0%, transparent 70%);
-      animation: bgBreath 9s ease-in-out infinite alternate;
+      animation:bgBreath 10s ease-in-out infinite alternate;
     }
-    @keyframes bgBreath { 0%{opacity:.7} 100%{opacity:1} }
+    @keyframes bgBreath { 0%{opacity:.6} 100%{opacity:1} }
 
-    /* ── Stars ── */
     .stars { position:fixed; inset:0; pointer-events:none; }
     .star {
       position:absolute; border-radius:50%;
@@ -38,62 +36,47 @@
       animation-delay:var(--delay,0s);
     }
     @keyframes twinkle {
-      0%  { opacity:0.08; transform:scale(0.8); }
-      100%{ opacity:0.6;  transform:scale(1.2); }
+      0%  { opacity:0.06; transform:scale(0.8); }
+      100%{ opacity:0.55; transform:scale(1.2); }
     }
 
-    /* ── Container ── */
     .wrap {
       position:relative; z-index:10;
       text-align:center;
-      padding:48px 28px;
-      max-width:520px;
-      width:100%;
-      animation:fadeUp .8s ease both;
+      padding:52px 28px 44px;
+      max-width:560px; width:100%;
+      animation:fadeUp .9s ease both;
     }
     @keyframes fadeUp {
-      from { opacity:0; transform:translateY(20px); }
+      from { opacity:0; transform:translateY(22px); }
       to   { opacity:1; transform:none; }
     }
 
-    /* ── Three animated cards D E P ── */
+    /* ── Three animated cards ── */
     .cards-row {
-      display:flex; justify-content:center; align-items:center;
-      gap:12px; margin-bottom:40px;
+      display:flex; justify-content:center; gap:12px;
+      margin-bottom:38px;
     }
     .lc-card {
-      width:44px; height:60px; border-radius:8px;
+      width:46px; height:64px; border-radius:9px;
       display:flex; align-items:center; justify-content:center;
-      font-size:18px; font-weight:900; letter-spacing:1px;
-      border:1.5px solid;
-      animation:cardFloat 3s ease-in-out infinite;
+      font-size:19px; font-weight:900; border:1.5px solid;
+      animation:cardFloat 3.2s ease-in-out infinite;
     }
-    .lc-card:nth-child(1){
-      color:#C678DD; border-color:rgba(198,120,221,.5);
-      background:rgba(198,120,221,.08);
-      animation-delay:0s;
-    }
-    .lc-card:nth-child(2){
-      color:#56B6C2; border-color:rgba(86,182,194,.5);
-      background:rgba(86,182,194,.08);
-      animation-delay:.4s;
-    }
-    .lc-card:nth-child(3){
-      color:#98C379; border-color:rgba(152,195,121,.5);
-      background:rgba(152,195,121,.08);
-      animation-delay:.8s;
-    }
+    .lc-card:nth-child(1){ color:#C678DD; border-color:rgba(198,120,221,.45); background:rgba(198,120,221,.07); animation-delay:0s; }
+    .lc-card:nth-child(2){ color:#56B6C2; border-color:rgba(86,182,194,.45);  background:rgba(86,182,194,.07);  animation-delay:.45s; }
+    .lc-card:nth-child(3){ color:#98C379; border-color:rgba(152,195,121,.45); background:rgba(152,195,121,.07); animation-delay:.9s; }
     @keyframes cardFloat {
-      0%,100% { transform:translateY(0);   opacity:.7; }
-      50%      { transform:translateY(-8px); opacity:1;  }
+      0%,100%{ transform:translateY(0);    opacity:.65; }
+      50%    { transform:translateY(-9px); opacity:1;   }
     }
 
     /* ── Logo ── */
     .logo {
-      font-size:clamp(36px,9vw,54px);
+      font-size:clamp(38px,9vw,56px);
       font-weight:900; letter-spacing:8px;
       color:#E6EDF3;
-      text-shadow:0 0 40px rgba(88,166,255,.2);
+      text-shadow:0 0 50px rgba(88,166,255,.2);
       margin-bottom:8px;
     }
     .logo span { color:#58A6FF; }
@@ -101,99 +84,127 @@
     .tagline {
       font-size:10px; font-weight:700;
       color:#8B949E; letter-spacing:3px;
-      text-transform:uppercase;
-      margin-bottom:44px;
+      text-transform:uppercase; margin-bottom:40px;
     }
 
-    /* ── Status badge ── */
+    /* ── Launch badge ── */
     .badge {
       display:inline-flex; align-items:center; gap:8px;
-      background:rgba(240,136,62,.08);
-      border:1px solid rgba(240,136,62,.25);
-      color:#F0883E; font-size:11px; font-weight:800;
+      background:rgba(88,166,255,.07);
+      border:1px solid rgba(88,166,255,.22);
+      color:#58A6FF; font-size:11px; font-weight:800;
       padding:6px 18px; border-radius:20px;
       letter-spacing:1.5px; text-transform:uppercase;
       margin-bottom:36px;
     }
     .pulse {
-      width:7px; height:7px; border-radius:50%;
-      background:#F0883E;
-      animation:pulse 1.4s ease-in-out infinite;
+      width:7px; height:7px; border-radius:50%; background:#58A6FF;
+      animation:pulseDot 1.3s ease-in-out infinite;
     }
-    @keyframes pulse {
-      0%,100%{ opacity:1; transform:scale(1); box-shadow:0 0 0 0 rgba(240,136,62,.5); }
-      50%    { opacity:.6; transform:scale(.8); box-shadow:0 0 0 4px rgba(240,136,62,0); }
+    @keyframes pulseDot {
+      0%,100%{ opacity:1; transform:scale(1);   box-shadow:0 0 0 0 rgba(88,166,255,.5); }
+      50%    { opacity:.5; transform:scale(.75); box-shadow:0 0 0 5px rgba(88,166,255,0); }
     }
 
-    /* ── Progress bar ── */
-    .progress-wrap {
+    /* ── Countdown ── */
+    .countdown {
+      display:flex; justify-content:center; align-items:flex-start;
+      gap:8px; margin-bottom:10px;
+    }
+    .cd-block { display:flex; flex-direction:column; align-items:center; min-width:64px; }
+    .cd-num {
+      font-size:clamp(48px,12vw,72px);
+      font-weight:900;
+      font-family:'Courier New', monospace;
+      color:#E6EDF3; line-height:1;
+      text-shadow:0 0 30px rgba(88,166,255,.25);
+      transition:color .2s;
+    }
+    .cd-num.urgent { color:#E06C75; text-shadow:0 0 20px rgba(224,108,117,.4); }
+    .cd-label {
+      font-size:9px; font-weight:700; color:#484F58;
+      text-transform:uppercase; letter-spacing:2px; margin-top:8px;
+    }
+    .cd-sep {
+      font-size:clamp(38px,9vw,58px);
+      font-weight:900; color:#21262D; line-height:1;
+      padding-top:8px;
+      animation:sepBlink 1s ease-in-out infinite;
+    }
+    @keyframes sepBlink { 0%,100%{opacity:1} 50%{opacity:.12} }
+
+    .launch-date {
+      font-size:12px; color:#8B949E;
+      margin-bottom:48px; letter-spacing:.4px;
+    }
+    .launch-date strong { color:#C6D3E0; }
+
+    /* ── Note from Minhal ── */
+    .note-card {
       background:#161B22;
       border:1px solid #21262D;
-      border-radius:10px;
-      height:5px;
-      width:260px;
-      margin:0 auto 12px;
-      overflow:hidden;
+      border-radius:14px;
+      padding:28px 28px 24px;
+      margin:0 auto 44px;
+      max-width:480px;
+      text-align:left;
+      position:relative;
     }
-    .progress-bar {
-      height:100%;
-      border-radius:10px;
-      background:linear-gradient(90deg,#C678DD,#56B6C2,#98C379);
-      background-size:200% 100%;
-      animation:progressShimmer 2.2s linear infinite;
-      width:100%;
+    .note-tag {
+      position:absolute; top:-1px; left:24px;
+      background:#0D1117;
+      border:1px solid #21262D;
+      border-top:none;
+      color:#8B949E; font-size:9px; font-weight:700;
+      letter-spacing:2px; text-transform:uppercase;
+      padding:4px 12px; border-radius:0 0 8px 8px;
     }
-    @keyframes progressShimmer {
-      0%   { background-position:200% 0; }
-      100% { background-position:-200% 0; }
+    .note-text {
+      font-size:14px; color:#8B949E;
+      line-height:1.85; margin-bottom:20px;
+      margin-top:12px;
     }
-    .progress-label {
-      font-size:11px; color:#8B949E;
-      letter-spacing:.5px; margin-bottom:44px;
+    .note-text strong { color:#C6D3E0; }
+    .note-text em { color:#58A6FF; font-style:normal; }
+    .note-sig {
+      font-size:12px; color:#484F58;
+      font-weight:600; letter-spacing:.3px;
+      border-top:1px solid #21262D;
+      padding-top:16px;
+      display:flex; align-items:center; gap:8px;
     }
-
-    /* ── Message ── */
-    .message {
-      font-size:15px; color:#C6D3E0;
-      line-height:1.85; margin-bottom:36px;
-      max-width:400px; margin-left:auto; margin-right:auto;
-    }
-    .message strong { color:#E6EDF3; }
+    .note-sig-dot { width:6px; height:6px; border-radius:50%; background:linear-gradient(135deg,#C678DD,#56B6C2); flex-shrink:0; }
 
     /* ── Quote ── */
     .quote-wrap {
-      border-left:2px solid rgba(88,166,255,.4);
-      background:rgba(88,166,255,.04);
+      border-left:2px solid rgba(88,166,255,.3);
+      background:rgba(88,166,255,.03);
       border-radius:0 10px 10px 0;
       padding:16px 20px;
       margin:0 auto 44px;
-      max-width:420px;
-      text-align:left;
+      max-width:420px; text-align:left;
     }
     .quote-text {
-      font-size:13.5px; font-style:italic;
-      color:#8B949E; line-height:1.75;
-      margin-bottom:8px;
+      font-size:13px; font-style:italic;
+      color:#8B949E; line-height:1.8; margin-bottom:8px;
     }
     .quote-attr {
-      font-size:10px; font-weight:700;
-      color:#484F58; letter-spacing:1.5px;
-      text-transform:uppercase;
+      font-size:9px; font-weight:700;
+      color:#484F58; letter-spacing:1.5px; text-transform:uppercase;
     }
 
     /* ── Footer ── */
     .footer {
       font-size:10px; color:#21262D;
-      font-weight:700; letter-spacing:2.5px;
-      text-transform:uppercase;
+      font-weight:700; letter-spacing:2.5px; text-transform:uppercase;
       display:flex; align-items:center; justify-content:center; gap:10px;
     }
     .fdot { width:3px; height:3px; border-radius:50%; background:#21262D; }
 
-    /* ── Mobile ── */
     @media(max-width:480px){
       .logo { letter-spacing:5px; }
-      .progress-wrap { width:220px; }
+      .cd-block { min-width:52px; }
+      .note-card { padding:24px 20px 20px; }
     }
   </style>
 </head>
@@ -204,36 +215,73 @@
 
 <div class="wrap">
 
-  <!-- Three cards -->
   <div class="cards-row">
     <div class="lc-card">D</div>
     <div class="lc-card">E</div>
     <div class="lc-card">P</div>
   </div>
 
-  <!-- Logo -->
   <div class="logo">LOST <span>CARD</span></div>
   <div class="tagline">A Computational Model of Relational Belief Decay</div>
 
-  <!-- Status -->
   <div style="margin-bottom:36px">
     <div class="badge">
       <div class="pulse"></div>
-      Update in Progress
+      Launching Monday
     </div>
   </div>
 
-  <!-- Progress -->
-  <div class="progress-wrap">
-    <div class="progress-bar"></div>
+  <!-- Countdown -->
+  <div class="countdown">
+    <div class="cd-block">
+      <div class="cd-num" id="cd-d">00</div>
+      <div class="cd-label">Days</div>
+    </div>
+    <div class="cd-sep">:</div>
+    <div class="cd-block">
+      <div class="cd-num" id="cd-h">00</div>
+      <div class="cd-label">Hours</div>
+    </div>
+    <div class="cd-sep">:</div>
+    <div class="cd-block">
+      <div class="cd-num" id="cd-m">00</div>
+      <div class="cd-label">Minutes</div>
+    </div>
+    <div class="cd-sep">:</div>
+    <div class="cd-block">
+      <div class="cd-num" id="cd-s">00</div>
+      <div class="cd-label">Seconds</div>
+    </div>
   </div>
-  <div class="progress-label">Our team is working on improvements — back very soon</div>
 
-  <!-- Message -->
-  <div class="message">
-    We're fixing a few things to make your experience better.<br>
-    <strong>LOST CARD</strong> will be back shortly.<br><br>
-    Thank you for your patience.
+  <div class="launch-date">
+    Going live <strong>Monday, 2 June 2026</strong> &nbsp;·&nbsp; 12:00 AM &nbsp;·&nbsp; Pakistan Standard Time
+  </div>
+
+  <!-- Note from Minhal -->
+  <div class="note-card">
+    <div class="note-tag">A note from the developer</div>
+    <div class="note-text">
+      I built <strong>LOST CARD</strong> during my second year of university —
+      not as an assignment, but as an answer to a question I couldn't stop asking:
+      <em>why do we lose people we never meant to lose?</em>
+      <br><br>
+      Every conversation has a structure. Every silence has a weight.
+      Every word you choose either holds a card in your hand — or lets it slip.
+      I mapped that onto <strong>7 data structures from computer science</strong>
+      and built a simulation that shows you, mathematically,
+      exactly where trust starts to leave.
+      <br><br>
+      This is not a game. It is a mirror.
+      And I think, if you give it a few minutes —
+      <strong>it will show you something true about yourself.</strong>
+      <br><br>
+      See you Monday. It will be worth the wait.
+    </div>
+    <div class="note-sig">
+      <div class="note-sig-dot"></div>
+      S. M. Minhal Abbas Rizvi &nbsp;·&nbsp; Developer, LOST CARD &nbsp;·&nbsp; BSSE, 2026
+    </div>
   </div>
 
   <!-- Quote -->
@@ -245,7 +293,6 @@
     <div class="quote-attr">— The Bet of Belief &nbsp;·&nbsp; S. M. Minhal Abbas Rizvi</div>
   </div>
 
-  <!-- Footer -->
   <div class="footer">
     <div class="fdot"></div>
     LOST CARD
@@ -257,10 +304,10 @@
 </div>
 
 <script>
-  // Generate stars
+  // Stars
   const st = document.getElementById('stars');
-  for (let i = 0; i < 80; i++) {
-    const s  = document.createElement('div');
+  for (let i = 0; i < 85; i++) {
+    const s = document.createElement('div');
     const big = Math.random() < 0.15;
     s.className = 'star';
     s.style.cssText =
@@ -269,6 +316,38 @@
       `--d:${2+Math.random()*6}s;--delay:${Math.random()*6}s`;
     st.appendChild(s);
   }
+
+  // Countdown to Monday 2 June 2026 12:00 AM PKT (UTC+5 → 19:00 UTC Sunday 1 June)
+  const LAUNCH = new Date('2026-06-01T19:00:00Z');
+
+  function pad(n){ return String(n).padStart(2,'0'); }
+
+  function tick() {
+    const diff = LAUNCH - Date.now();
+    if (diff <= 0) {
+      // Time's up — redirect to app
+      window.location.replace('login.html');
+      return;
+    }
+    const days  = Math.floor(diff / 86400000);
+    const hours = Math.floor((diff % 86400000) / 3600000);
+    const mins  = Math.floor((diff % 3600000)  / 60000);
+    const secs  = Math.floor((diff % 60000)    / 1000);
+
+    document.getElementById('cd-d').textContent = pad(days);
+    document.getElementById('cd-h').textContent = pad(hours);
+    document.getElementById('cd-m').textContent = pad(mins);
+    document.getElementById('cd-s').textContent = pad(secs);
+
+    // Turn red in last hour
+    const urgent = diff < 3600000;
+    ['cd-d','cd-h','cd-m','cd-s'].forEach(id => {
+      document.getElementById(id).classList.toggle('urgent', urgent);
+    });
+  }
+
+  tick();
+  setInterval(tick, 1000);
 </script>
 </body>
 </html>
