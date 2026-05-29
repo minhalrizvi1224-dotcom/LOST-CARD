@@ -3289,7 +3289,8 @@ function startAIAssistant() {
   if (leftSidebar) leftSidebar.style.display = 'none';
 
   // ── Hair Band: Construction Mode ─────────────────────────────────────
-  const HB_CONSTRUCTION = false; // set false when HB is back online
+  // Auto-disables at 3am UTC 30 May 2026 (8am PKT) — Gemini quota resets at midnight UTC
+  const HB_CONSTRUCTION = Date.now() < new Date('2026-05-30T03:00:00Z').getTime();
   if (HB_CONSTRUCTION) {
     document.getElementById('choicesArea').innerHTML = '';
     document.getElementById('chatMessages').innerHTML = `
