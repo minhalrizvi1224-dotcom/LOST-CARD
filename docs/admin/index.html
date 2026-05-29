@@ -732,10 +732,13 @@ window.addEventListener('DOMContentLoaded', () => {
   adAuth.onAuthStateChanged(async user => {
     if (!user) { showAuthScreen(); return; }
     // Check isAdmin flag from Firestore — no hardcoded UID in client code
-    const adminDoc = await adDB.collection('users').doc(user.uid).get().catch(() => null);
+    // Force server fetch — bypass Firestore offline cache
+    const adminDoc = await adDB.collection('users').doc(user.uid).get({ source: 'server' }).catch(() =>
+      adDB.collection('users').doc(user.uid).get().catch(() => null)
+    );
     if (!adminDoc || !adminDoc.exists || adminDoc.data().isAdmin !== true) {
       await adAuth.signOut();
-      showErr('Access denied.');
+      showErr('Access denied. Make sure isAdmin:true is set in Firestore.');
       return;
     }
     adUser = user;
