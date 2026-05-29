@@ -54,13 +54,22 @@ async function callCloudAI(provider, messages, maxTokens) {
   return result.data.text;
 }
 
-// Feature flag: Cloud Functions not yet deployed — always use direct API pool.
-// Set to false until 'firebase deploy --only functions' is run successfully.
-// When CF is deployed, change this to null to enable auto-detection.
-let _cfAvailable = false;
+// CF flag: null = auto-detect on first call, true/false = forced
+// Set to false ONLY if CF deploy fails and you need emergency direct-pool fallback
+let _cfAvailable = null;
 
 async function _detectCF() {
-  return _cfAvailable; // CF not deployed — skip detection entirely
+  if (_cfAvailable !== null) return _cfAvailable;
+  try {
+    // Ping the CF with a minimal call to check it's live
+    const fn = firebase.functions().httpsCallable('ai');
+    await fn({ provider: 'groq', messages: [{ role: 'user', content: 'ping' }], maxTokens: 1 });
+    _cfAvailable = true;
+  } catch(e) {
+    // CF unavailable or not deployed — fall back to direct pool
+    _cfAvailable = false;
+  }
+  return _cfAvailable;
 }
 
 // ══════════════════════════════════════════════════════════════════════
@@ -2396,8 +2405,10 @@ async function generateCustomReply(chatId, setup, userText) {
     }
   }
 
+  // Sanitize userText before injecting into system prompt to prevent prompt injection
+  const safeUserText = (userText || '').replace(/"/g, "'").replace(/\\/g, '').slice(0, 300);
   const sysPrompt = userText
-    ? `You are ${setup.theirName}. ${character} You're texting ${setup.yourName}. Situation: ${setup.scenario}. You're ${mood}${trstLine ? ', ' + trstLine : ''}.${diffLayer}${exDirective}${explicitOverride} ${langHint} They just wrote: "${userText}". Reply as ${setup.theirName} — real, in character, psychologically true to your state. 1-2 sentences MAX. Text message style. No asterisks, no labels, no explanations. ${typeReactivityHint} ${varietyNote}${charLock}`
+    ? `You are ${setup.theirName}. ${character} You're texting ${setup.yourName}. Situation: ${setup.scenario}. You're ${mood}${trstLine ? ', ' + trstLine : ''}.${diffLayer}${exDirective}${explicitOverride} ${langHint} They just wrote: [${safeUserText}]. Reply as ${setup.theirName} — real, in character, psychologically true to your state. 1-2 sentences MAX. Text message style. No asterisks, no labels, no explanations. ${typeReactivityHint} ${varietyNote}${charLock}`
     : `You are ${setup.theirName}. ${character} You're texting ${setup.yourName}. Situation: ${setup.scenario}. ${langHint} Context: ${openingSeed} ${typeOpeningHint} 1-2 sentences max. No labels.${charLock}`;
 
   // ── Free message limit check (shared with Hair Band) ─────────────────
@@ -5494,11 +5505,11 @@ function generateArchetypeReportHTML(s) {
         <span style="font-size:26px">${archetype.icon}</span>
         <div>
           <div style="font-size:16px;font-weight:800;color:${archetype.color}">${archetype.name}</div>
-          <div style="font-size:11px;color:var(--muted);font-style:italic">${archetype.pattern}</div>
+          <div style="font-size:11px;color:var(--muted);font-style:italic">${esc(archetype.pattern)}</div>
         </div>
-        ${health ? `<div style="margin-left:auto;text-align:center"><div style="font-size:32px;font-weight:900;color:var(--blue)">${health.grade}</div><div style="font-size:11px;color:var(--muted)">${health.score}/100</div></div>` : ''}
+        ${health ? `<div style="margin-left:auto;text-align:center"><div style="font-size:32px;font-weight:900;color:var(--blue)">${esc(health.grade)}</div><div style="font-size:11px;color:var(--muted)">${health.score}/100</div></div>` : ''}
       </div>
-      <div style="font-size:13px;line-height:1.7;color:var(--text)">${archetype.desc}</div>
+      <div style="font-size:13px;line-height:1.7;color:var(--text)">${esc(archetype.desc)}</div>
     </div>` : ''}
 
     ${health ? `<div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px">

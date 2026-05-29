@@ -22,7 +22,8 @@
 //    service cloud.firestore {
 //      match /databases/{database}/documents {
 //        function isAdmin() {
-//          return request.auth != null && request.auth.uid == 'gHFlKHBDODOp1zXQ1T304skhITi1';
+//          return request.auth != null
+//            && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
 //        }
 //        match /users/{uid} {
 //          allow read: if request.auth != null && request.auth.uid == uid;
@@ -48,8 +49,14 @@
 //          allow read, write, delete: if isAdmin();
 //        }
 //        match /adminSettings/{doc} {
-//          allow read: if request.auth != null;
-//          allow write: if isAdmin();
+//          allow read, write: if isAdmin();
+//        }
+//        match /complaints/{id} {
+//          allow create: if request.auth != null;
+//          allow read, write, delete: if isAdmin();
+//        }
+//        match /loginAttempts/{id} {
+//          allow read, write: if true;
 //        }
 //      }
 //    }

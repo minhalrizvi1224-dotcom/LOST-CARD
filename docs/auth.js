@@ -120,20 +120,19 @@ function initAuth() {
       pkrPriceAnnual    = c.pkrPriceAnnual   || 9800;
     }
 
-    // Initial load — AWAIT so keys are ready before authReady fires
-    await firebaseDB.collection('adminSettings').doc('config').get().then(cfg => {
-      if (cfg.exists) _applyAdminConfig(cfg.data());
-    }).catch(() => {});
+    // Only admin loads pool keys — regular users call Cloud Function (keys never sent to browser)
+    if (docData.isAdmin === true) {
+      await firebaseDB.collection('adminSettings').doc('config').get().then(cfg => {
+        if (cfg.exists) _applyAdminConfig(cfg.data());
+      }).catch(() => {});
 
-    // Real-time listener — whenever admin adds/removes keys, app updates immediately
-    // No page reload needed after admin changes the pool
-    firebaseDB.collection('adminSettings').doc('config').onSnapshot(cfg => {
-      if (cfg.exists) {
-        _applyAdminConfig(cfg.data());
-        // Clear cooldown cache so new keys are tried immediately
-        window.dispatchEvent(new CustomEvent('lc-pool-updated'));
-      }
-    }, () => {}); // silent error handler
+      firebaseDB.collection('adminSettings').doc('config').onSnapshot(cfg => {
+        if (cfg.exists) {
+          _applyAdminConfig(cfg.data());
+          window.dispatchEvent(new CustomEvent('lc-pool-updated'));
+        }
+      }, () => {});
+    }
 
     // Update last login + mark online
     firebaseDB.collection('users').doc(user.uid).update({

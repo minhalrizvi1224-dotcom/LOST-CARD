@@ -143,13 +143,15 @@ exports.sendVerificationEmail = functions
   const { email, displayName } = data || {};
   if (!email) throw new functions.https.HttpsError('invalid-argument', 'Email required.');
 
-  // Load Resend key from Firestore (admin can update without redeploy)
-  // Falls back to hardcoded key if not set
-  let resendKey = 're_5o8ZbTFe_KtLJLkscyvyjCs6bKiTkFT2V';
+  // Load Resend key from Firestore only — never hardcoded in source
+  let resendKey = null;
   try {
     const cfg = await db.collection('adminSettings').doc('config').get();
     if (cfg.exists && cfg.data().resendKey) resendKey = cfg.data().resendKey;
   } catch(e) {}
+  if (!resendKey) {
+    throw new functions.https.HttpsError('failed-precondition', 'Email service not configured. Add resendKey to adminSettings/config.');
+  }
 
   // Generate Firebase email verification link (Admin SDK)
   const verificationLink = await admin.auth()
