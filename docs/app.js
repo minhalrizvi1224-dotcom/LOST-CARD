@@ -2314,8 +2314,10 @@ async function generateCustomReply(chatId, setup, userText) {
       sim.ns.pfc       = Math.min(1, sim.ns.pfc        + 0.15);
       sim.ns.dopamine  = Math.max(0, sim.ns.dopamine   - 0.15);
       sim.trust        = Math.max(0, sim.trust          - 0.20);
-      sim.ns.recompute();
-      updateSidebarStats();
+      sim.ns.computeNLI();
+      // Refresh the right-sidebar stats immediately to show the damage
+      updateSimUI({ nli: sim.ns.nli, trust: sim.trust, state: sim.ns.getStateLabel(),
+        stateColor: sim.ns.getStateColor(), cards: { ...sim.cards }, stackSize: sim.stack.size(), exitDist: 999 });
       showToast('⚠ Boundary violated — trust and NLI severely damaged.', 'error');
     }
 
@@ -2451,10 +2453,19 @@ function sendCustomMessage() {
       }
     }
 
-    // Update UI to reflect the extra damage before terminal check
-    updateSimUI({ nli: sim.ns.nli, trust: sim.trust, state: sim.ns.getStateLabel(),
-      stateColor: sim.ns.getStateColor(), cards: { ...sim.cards }, stackSize: sim.stack.size(),
-      exitDist: sim.dag?.lastExitDist ?? result.exitDist });
+    // Sync result object so the updateSimUI call below shows damage-adjusted NLI/state
+    result.nli        = sim.ns.nli;
+    result.trust      = sim.trust;
+    result.state      = sim.ns.getStateLabel();
+    result.stateColor = sim.ns.getStateColor();
+
+    // ── Re-check terminal after extra damage ────────────────────────────
+    // Extra damage may push NLI ≥ 0.75 (amygdala) or trust below floor.
+    // If so, mark the result as terminal so it fires normally below.
+    if (!result.terminal) {
+      if (sim.ns.nli >= 0.75)   { result.terminal = TC_AMYGDALA;   result.terminalLabel = 'AMYGDALA OVERRIDE - RATIONAL MIND OFFLINE'; }
+      else if (sim.trust < 0.28) { result.terminal = TC_TRUST_FLOOR; result.terminalLabel = 'TRUST FLOOR REACHED'; }
+    }
 
     // ── Part 4: Flatline terminal check ──────────────────────────────────
     // Fires when the conversation dies from pure disengagement (not conflict).
