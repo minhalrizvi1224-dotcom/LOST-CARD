@@ -3430,7 +3430,7 @@ function logHairBandQuery(userMsg, aiReply) {
 function _friendlyAPIError(err) {
   const msg = (err && err.message) ? err.message : '';
   if (/rate.?limit|TPM|tokens.per.minute|too.many.request/i.test(msg))
-    return '⏳ Too many messages at once — please wait a few seconds and try again.';
+    return 'Hair Band is busy right now — wait a moment and try again.';
   if (/invalid.api.key|invalid_api_key|Incorrect API/i.test(msg))
     return '❌ AI service unavailable right now. Please try again shortly.';
   if (/connect|network|fetch/i.test(msg))
@@ -3488,8 +3488,8 @@ async function callAI(provider, key, history, systemPrompt, userMsg, maxTokens =
     if (_isKeyErr(resp.status)) {
       const ed = await resp.json().catch(() => ({}));
       lastErrMsg = ed?.error?.message || `HTTP ${resp.status}`;
-      // 429: 60s cooldown. 402/401: 5-min cooldown (key is dead/broke)
-      _keyCooldowns[entry.key] = now + (resp.status === 429 ? 60000 : 300000);
+      // 429: 30s cooldown. 402/401: 5-min cooldown (key is dead/broke)
+      _keyCooldowns[entry.key] = now + (resp.status === 429 ? 30000 : 300000);
       resp = null;
       continue;
     }
@@ -3497,29 +3497,22 @@ async function callAI(provider, key, history, systemPrompt, userMsg, maxTokens =
     break;
   }
 
-  // ── Second pass: progressive backoff when all keys are cooling ────────
-  // Tries 3 rounds: wait 3s → 6s → 10s, looking for any key that recovered
+  // ── Second pass: single 4s wait, then one more attempt ──────────────
+  // Short wait lets the rate-limit window start recovering without
+  // making the user stare at a typing indicator for 19 seconds.
   if (!resp && allSkipped && entries.length > 0) {
-    const waits = [3000, 6000, 10000];
-    for (const waitMs of waits) {
-      await new Promise(r => setTimeout(r, waitMs));
-      const now2 = Date.now();
-      for (let i = 0; i < entries.length; i++) {
-        const entry = entries[(_poolKeyIdx + i) % entries.length];
-        if (_keyCooldowns[entry.key] && now2 < _keyCooldowns[entry.key]) continue;
-        resp = await _fetchEntry(entry);
-        if (resp.ok) {
-          _poolKeyIdx = (_poolKeyIdx + i + 1) % entries.length;
-          break;
-        }
-        if (_isKeyErr(resp.status)) {
-          _keyCooldowns[entry.key] = now2 + (resp.status === 429 ? 60000 : 300000);
-          resp = null;
-          continue;
-        }
-        break;
+    await new Promise(r => setTimeout(r, 4000));
+    const now2 = Date.now();
+    for (let i = 0; i < entries.length; i++) {
+      const entry = entries[(_poolKeyIdx + i) % entries.length];
+      // On the retry pass, ignore cooldowns — give every key one more chance
+      resp = await _fetchEntry(entry);
+      if (resp.ok) { _poolKeyIdx = (_poolKeyIdx + i + 1) % entries.length; break; }
+      if (_isKeyErr(resp.status)) {
+        _keyCooldowns[entry.key] = now2 + (resp.status === 429 ? 30000 : 300000);
+        resp = null; continue;
       }
-      if (resp && resp.ok) break;
+      break;
     }
   }
 
