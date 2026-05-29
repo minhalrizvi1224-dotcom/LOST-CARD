@@ -1924,6 +1924,7 @@ function showConv(chatId) {
 // DEFAULT MODE
 // ══════════════════════════════════════════════════════════════════════
 function startDefaultMode() {
+  showSection('chatApp');
   const csb = document.getElementById('changeSetupBtn');
   if (csb) csb.style.display = 'none';
   showConv('default');
@@ -1989,6 +1990,9 @@ function startCustomMode(chatId, setup) {
   currentChatId     = chatId;
   currentChatSetup  = setup;
   const meta = CHAT_META[chatId];
+
+  // Always navigate to the chat section — user may have clicked from landing page
+  showSection('chatApp');
 
   document.getElementById('chatWelcome').style.display = 'none';
   document.getElementById('chatConv').style.display    = 'flex';
@@ -3100,6 +3104,7 @@ function autoResizeInput(el) {
 // AI ASSISTANT
 // ══════════════════════════════════════════════════════════════════════
 function startAIAssistant() {
+  showSection('chatApp');
   isCustomMode = false;
   const csb = document.getElementById('changeSetupBtn');
   if (csb) csb.style.display = 'none';
