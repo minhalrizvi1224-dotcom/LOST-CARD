@@ -733,12 +733,22 @@ window.addEventListener('DOMContentLoaded', () => {
     if (!user) { showAuthScreen(); return; }
     // Check isAdmin flag from Firestore — no hardcoded UID in client code
     // Force server fetch — bypass Firestore offline cache
-    const adminDoc = await adDB.collection('users').doc(user.uid).get({ source: 'server' }).catch(() =>
-      adDB.collection('users').doc(user.uid).get().catch(() => null)
-    );
-    if (!adminDoc || !adminDoc.exists || adminDoc.data().isAdmin !== true) {
+    let adminDoc = null;
+    let fetchErr = null;
+    try {
+      adminDoc = await adDB.collection('users').doc(user.uid).get({ source: 'server' });
+    } catch(e1) {
+      fetchErr = e1.message;
+      try { adminDoc = await adDB.collection('users').doc(user.uid).get(); } catch(e2) { fetchErr = e2.message; }
+    }
+    if (!adminDoc || !adminDoc.exists) {
       await adAuth.signOut();
-      showErr('Access denied. Make sure isAdmin:true is set in Firestore.');
+      showErr('User doc not found. UID: ' + user.uid + (fetchErr ? ' | Error: ' + fetchErr : ''));
+      return;
+    }
+    if (adminDoc.data().isAdmin !== true) {
+      await adAuth.signOut();
+      showErr('isAdmin is not true. Value: ' + adminDoc.data().isAdmin + ' | UID: ' + user.uid);
       return;
     }
     adUser = user;
