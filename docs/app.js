@@ -3767,7 +3767,7 @@ async function callAI(provider, key, history, systemPrompt, userMsg, maxTokens =
       const ed = await resp.json().catch(() => ({}));
       lastErrMsg = ed?.error?.message || `HTTP ${resp.status}`;
       // 429: 30s cooldown. 402/401: 5-min cooldown (key is dead/broke)
-      _keyCooldowns[entry.key] = now + (resp.status === 429 ? 30000 : 300000);
+      _keyCooldowns[entry.key] = now + (resp.status === 429 ? 65000 : 300000);
       resp = null;
       continue;
     }
@@ -3784,7 +3784,7 @@ async function callAI(provider, key, history, systemPrompt, userMsg, maxTokens =
       const cd = _keyCooldowns[e.key] || 0;
       return cd > 0 && cd < min ? cd : min;
     }, Infinity);
-    const waitMs = soonest === Infinity ? 3000 : Math.min(Math.max(soonest - Date.now(), 500), 8000);
+    const waitMs = soonest === Infinity ? 3000 : Math.min(Math.max(soonest - Date.now(), 500), 12000);
     await new Promise(r => setTimeout(r, waitMs));
     const now2   = Date.now();
     const retryStart = isHBCall ? (_hbKeyIdx % entries.length) : (_poolKeyIdx % entries.length);
