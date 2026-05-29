@@ -3787,14 +3787,24 @@ async function callAI(provider, key, history, systemPrompt, userMsg, maxTokens =
   const _isKeyErr = (s) => s === 429 || s === 402 || s === 401 || s === 403 || s === 400 || s === 404;
 
   const _fetchEntry = (entry) => {
-    const eUrl   = entry.provider === 'groq'
-      ? 'https://api.groq.com/openai/v1/chat/completions'
-      : 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
-    const eModel = entry.provider === 'groq' ? 'llama-3.3-70b-versatile' : 'gemini-2.0-flash';
-    return fetch(eUrl, {
+    if (entry.provider === 'gemini') {
+      // Native Gemini endpoint — more reliable than OpenAI-compat
+      const gUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${entry.key}`;
+      const contents = [];
+      for (const m of messages) {
+        if (m.role === 'system') continue;
+        contents.push({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] });
+      }
+      const sys = messages.find(m => m.role === 'system');
+      const body = { contents, generationConfig: { maxOutputTokens: maxTokens, temperature: 0.9 } };
+      if (sys) body.systemInstruction = { parts: [{ text: sys.content }] };
+      return fetch(gUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    }
+    // Groq — OpenAI-compatible
+    return fetch('https://api.groq.com/openai/v1/chat/completions', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${entry.key}` },
-      body:    JSON.stringify({ model: eModel, messages, max_tokens: maxTokens, temperature: 0.9 })
+      body:    JSON.stringify({ model: 'llama-3.3-70b-versatile', messages, max_tokens: maxTokens, temperature: 0.9 })
     });
   };
 
@@ -3867,7 +3877,10 @@ async function callAI(provider, key, history, systemPrompt, userMsg, maxTokens =
   }
 
   const data = await resp.json();
-  return data.choices?.[0]?.message?.content?.trim() || '[No response]';
+  // Native Gemini format OR OpenAI-compat format
+  return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim()
+      || data.choices?.[0]?.message?.content?.trim()
+      || '[No response]';
 }
 
 // ══════════════════════════════════════════════════════════════════════
