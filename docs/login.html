@@ -341,9 +341,17 @@ window.addEventListener('DOMContentLoaded', () => {
   if (params.get('suspended') === '1') {
     showAuthMsg('Your account has been suspended. Contact the administrator.', 'error');
   }
+  if (params.get('unverified') === '1') {
+    showAuthMsg('📧 Please verify your email before signing in. Check your inbox (and spam folder).', 'error');
+  }
   if (!initFirebase()) return;
   auth.onAuthStateChanged(user => {
-    if (user && !isSigningUp) window.location.href = 'index.html';
+    // Only redirect if verified — unverified users stay on login page
+    if (user && !isSigningUp && user.emailVerified) {
+      window.location.href = 'index.html';
+    } else if (user && !isSigningUp && !user.emailVerified) {
+      auth.signOut().catch(() => {});
+    }
   });
 });
 
@@ -429,11 +437,22 @@ async function handleAuth(e) {
       const cred = await auth.createUserWithEmailAndPassword(email, password);
       await cred.user.updateProfile({ displayName: name });
 
-      // Send email verification
-      await cred.user.sendEmailVerification();
+      // Send verification email — if it fails, delete the account and show error
+      try {
+        await cred.user.sendEmailVerification();
+      } catch (emailErr) {
+        // Can't send email → delete the half-created account and stop
+        await cred.user.delete().catch(() => {});
+        await auth.signOut().catch(() => {});
+        isSigningUp = false;
+        showAuthMsg('Could not send verification email. Check your email address and try again.', 'error');
+        resetBtn(btn);
+        return;
+      }
+
       _pendingVerifyUser = cred.user;
 
-      // Save to Firestore (emailVerified: false until they click the link)
+      // Save to Firestore (emailVerified: false — blocked from app until verified)
       await db.collection('users').doc(cred.user.uid).set({
         email, displayName: name,
         emailVerified:  false,
@@ -447,7 +466,7 @@ async function handleAuth(e) {
       await auth.signOut();
       isSigningUp = false;
 
-      // Show verify panel
+      // Show verify panel — no way to skip this
       document.getElementById('authForm').style.display = 'none';
       document.getElementById('authTabs').style.display = 'none';
       document.getElementById('authQuote').style.display = 'none';

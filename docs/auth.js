@@ -46,8 +46,14 @@ function initAuth() {
   // Auth state listener
   firebaseAuth.onAuthStateChanged(async (user) => {
     if (!user) {
-      // Not signed in - redirect to login
       window.location.href = 'login.html';
+      return;
+    }
+
+    // Block unverified users — sign them out and send back to login
+    if (!user.emailVerified) {
+      await firebaseAuth.signOut();
+      window.location.href = 'login.html?unverified=1';
       return;
     }
 
