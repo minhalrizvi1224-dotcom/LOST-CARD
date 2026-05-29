@@ -776,6 +776,7 @@ Never refuse to explain any part of the simulation. Never add unnecessary discla
 // INIT
 // ══════════════════════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
+  renderChatList();
   loadHistory();
   initAuth();
 
@@ -1804,6 +1805,106 @@ function getAPIKey(provider) {
   if (provider === 'groq')     return localStorage.getItem('lc_groq_key') || '';
   if (provider === 'deepseek') return localStorage.getItem('lc_deepseek_key') || '';
   return '';
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// CHAT LIST — Dynamic render + Pin/Unpin system
+// ══════════════════════════════════════════════════════════════════════
+
+const _CHAT_LIST_DATA = [
+  // ── Default scenarios ──────────────────────────────────────────────
+  { id:'hani',       type:'default', name:'Umm-e-Laila & Hani',  sub:'Default · Scripted · 23 moves',                emoji:'🃏', grad:'linear-gradient(135deg,#C678DD,#56B6C2)', action:"startDefaultMode('hani')" },
+  { id:'reza',       type:'default', name:'Ayla & Reza',          sub:'Default · Scripted · 23 moves',                emoji:'💌', grad:'linear-gradient(135deg,#F0883E,#E06C75)', action:"startDefaultMode('reza')" },
+  // ── Custom chats ───────────────────────────────────────────────────
+  { id:'bestfriend', type:'custom',  name:'Best Friend',          sub:'Closest friendship · Tap to begin',            emoji:'🤝', grad:'linear-gradient(135deg,#F0883E,#E5C07B)', tag:'Best Friend' },
+  { id:'friend',     type:'custom',  name:'Friend',               sub:'Meaningful friendship · Tap to begin',         emoji:'💬', grad:'linear-gradient(135deg,#58A6FF,#79BBFF)', tag:'Friend' },
+  { id:'partner',    type:'custom',  name:'Partner / Romantic',   sub:'Someone you love · Tap to begin',              emoji:'💕', grad:'linear-gradient(135deg,#E06C75,#F0883E)', tag:'Romantic' },
+  { id:'family',     type:'custom',  name:'Family',               sub:"Blood that doesn't always understand · Tap to begin", emoji:'🏡', grad:'linear-gradient(135deg,#98C379,#56B6C2)', tag:'Family' },
+  { id:'colleague',  type:'custom',  name:'Colleague',            sub:'Professional proximity · Tap to begin',        emoji:'💼', grad:'linear-gradient(135deg,#E5C07B,#F0883E)', tag:'Colleague' },
+  { id:'childhood',  type:'custom',  name:'Childhood Friend',     sub:'Who you were before who you became · Tap to begin', emoji:'🌱', grad:'linear-gradient(135deg,#C678DD,#9333EA)', tag:'Childhood' },
+  { id:'mentor',     type:'custom',  name:'Mentor / Teacher',     sub:'Authority, guidance, unequal power · Tap to begin', emoji:'🎓', grad:'linear-gradient(135deg,#2EA043,#3FB950)', tag:'Mentor' },
+  { id:'rival',      type:'custom',  name:'Rival / Competitor',   sub:'Respect wrapped in competition · Tap to begin',emoji:'⚔️', grad:'linear-gradient(135deg,#F85149,#FF6B6B)', tag:'Rival' },
+  { id:'ex',         type:'custom',  name:'Ex / Former Partner',  sub:'Aftermath of love · Hardest simulation',       emoji:'💔', grad:'linear-gradient(135deg,#6E40C9,#A371F7)', tag:'HARDEST', tagStyle:'color:#FF7B72;border-color:rgba(255,123,114,.4);background:rgba(255,123,114,.08)' },
+  { id:'online',     type:'custom',  name:'Online Friend',        sub:'Intimate but physically absent · Tap to begin',emoji:'🌐', grad:'linear-gradient(135deg,#1F6FEB,#58A6FF)', tag:'Online' },
+];
+
+function _getPins() {
+  try { return JSON.parse(localStorage.getItem('lc_pins') || '{}'); } catch(e) { return {}; }
+}
+function _setPins(p) { localStorage.setItem('lc_pins', JSON.stringify(p)); }
+
+// One-time migration: ensure both default chats (hani, reza) start pinned
+(function _ensureDefaultsPinned() {
+  if (localStorage.getItem('lc_pins_v2') === '1') return;
+  const p = _getPins();
+  _CHAT_LIST_DATA.filter(c => c.type === 'default').forEach(c => { delete p[c.id]; });
+  _setPins(p);
+  localStorage.setItem('lc_pins_v2', '1');
+})();
+
+function _isPinned(item) {
+  const p = _getPins();
+  if (item.type === 'default') return p[item.id] !== false; // defaults pinned unless explicitly removed
+  return p[item.id] === true; // customs unpinned unless explicitly pinned
+}
+
+function togglePin(id) {
+  const item = _CHAT_LIST_DATA.find(c => c.id === id);
+  if (!item) return;
+  const p = _getPins();
+  if (item.type === 'default') {
+    if (p[id] === false) delete p[id]; else p[id] = false; // toggle unpin/pin
+  } else {
+    p[id] = !p[id]; // toggle pin/unpin
+  }
+  _setPins(p);
+  renderChatList();
+}
+
+function renderChatList() {
+  const container = document.getElementById('chatListDynamic');
+  if (!container) return;
+
+  const pinned   = _CHAT_LIST_DATA.filter(c =>  _isPinned(c));
+  const unpinned = _CHAT_LIST_DATA.filter(c => !_isPinned(c));
+  const defaults = unpinned.filter(c => c.type === 'default');
+  const customs  = unpinned.filter(c => c.type === 'custom');
+
+  const makePin = (id, pinned) => `
+    <button class="ci-pin-btn${pinned ? ' is-pinned' : ''}"
+      onclick="event.stopPropagation();togglePin('${id}')"
+      title="${pinned ? 'Unpin' : 'Pin to top'}">📌</button>`;
+
+  const makeItem = (c) => {
+    const pinned = _isPinned(c);
+    const action = c.type === 'custom' ? `openChat('${c.id}')` : c.action;
+    const tagHtml = c.tag
+      ? `<span class="ci-rel-tag"${c.tagStyle ? ` style="${c.tagStyle}"` : ''}>${c.tag}</span>` : '';
+    const previewId = c.type === 'custom' ? ` id="prev_${c.id}"` : '';
+    return `
+      <div class="chat-item${currentChatId === c.id ? ' active' : ''}" data-id="${c.id}" onclick="${action}">
+        <div class="ci-avatar ci-emoji" style="background:${c.grad}">${c.emoji}</div>
+        <div class="ci-info">
+          <div class="ci-name">${c.name}</div>
+          <div class="ci-preview"${previewId}>${c.sub}</div>
+        </div>
+        <div class="ci-meta" style="display:flex;align-items:center;gap:5px">
+          ${tagHtml}${makePin(c.id, pinned)}
+        </div>
+      </div>`;
+  };
+
+  let html = '';
+  if (pinned.length) {
+    html += `<div class="cl-section-label">PINNED</div>${pinned.map(makeItem).join('')}`;
+  }
+  if (defaults.length) {
+    html += `<div class="cl-section-label">DEFAULT</div>${defaults.map(makeItem).join('')}`;
+  }
+  if (customs.length) {
+    html += `<div class="cl-section-label">CUSTOM – CHOOSE YOUR RELATION</div>${customs.map(makeItem).join('')}`;
+  }
+  container.innerHTML = html;
 }
 
 // ── Pool rotation indices ─────────────────────────────────────────────

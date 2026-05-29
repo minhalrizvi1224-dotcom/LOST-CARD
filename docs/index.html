@@ -353,123 +353,17 @@
       </div>
 
       <div class="cl-list-scroll">
-      <div class="cl-section-label">PINNED</div>
+        <div id="chatListDynamic"></div>
 
-      <!-- Default chat -->
-      <div class="chat-item active" data-id="default" onclick="openChat('default')">
-        <div class="ci-avatar ci-emoji" style="background:linear-gradient(135deg,#C678DD,#56B6C2)">🃏</div>
-        <div class="ci-info">
-          <div class="ci-name">Umm-e-Laila &amp; Hani</div>
-          <div class="ci-preview">Default · Scripted · 23 moves</div>
+        <div class="cl-section-label">ASSISTANT</div>
+        <div class="chat-item" data-id="ai_assistant" onclick="openChat('ai_assistant')">
+          <div class="ci-avatar" style="background:linear-gradient(135deg,#1a1a1a,#2a2a2a);font-size:18px;border:1px solid #3a3a3a">🪢</div>
+          <div class="ci-info">
+            <div class="ci-name">Hair Band</div>
+            <div class="ci-preview">Ask anything about LOST CARD</div>
+          </div>
+          <div class="ci-meta"><span class="ci-ai-badge">AI</span></div>
         </div>
-        <div class="ci-meta"><span class="ci-pin">📌</span></div>
-      </div>
-
-      <div class="cl-section-label">CUSTOM - CHOOSE YOUR RELATION</div>
-
-      <!-- 6 custom chats -->
-      <div class="chat-item" data-id="bestfriend" onclick="openChat('bestfriend')">
-        <div class="ci-avatar ci-emoji" style="background:linear-gradient(135deg,#F0883E,#E5C07B)">🤝</div>
-        <div class="ci-info">
-          <div class="ci-name">Best Friend</div>
-          <div class="ci-preview" id="prev_bestfriend">Closest friendship · Tap to begin</div>
-        </div>
-        <div class="ci-meta"><span class="ci-rel-tag">Best Friend</span></div>
-      </div>
-
-      <div class="chat-item" data-id="friend" onclick="openChat('friend')">
-        <div class="ci-avatar ci-emoji" style="background:linear-gradient(135deg,#58A6FF,#79BBFF)">💬</div>
-        <div class="ci-info">
-          <div class="ci-name">Friend</div>
-          <div class="ci-preview" id="prev_friend">Meaningful friendship · Tap to begin</div>
-        </div>
-        <div class="ci-meta"><span class="ci-rel-tag">Friend</span></div>
-      </div>
-
-      <div class="chat-item" data-id="partner" onclick="openChat('partner')">
-        <div class="ci-avatar ci-emoji" style="background:linear-gradient(135deg,#E06C75,#F0883E)">💕</div>
-        <div class="ci-info">
-          <div class="ci-name">Partner / Romantic</div>
-          <div class="ci-preview" id="prev_partner">Someone you love · Tap to begin</div>
-        </div>
-        <div class="ci-meta"><span class="ci-rel-tag">Romantic</span></div>
-      </div>
-
-      <div class="chat-item" data-id="family" onclick="openChat('family')">
-        <div class="ci-avatar ci-emoji" style="background:linear-gradient(135deg,#98C379,#56B6C2)">🏡</div>
-        <div class="ci-info">
-          <div class="ci-name">Family</div>
-          <div class="ci-preview" id="prev_family">Blood that doesn't always understand · Tap to begin</div>
-        </div>
-        <div class="ci-meta"><span class="ci-rel-tag">Family</span></div>
-      </div>
-
-      <div class="chat-item" data-id="colleague" onclick="openChat('colleague')">
-        <div class="ci-avatar ci-emoji" style="background:linear-gradient(135deg,#E5C07B,#F0883E)">💼</div>
-        <div class="ci-info">
-          <div class="ci-name">Colleague</div>
-          <div class="ci-preview" id="prev_colleague">Professional proximity · Tap to begin</div>
-        </div>
-        <div class="ci-meta"><span class="ci-rel-tag">Colleague</span></div>
-      </div>
-
-      <div class="chat-item" data-id="childhood" onclick="openChat('childhood')">
-        <div class="ci-avatar ci-emoji" style="background:linear-gradient(135deg,#C678DD,#9333EA)">🌱</div>
-        <div class="ci-info">
-          <div class="ci-name">Childhood Friend</div>
-          <div class="ci-preview" id="prev_childhood">Who you were before who you became · Tap to begin</div>
-        </div>
-        <div class="ci-meta"><span class="ci-rel-tag">Childhood</span></div>
-      </div>
-
-      <div class="chat-item" data-id="mentor" onclick="openChat('mentor')">
-        <div class="ci-avatar ci-emoji" style="background:linear-gradient(135deg,#2EA043,#3FB950)">🎓</div>
-        <div class="ci-info">
-          <div class="ci-name">Mentor / Teacher</div>
-          <div class="ci-preview" id="prev_mentor">Authority, guidance, unequal power · Tap to begin</div>
-        </div>
-        <div class="ci-meta"><span class="ci-rel-tag">Mentor</span></div>
-      </div>
-
-      <div class="chat-item" data-id="rival" onclick="openChat('rival')">
-        <div class="ci-avatar ci-emoji" style="background:linear-gradient(135deg,#F85149,#FF6B6B)">⚔️</div>
-        <div class="ci-info">
-          <div class="ci-name">Rival / Competitor</div>
-          <div class="ci-preview" id="prev_rival">Respect wrapped in competition · Tap to begin</div>
-        </div>
-        <div class="ci-meta"><span class="ci-rel-tag">Rival</span></div>
-      </div>
-
-      <div class="chat-item" data-id="ex" onclick="openChat('ex')">
-        <div class="ci-avatar ci-emoji" style="background:linear-gradient(135deg,#6E40C9,#A371F7)">💔</div>
-        <div class="ci-info">
-          <div class="ci-name">Ex / Former Partner</div>
-          <div class="ci-preview" id="prev_ex">Aftermath of love · Hardest simulation</div>
-        </div>
-        <div class="ci-meta"><span class="ci-rel-tag" style="color:#FF7B72;border-color:rgba(255,123,114,.4);background:rgba(255,123,114,.08)">HARDEST</span></div>
-      </div>
-
-      <div class="chat-item" data-id="online" onclick="openChat('online')">
-        <div class="ci-avatar ci-emoji" style="background:linear-gradient(135deg,#1F6FEB,#58A6FF)">🌐</div>
-        <div class="ci-info">
-          <div class="ci-name">Online Friend</div>
-          <div class="ci-preview" id="prev_online">Intimate but physically absent · Tap to begin</div>
-        </div>
-        <div class="ci-meta"><span class="ci-rel-tag">Online</span></div>
-      </div>
-
-      <div class="cl-section-label">ASSISTANT</div>
-
-      <!-- AI assistant chat -->
-      <div class="chat-item" data-id="ai_assistant" onclick="openChat('ai_assistant')">
-        <div class="ci-avatar" style="background:linear-gradient(135deg,#1a1a1a,#2a2a2a);font-size:18px;border:1px solid #3a3a3a">🪢</div>
-        <div class="ci-info">
-          <div class="ci-name">Hair Band</div>
-          <div class="ci-preview">Ask anything about LOST CARD</div>
-        </div>
-        <div class="ci-meta"><span class="ci-ai-badge">AI</span></div>
-      </div>
-
       </div><!-- /cl-list-scroll -->
     </aside>
 
