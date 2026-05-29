@@ -3393,8 +3393,10 @@ async function sendAIMessage() {
   } catch(err) {
     typingEl.remove();
     isAITyping = false;
-    const isRateErr = /rate.?limit|429|busy|quota|exhaust|too.many/i.test((err && err.message) || '');
-    if (isRateErr) {
+    const errMsg = (err && err.message) || '';
+    const isRateErr = /rate.?limit|429|busy|quota|exhaust|too.many|capacity|HTTP 429/i.test(errMsg);
+    const isKeyErr  = /HTTP 4[0-9][0-9]|invalid.*key|api.key|permission|forbidden|not.*found/i.test(errMsg);
+    if (isRateErr || isKeyErr) {
       _hbRateRetry(text);
     } else {
       addMessage('them', 'Hair Band', _friendlyAPIError(err, 'Hair Band'));
@@ -3615,7 +3617,7 @@ function incrementHBCount() {
 
 // ── Gemini API call (legacy — admin-allocated key) ────────────────────
 async function callGemini(apiKey, history, systemPrompt, userMsg, maxTokens = 500) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
   const contents = [];
   for (const m of history.slice(-6)) { // trimmed from -10 to match callAI
     contents.push({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] });
@@ -3788,7 +3790,7 @@ async function callAI(provider, key, history, systemPrompt, userMsg, maxTokens =
     const eUrl   = entry.provider === 'groq'
       ? 'https://api.groq.com/openai/v1/chat/completions'
       : 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
-    const eModel = entry.provider === 'groq' ? 'llama-3.3-70b-versatile' : 'gemini-2.0-flash-lite';
+    const eModel = entry.provider === 'groq' ? 'llama-3.3-70b-versatile' : 'gemini-2.0-flash';
     return fetch(eUrl, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${entry.key}` },
