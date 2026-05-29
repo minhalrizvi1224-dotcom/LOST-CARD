@@ -1774,7 +1774,13 @@ function getAPIKey(provider) {
 }
 
 // ── Unified pool rotation (Groq + DeepSeek interleaved) ──────────────
-let _poolKeyIdx = 0;  // round-robin pointer across the unified pool
+// Random start index: 100 users all loading the page start at random positions
+// in the pool instead of everyone hammering pool_key[0] first (thundering herd)
+let _poolKeyIdx = Math.floor(Math.random() * 1000);
+
+// Per-key 429 cooldown map: key → ms timestamp when it becomes usable again
+// Prevents retrying a rate-limited key for 60 seconds within this session
+const _keyCooldowns = {};
 
 // Returns [{key, provider}, ...] interleaving Groq and Gemini keys
 function _getUnifiedPool() {
@@ -3116,9 +3122,9 @@ async function sendAIMessage() {
   try {
     let reply;
     if (useGemini) {
-      reply = await callGemini(apiKey, aiAssistantHistory, AI_SYSTEM_PROMPT, text, 700);
+      reply = await callGemini(apiKey, aiAssistantHistory, AI_SYSTEM_PROMPT, text, 500);
     } else {
-      reply = await callAI(apiProvider, apiKey, aiAssistantHistory, AI_SYSTEM_PROMPT, text, 700);
+      reply = await callAI(apiProvider, apiKey, aiAssistantHistory, AI_SYSTEM_PROMPT, text, 500);
     }
     typingEl.remove();
     isAITyping = false;
@@ -3304,10 +3310,10 @@ function incrementHBCount() {
 }
 
 // ── Gemini API call (legacy — admin-allocated key) ────────────────────
-async function callGemini(apiKey, history, systemPrompt, userMsg, maxTokens = 700) {
+async function callGemini(apiKey, history, systemPrompt, userMsg, maxTokens = 500) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
   const contents = [];
-  for (const m of history.slice(-10)) {
+  for (const m of history.slice(-6)) { // trimmed from -10 to match callAI
     contents.push({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] });
   }
   if (userMsg) contents.push({ role: 'user', parts: [{ text: userMsg }] });
@@ -3433,29 +3439,27 @@ function _friendlyAPIError(err) {
 }
 
 async function callAI(provider, key, history, systemPrompt, userMsg, maxTokens = 180) {
-  // Build message array (shared across all pool entries)
+  // ── Token optimization: trim history to last 6 msgs (was 10) ──────────
+  // Each extra message pair adds ~200-500 tokens. 6 keeps context while
+  // reducing TPM usage by ~40% on long conversations.
   const messages = [{ role: 'system', content: systemPrompt }];
-  const trimmed  = history.slice(-10);
-  for (const m of trimmed) messages.push(m);
+  for (const m of history.slice(-6)) messages.push(m);
   if (userMsg) messages.push({ role: 'user', content: userMsg });
 
   // Unified pool: [{key, provider}, ...] — Groq + Gemini interleaved
-  // Falls back to the passed key/provider if pool is empty
   const pool    = _getUnifiedPool();
   const entries = pool.length ? pool : [{ key, provider }];
   const startIdx = _poolKeyIdx % entries.length;
 
-  // Fetch helper — uses each entry's own provider URL and model
+  // Key-level errors: skip and try next key
+  // 429 = rate limited, 402 = out of credits, 401 = invalid
+  const _isKeyErr = (s) => s === 429 || s === 402 || s === 401;
+
   const _fetchEntry = (entry) => {
-    let eUrl, eModel;
-    if (entry.provider === 'groq') {
-      eUrl   = 'https://api.groq.com/openai/v1/chat/completions';
-      eModel = 'llama-3.3-70b-versatile';
-    } else {
-      // Gemini OpenAI-compatible endpoint
-      eUrl   = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
-      eModel = 'gemini-2.0-flash';
-    }
+    const eUrl   = entry.provider === 'groq'
+      ? 'https://api.groq.com/openai/v1/chat/completions'
+      : 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
+    const eModel = entry.provider === 'groq' ? 'llama-3.3-70b-versatile' : 'gemini-2.0-flash';
     return fetch(eUrl, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${entry.key}` },
@@ -3464,45 +3468,58 @@ async function callAI(provider, key, history, systemPrompt, userMsg, maxTokens =
   };
 
   let resp       = null;
-  let lastErrMsg = 'HTTP error';
-  let allWereSkipped = true;
+  let lastErrMsg = 'Rate limited — please try again in a moment.';
+  let allSkipped = true;
+  const now      = Date.now();
 
-  // Key-level errors: skip and try next key
-  // 429 = rate limited, 402 = insufficient balance, 401 = invalid key
-  const _isKeyError = (status) => status === 429 || status === 402 || status === 401;
-
-  // First pass — try every entry once, skip on key-level errors, stop on other errors
+  // ── First pass: try each key, skip rate-limited ones ─────────────────
   for (let i = 0; i < entries.length; i++) {
     const entry = entries[(startIdx + i) % entries.length];
+
+    // Skip keys still in their 60-second cooldown window
+    if (_keyCooldowns[entry.key] && now < _keyCooldowns[entry.key]) continue;
+
     resp = await _fetchEntry(entry);
     if (resp.ok) {
-      _poolKeyIdx    = (startIdx + i + 1) % entries.length;
-      allWereSkipped = false;
+      _poolKeyIdx = (startIdx + i + 1) % entries.length;
+      allSkipped  = false;
       break;
     }
-    if (_isKeyError(resp.status)) {
+    if (_isKeyErr(resp.status)) {
       const ed = await resp.json().catch(() => ({}));
       lastErrMsg = ed?.error?.message || `HTTP ${resp.status}`;
+      // 429: 60s cooldown. 402/401: 5-min cooldown (key is dead/broke)
+      _keyCooldowns[entry.key] = now + (resp.status === 429 ? 60000 : 300000);
       resp = null;
       continue;
     }
-    allWereSkipped = false;
+    allSkipped = false; // non-key error (500, etc.) — stop trying
     break;
   }
 
-  // All entries were skipped → wait 5 s (rate-limit window starts resetting)
-  // then do a second full pass — rescues brief spikes without showing error
-  if (!resp && allWereSkipped && entries.length > 0) {
-    await new Promise(r => setTimeout(r, 5000));
-    for (let i = 0; i < entries.length; i++) {
-      const entry = entries[(_poolKeyIdx + i) % entries.length];
-      resp = await _fetchEntry(entry);
-      if (resp.ok) {
-        _poolKeyIdx = (_poolKeyIdx + i + 1) % entries.length;
+  // ── Second pass: progressive backoff when all keys are cooling ────────
+  // Tries 3 rounds: wait 3s → 6s → 10s, looking for any key that recovered
+  if (!resp && allSkipped && entries.length > 0) {
+    const waits = [3000, 6000, 10000];
+    for (const waitMs of waits) {
+      await new Promise(r => setTimeout(r, waitMs));
+      const now2 = Date.now();
+      for (let i = 0; i < entries.length; i++) {
+        const entry = entries[(_poolKeyIdx + i) % entries.length];
+        if (_keyCooldowns[entry.key] && now2 < _keyCooldowns[entry.key]) continue;
+        resp = await _fetchEntry(entry);
+        if (resp.ok) {
+          _poolKeyIdx = (_poolKeyIdx + i + 1) % entries.length;
+          break;
+        }
+        if (_isKeyErr(resp.status)) {
+          _keyCooldowns[entry.key] = now2 + (resp.status === 429 ? 60000 : 300000);
+          resp = null;
+          continue;
+        }
         break;
       }
-      if (_isKeyError(resp.status)) { resp = null; continue; }
-      break;
+      if (resp && resp.ok) break;
     }
   }
 
