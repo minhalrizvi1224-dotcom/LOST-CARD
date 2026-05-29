@@ -3,107 +3,342 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>LOST CARD — Psychological Relationship Simulation</title>
-<meta name="description" content="LOST CARD is a psychological simulation web app that models relational belief decay using computational structures. AI-powered relationship simulations, neurological load tracking, and deep psychological analysis."/>
+<title>LOST CARD — Computational Model of Relational Belief Decay</title>
+<meta name="description" content="LOST CARD is a computational model of relational belief decay. Simulate real conversations, track neurological load in real time, and see exactly why connections break."/>
+<meta name="theme-color" content="#0D1117"/>
 <style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{background:#0D1117;color:#E6EDF3;font-family:'Segoe UI',system-ui,sans-serif;line-height:1.6}
-  a{color:#58A6FF;text-decoration:none}
-  a:hover{text-decoration:underline}
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0D1117;--surface:#161B22;--surface2:#1C2128;
+  --border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.05);
+  --text:#E6EDF3;--muted:#8B949E;
+  --blue:#58A6FF;--orange:#F0883E;--green:#56D364;
+  --devotion:#C678DD;--excitement:#56B6C2;--presence:#98C379;
+}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;line-height:1.6}
+a{color:var(--blue);text-decoration:none}
+a:hover{text-decoration:underline}
 
-  /* NAV */
-  nav{display:flex;align-items:center;justify-content:space-between;padding:18px 40px;border-bottom:1px solid rgba(255,255,255,.07);position:sticky;top:0;background:#0D1117;z-index:100}
-  .nav-logo{font-size:18px;font-weight:800;color:#E6EDF3;letter-spacing:1px}
-  .nav-logo span{color:#58A6FF}
-  .nav-links{display:flex;gap:24px;align-items:center}
-  .nav-links a{font-size:13px;color:#8B949E}
-  .nav-cta{background:#58A6FF;color:#0D1117!important;font-weight:700;padding:8px 18px;border-radius:8px;font-size:13px;text-decoration:none!important}
-  .nav-cta:hover{background:#79b8ff}
+/* NAV */
+nav{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 40px;border-bottom:1px solid var(--border2);
+  position:sticky;top:0;background:rgba(13,17,23,.95);
+  backdrop-filter:blur(12px);z-index:200;
+}
+.nav-logo{font-size:17px;font-weight:900;letter-spacing:2px;color:var(--text)}
+.nav-logo span{color:var(--blue)}
+.nav-links{display:flex;gap:24px;align-items:center}
+.nav-links a{font-size:13px;color:var(--muted);transition:color .2s}
+.nav-links a:hover{color:var(--text);text-decoration:none}
+.nav-cta{
+  background:var(--blue);color:#0D1117!important;
+  font-weight:700;padding:8px 18px;border-radius:8px;font-size:13px;
+  transition:opacity .2s;
+}
+.nav-cta:hover{opacity:.88;text-decoration:none!important}
 
-  /* HERO */
-  .hero{text-align:center;padding:90px 20px 70px}
-  .hero-badge{display:inline-block;background:rgba(88,166,255,.1);border:1px solid rgba(88,166,255,.25);color:#58A6FF;font-size:12px;font-weight:600;padding:5px 14px;border-radius:20px;margin-bottom:24px;letter-spacing:.4px}
-  .hero h1{font-size:clamp(36px,6vw,64px);font-weight:900;line-height:1.1;margin-bottom:20px;letter-spacing:-1px}
-  .hero h1 span{color:#58A6FF}
-  .hero p{font-size:17px;color:#8B949E;max-width:560px;margin:0 auto 36px;line-height:1.7}
-  .hero-buttons{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
-  .btn-primary{background:#58A6FF;color:#0D1117;font-weight:700;padding:14px 28px;border-radius:10px;font-size:15px;text-decoration:none;transition:background .2s}
-  .btn-primary:hover{background:#79b8ff;text-decoration:none}
-  .btn-secondary{background:rgba(255,255,255,.06);color:#E6EDF3;font-weight:600;padding:14px 28px;border-radius:10px;font-size:15px;text-decoration:none;border:1px solid rgba(255,255,255,.1);transition:background .2s}
-  .btn-secondary:hover{background:rgba(255,255,255,.1);text-decoration:none}
+/* HERO */
+.hero{
+  text-align:center;padding:96px 24px 80px;
+  background:radial-gradient(ellipse at 50% 0%,rgba(88,166,255,.07) 0%,transparent 65%);
+}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(88,166,255,.08);border:1px solid rgba(88,166,255,.2);
+  color:var(--blue);font-size:11px;font-weight:700;
+  padding:5px 14px;border-radius:20px;margin-bottom:28px;
+  letter-spacing:1.5px;text-transform:uppercase;
+}
+.hero h1{
+  font-size:clamp(34px,6vw,62px);font-weight:900;
+  line-height:1.08;margin-bottom:22px;letter-spacing:-1px;
+}
+.hero h1 span{color:var(--blue)}
+.hero-sub{
+  font-size:16px;color:var(--muted);
+  max-width:520px;margin:0 auto 40px;line-height:1.75;
+}
+.btn-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn-primary{
+  background:var(--blue);color:#0D1117;font-weight:700;
+  padding:13px 28px;border-radius:10px;font-size:15px;
+  text-decoration:none;transition:opacity .2s;
+}
+.btn-primary:hover{opacity:.88;text-decoration:none}
+.btn-outline{
+  background:transparent;color:var(--text);font-weight:600;
+  padding:13px 28px;border-radius:10px;font-size:15px;
+  text-decoration:none;border:1px solid var(--border);
+  transition:border-color .2s;
+}
+.btn-outline:hover{border-color:rgba(255,255,255,.25);text-decoration:none}
 
-  /* STATS */
-  .stats{display:flex;justify-content:center;gap:48px;padding:40px 20px;border-top:1px solid rgba(255,255,255,.07);border-bottom:1px solid rgba(255,255,255,.07);flex-wrap:wrap}
-  .stat-item{text-align:center}
-  .stat-num{font-size:28px;font-weight:800;color:#58A6FF}
-  .stat-label{font-size:12px;color:#8B949E;margin-top:2px;letter-spacing:.4px;text-transform:uppercase}
+/* STATS STRIP */
+.stats-strip{
+  display:flex;justify-content:center;flex-wrap:wrap;gap:0;
+  border-top:1px solid var(--border2);border-bottom:1px solid var(--border2);
+}
+.stat-item{
+  padding:28px 40px;text-align:center;
+  border-right:1px solid var(--border2);
+}
+.stat-item:last-child{border-right:none}
+.stat-num{font-size:30px;font-weight:900;color:var(--blue);line-height:1}
+.stat-label{font-size:11px;color:var(--muted);margin-top:5px;letter-spacing:.8px;text-transform:uppercase}
 
-  /* FEATURES */
-  .section{padding:70px 20px;max-width:1100px;margin:0 auto}
-  .section-title{text-align:center;margin-bottom:50px}
-  .section-title h2{font-size:32px;font-weight:800;margin-bottom:10px}
-  .section-title p{color:#8B949E;font-size:15px;max-width:500px;margin:0 auto}
+/* GENERIC SECTION */
+.section{padding:80px 24px;max-width:1080px;margin:0 auto}
+.section-label{
+  display:inline-block;font-size:10px;font-weight:800;
+  color:var(--blue);letter-spacing:2px;text-transform:uppercase;
+  margin-bottom:12px;
+}
+.section-heading{font-size:clamp(24px,4vw,34px);font-weight:800;line-height:1.2;margin-bottom:12px}
+.section-sub{font-size:15px;color:var(--muted);max-width:520px;line-height:1.7}
+.center{text-align:center}
+.center .section-sub{margin:0 auto}
 
-  .features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
-  .feature-card{background:#161B22;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:28px}
-  .feature-icon{font-size:28px;margin-bottom:14px}
-  .feature-card h3{font-size:16px;font-weight:700;margin-bottom:8px;color:#E6EDF3}
-  .feature-card p{font-size:13px;color:#8B949E;line-height:1.6}
+/* DIVIDER STRIPE */
+.stripe{background:var(--surface);border-top:1px solid var(--border2);border-bottom:1px solid var(--border2)}
 
-  /* THREE CARDS */
-  .cards-row{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-top:40px}
-  .rcard{flex:1;min-width:200px;max-width:280px;border-radius:12px;padding:24px;text-align:center}
-  .rcard h3{font-size:15px;font-weight:800;margin-bottom:6px;letter-spacing:.6px;text-transform:uppercase}
-  .rcard p{font-size:12px;line-height:1.6;opacity:.85}
-  .rcard-devotion{background:rgba(198,120,221,.12);border:1px solid rgba(198,120,221,.3);color:#C678DD}
-  .rcard-excitement{background:rgba(86,182,194,.12);border:1px solid rgba(86,182,194,.3);color:#56B6C2}
-  .rcard-presence{background:rgba(152,195,121,.12);border:1px solid rgba(152,195,121,.3);color:#98C379}
-  .rcard h3{color:inherit}
-  .rcard p{color:#E6EDF3}
+/* THREE CARDS */
+.cards-theory{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:16px;margin-top:48px;
+}
+.theory-card{
+  border-radius:14px;padding:28px 24px;
+  position:relative;overflow:hidden;
+}
+.theory-card::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% 0%,var(--glow) 0%,transparent 70%);
+  opacity:.18;pointer-events:none;
+}
+.tc-devotion{background:rgba(198,120,221,.07);border:1px solid rgba(198,120,221,.25);--glow:#C678DD}
+.tc-excitement{background:rgba(86,182,194,.07);border:1px solid rgba(86,182,194,.25);--glow:#56B6C2}
+.tc-presence{background:rgba(152,195,121,.07);border:1px solid rgba(152,195,121,.25);--glow:#98C379}
+.tc-icon{font-size:22px;margin-bottom:12px}
+.tc-name{font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px}
+.tc-devotion .tc-name{color:var(--devotion)}
+.tc-excitement .tc-name{color:var(--excitement)}
+.tc-presence .tc-name{color:var(--presence)}
+.tc-desc{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:14px}
+.tc-lost{
+  font-size:11px;font-style:italic;color:var(--muted);
+  padding-top:12px;border-top:1px solid rgba(255,255,255,.07);
+}
 
-  /* PRICING */
-  .pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;max-width:860px;margin:0 auto}
-  .price-card{background:#161B22;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:32px 24px;text-align:center;position:relative}
-  .price-card.popular{border-color:#58A6FF;box-shadow:0 0 30px rgba(88,166,255,.12)}
-  .popular-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#58A6FF;color:#0D1117;font-size:11px;font-weight:700;padding:4px 14px;border-radius:20px;letter-spacing:.4px}
-  .price-name{font-size:13px;font-weight:700;color:#8B949E;letter-spacing:.6px;text-transform:uppercase;margin-bottom:12px}
-  .price-amount{font-size:38px;font-weight:900;color:#E6EDF3;margin-bottom:4px}
-  .price-amount span{font-size:16px;font-weight:400;color:#8B949E}
-  .price-desc{font-size:12px;color:#8B949E;margin-bottom:20px}
-  .price-features{list-style:none;text-align:left;margin-bottom:24px}
-  .price-features li{font-size:13px;color:#8B949E;padding:5px 0;display:flex;gap:8px;align-items:flex-start}
-  .price-features li::before{content:"✓";color:#58A6FF;font-weight:700;flex-shrink:0}
-  .price-btn{display:block;background:#58A6FF;color:#0D1117;font-weight:700;padding:11px;border-radius:8px;font-size:14px;text-decoration:none}
-  .price-btn:hover{background:#79b8ff;text-decoration:none}
-  .price-btn.free{background:rgba(255,255,255,.07);color:#E6EDF3}
-  .price-btn.free:hover{background:rgba(255,255,255,.12)}
+/* TWO MODES */
+.modes-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:40px}
+.mode-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:32px}
+.mode-badge{
+  display:inline-block;font-size:10px;font-weight:800;
+  padding:3px 10px;border-radius:6px;letter-spacing:1px;
+  text-transform:uppercase;margin-bottom:16px;
+}
+.mode-badge.default{background:rgba(86,211,100,.1);color:var(--green);border:1px solid rgba(86,211,100,.2)}
+.mode-badge.custom{background:rgba(88,166,255,.1);color:var(--blue);border:1px solid rgba(88,166,255,.2)}
+.mode-card h3{font-size:18px;font-weight:800;margin-bottom:10px}
+.mode-card p{font-size:13px;color:var(--muted);line-height:1.65;margin-bottom:16px}
+.mode-detail{list-style:none}
+.mode-detail li{
+  font-size:12px;color:var(--muted);padding:5px 0;
+  display:flex;align-items:flex-start;gap:8px;
+  border-bottom:1px solid var(--border2);
+}
+.mode-detail li:last-child{border-bottom:none}
+.mode-detail li::before{content:"·";color:var(--blue);flex-shrink:0;font-weight:900}
 
-  /* TECH */
-  .tech-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
-  .tech-item{background:#161B22;border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:18px 20px;display:flex;gap:14px;align-items:flex-start}
-  .tech-num{font-size:11px;font-weight:700;color:#58A6FF;background:rgba(88,166,255,.1);border-radius:6px;padding:3px 8px;flex-shrink:0;margin-top:2px}
-  .tech-item h4{font-size:13px;font-weight:700;color:#E6EDF3;margin-bottom:3px}
-  .tech-item p{font-size:12px;color:#8B949E}
+/* FEATURES GRID */
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:48px}
+.feat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:26px}
+.feat-icon{
+  width:40px;height:40px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;margin-bottom:16px;
+  background:rgba(88,166,255,.1);border:1px solid rgba(88,166,255,.15);
+}
+.feat-card h3{font-size:14px;font-weight:700;margin-bottom:7px}
+.feat-card p{font-size:13px;color:var(--muted);line-height:1.6}
 
-  /* AUTHOR */
-  .author-section{background:#161B22;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:40px;text-align:center;max-width:620px;margin:0 auto}
-  .author-section h3{font-size:20px;font-weight:800;margin-bottom:8px}
-  .author-section .role{font-size:13px;color:#8B949E;margin-bottom:16px}
-  .author-section p{font-size:14px;color:#8B949E;line-height:1.7}
+/* 7 DSA */
+.dsa-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-top:48px}
+.dsa-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;padding:18px 20px;
+  display:flex;gap:14px;align-items:flex-start;
+}
+.dsa-num{
+  font-size:10px;font-weight:800;color:var(--blue);
+  background:rgba(88,166,255,.1);border:1px solid rgba(88,166,255,.15);
+  border-radius:6px;padding:4px 9px;flex-shrink:0;margin-top:1px;
+  letter-spacing:.5px;
+}
+.dsa-card h4{font-size:13px;font-weight:700;margin-bottom:3px}
+.dsa-card p{font-size:11px;color:var(--muted);line-height:1.5}
 
-  /* FOOTER */
-  footer{border-top:1px solid rgba(255,255,255,.07);padding:30px 40px;display:flex;justify-content:space-between;align-items:center;flex-wrap:gap;gap:12px;flex-wrap:wrap}
-  .footer-left{font-size:13px;color:#8B949E}
-  .footer-right{display:flex;gap:20px}
-  .footer-right a{font-size:13px;color:#8B949E}
-  .footer-right a:hover{color:#58A6FF}
+/* HAIR BAND */
+.hb-section{
+  display:grid;grid-template-columns:1fr 1fr;gap:40px;
+  align-items:center;margin-top:0;
+}
+.hb-visual{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:16px;padding:28px;font-family:monospace;
+}
+.hb-msg{margin-bottom:14px}
+.hb-them{
+  background:var(--surface2);border-radius:10px;
+  padding:12px 16px;font-size:13px;color:var(--text);line-height:1.55;
+  border:1px solid var(--border);max-width:90%;
+}
+.hb-you{
+  background:rgba(88,166,255,.1);border-radius:10px;
+  padding:12px 16px;font-size:13px;color:var(--text);line-height:1.55;
+  border:1px solid rgba(88,166,255,.2);max-width:90%;margin-left:auto;
+}
+.hb-label{font-size:10px;color:var(--muted);margin-bottom:4px;font-family:'Segoe UI',system-ui;font-weight:600}
+.hb-you-label{text-align:right}
+.hb-info{padding-left:8px}
+.hb-info h3{font-size:22px;font-weight:800;margin-bottom:10px}
+.hb-info p{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:16px}
+.hb-tags{display:flex;gap:8px;flex-wrap:wrap}
+.hb-tag{
+  font-size:11px;font-weight:700;padding:4px 12px;border-radius:6px;
+  background:rgba(88,166,255,.08);color:var(--blue);
+  border:1px solid rgba(88,166,255,.15);letter-spacing:.3px;
+}
 
-  @media(max-width:600px){
-    nav{padding:14px 20px}
-    .hero{padding:60px 20px 50px}
-    .stats{gap:28px}
-    footer{flex-direction:column;text-align:center}
-  }
+/* REPORT */
+.report-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-top:40px}
+.report-item{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;padding:18px;text-align:center;
+}
+.report-item .ri-icon{font-size:22px;margin-bottom:8px}
+.report-item h4{font-size:13px;font-weight:700;margin-bottom:5px}
+.report-item p{font-size:11px;color:var(--muted);line-height:1.55}
+
+/* RELATIONSHIP TYPES */
+.rel-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+  gap:10px;margin-top:40px;
+}
+.rel-item{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;padding:14px 16px;
+  display:flex;align-items:center;gap:10px;
+}
+.rel-emoji{font-size:18px;flex-shrink:0}
+.rel-name{font-size:13px;font-weight:600}
+.rel-sub{font-size:10px;color:var(--muted);margin-top:1px}
+
+/* AUTHOR */
+.author-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:16px;padding:40px;
+  display:grid;grid-template-columns:auto 1fr;gap:28px;
+  align-items:start;max-width:680px;margin:40px auto 0;
+}
+.author-avatar{
+  width:64px;height:64px;border-radius:50%;
+  background:linear-gradient(135deg,var(--blue),var(--devotion));
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;font-weight:900;color:#fff;flex-shrink:0;
+}
+.author-name{font-size:18px;font-weight:800;margin-bottom:4px}
+.author-role{font-size:12px;color:var(--blue);font-weight:600;letter-spacing:.3px;margin-bottom:12px}
+.author-bio{font-size:13px;color:var(--muted);line-height:1.7}
+.author-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.author-chip{
+  font-size:10px;font-weight:700;padding:3px 10px;border-radius:6px;
+  background:rgba(255,255,255,.05);color:var(--muted);
+  border:1px solid var(--border);letter-spacing:.3px;
+}
+
+/* PRICING */
+.pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;max-width:800px;margin:40px auto 0}
+.price-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:14px;padding:30px 24px;text-align:center;
+  position:relative;
+}
+.price-card.featured{border-color:rgba(88,166,255,.4);box-shadow:0 0 32px rgba(88,166,255,.08)}
+.price-popular{
+  position:absolute;top:-11px;left:50%;transform:translateX(-50%);
+  background:var(--blue);color:#0D1117;font-size:10px;font-weight:800;
+  padding:3px 14px;border-radius:20px;letter-spacing:.8px;text-transform:uppercase;
+}
+.price-name{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:14px}
+.price-amount{font-size:36px;font-weight:900;margin-bottom:2px}
+.price-period{font-size:13px;color:var(--muted)}
+.price-desc{font-size:11px;color:var(--muted);margin:10px 0 20px}
+.price-list{list-style:none;text-align:left;margin-bottom:24px}
+.price-list li{
+  font-size:12px;color:var(--muted);padding:5px 0;
+  display:flex;gap:8px;align-items:center;
+  border-bottom:1px solid var(--border2);
+}
+.price-list li:last-child{border-bottom:none}
+.price-list li::before{content:"✓";color:var(--green);font-weight:700;flex-shrink:0}
+.price-btn{
+  display:block;padding:11px;border-radius:8px;
+  font-size:13px;font-weight:700;text-align:center;text-decoration:none;
+  transition:opacity .2s;
+}
+.price-btn:hover{opacity:.85;text-decoration:none}
+.price-btn.blue{background:var(--blue);color:#0D1117}
+.price-btn.ghost{background:rgba(255,255,255,.06);color:var(--text);border:1px solid var(--border)}
+
+/* CTA */
+.cta-section{
+  background:linear-gradient(135deg,rgba(88,166,255,.07),rgba(198,120,221,.05));
+  border-top:1px solid rgba(88,166,255,.12);
+  border-bottom:1px solid rgba(88,166,255,.12);
+  padding:80px 24px;text-align:center;
+}
+.cta-section h2{font-size:clamp(22px,4vw,34px);font-weight:900;margin-bottom:12px}
+.cta-section p{font-size:15px;color:var(--muted);margin-bottom:32px}
+
+/* FOOTER */
+footer{
+  border-top:1px solid var(--border2);
+  padding:28px 40px;
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;
+}
+.footer-left{font-size:12px;color:var(--muted)}
+.footer-right{display:flex;gap:20px}
+.footer-right a{font-size:12px;color:var(--muted)}
+.footer-right a:hover{color:var(--text)}
+
+/* NLI pill */
+.nli-row{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:36px}
+.nli-pill{
+  padding:8px 18px;border-radius:20px;font-size:12px;font-weight:700;
+  letter-spacing:.4px;
+}
+.nli-harmony{background:rgba(86,211,100,.1);color:#56D364;border:1px solid rgba(86,211,100,.2)}
+.nli-fracture{background:rgba(240,136,62,.1);color:var(--orange);border:1px solid rgba(240,136,62,.2)}
+.nli-collapse{background:rgba(255,123,114,.1);color:#FF7B72;border:1px solid rgba(255,123,114,.2)}
+.nli-override{background:rgba(255,123,114,.18);color:#FF7B72;border:1px solid rgba(255,123,114,.35);font-size:11px}
+
+/* RESPONSIVE */
+@media(max-width:700px){
+  nav{padding:14px 20px}
+  .modes-grid{grid-template-columns:1fr}
+  .hb-section{grid-template-columns:1fr}
+  .hb-visual{display:none}
+  .author-card{grid-template-columns:1fr;text-align:center}
+  .author-avatar{margin:0 auto}
+  .author-chips{justify-content:center}
+  footer{flex-direction:column;text-align:center}
+  .stat-item{border-right:none;border-bottom:1px solid var(--border2);padding:20px}
+  .stats-strip{flex-direction:column}
+}
 </style>
 </head>
 <body>
@@ -112,37 +347,44 @@
 <nav>
   <div class="nav-logo">LOST <span>CARD</span></div>
   <div class="nav-links">
+    <a href="#simulation">Simulation</a>
     <a href="#features">Features</a>
     <a href="#pricing">Pricing</a>
     <a href="./terms.html">Terms</a>
-    <a href="./index.html" class="nav-cta">Launch App →</a>
+    <a href="./index.html" class="nav-cta">Open App</a>
   </div>
 </nav>
 
 <!-- HERO -->
 <div class="hero">
-  <div class="hero-badge">Psychological Simulation · AI-Powered</div>
-  <h1>What if your relationship<br/>ran on a <span>data structure</span>?</h1>
-  <p>LOST CARD is a computational model of relational belief decay. Simulate real conversations, track neurological load in real time, and understand why connections break before they do.</p>
-  <div class="hero-buttons">
-    <a href="./index.html" class="btn-primary">Start Simulation — Free</a>
-    <a href="#features" class="btn-secondary">Learn More</a>
+  <div class="hero-eyebrow">
+    <span>✦</span> The Bet of Belief · S. M. Minhal Abbas Rizvi
+  </div>
+  <h1>Your relationship,<br/>rendered in <span>data</span>.</h1>
+  <p class="hero-sub">
+    LOST CARD is a computational model of relational belief decay.
+    Simulate real conversations, watch your neurological load shift in real time,
+    and understand exactly why connections break — before they do.
+  </p>
+  <div class="btn-row">
+    <a href="./index.html" class="btn-primary">Start for Free</a>
+    <a href="#simulation" class="btn-outline">See How It Works</a>
   </div>
 </div>
 
-<!-- STATS -->
-<div class="stats">
+<!-- STATS STRIP -->
+<div class="stats-strip">
   <div class="stat-item">
     <div class="stat-num">7</div>
-    <div class="stat-label">DSA Concepts Active</div>
-  </div>
-  <div class="stat-item">
-    <div class="stat-num">50</div>
-    <div class="stat-label">Free AI Messages</div>
+    <div class="stat-label">DSA Structures Active</div>
   </div>
   <div class="stat-item">
     <div class="stat-num">3</div>
     <div class="stat-label">Psychological Cards</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">10</div>
+    <div class="stat-label">Relationship Types</div>
   </div>
   <div class="stat-item">
     <div class="stat-num">23</div>
@@ -150,196 +392,435 @@
   </div>
 </div>
 
+<!-- THE BET OF BELIEF -->
+<div class="section center" id="theory">
+  <div class="section-label">The Theory</div>
+  <h2 class="section-heading">The Bet of Belief</h2>
+  <p class="section-sub">
+    Every word you speak in a relationship is a card you play.
+    You play without knowing you are in a game — until the cards are gone.
+  </p>
+  <div class="cards-theory">
+    <div class="theory-card tc-devotion">
+      <div class="tc-icon">💜</div>
+      <div class="tc-name">Devotion</div>
+      <div class="tc-desc">Your emotional investment. How much of yourself you have placed into this relationship.</div>
+      <div class="tc-lost">Lost through habitual aggression in calm states, or investing before trust can hold the weight.</div>
+    </div>
+    <div class="theory-card tc-excitement">
+      <div class="tc-icon">💙</div>
+      <div class="tc-name">Excitement</div>
+      <div class="tc-desc">Your relational energy. The life inside the connection — curiosity, anticipation, aliveness.</div>
+      <div class="tc-lost">Lost when unresolved conflicts stack faster than they are cleared, especially two aggressive moves in sequence.</div>
+    </div>
+    <div class="theory-card tc-presence">
+      <div class="tc-icon">💚</div>
+      <div class="tc-name">Presence</div>
+      <div class="tc-desc">Your psychological availability. Whether the other person can count on you to actually show up.</div>
+      <div class="tc-lost">Lost through repeated withdrawal — three silences, or staying in high-stress states too long.</div>
+    </div>
+  </div>
+
+  <div style="margin-top:44px">
+    <p style="font-size:13px;color:var(--muted);max-width:560px;margin:0 auto 20px;line-height:1.7">
+      The NLI tracks your neurological load in real time.
+      Every move shifts your PFC, cortisol, and dopamine — and the simulation reads all three.
+    </p>
+    <div class="nli-row">
+      <div class="nli-pill nli-harmony">HARMONY · NLI &lt; 0.30</div>
+      <div class="nli-pill nli-fracture">FRACTURE · 0.30 – 0.70</div>
+      <div class="nli-pill nli-collapse">COLLAPSE · &gt; 0.70</div>
+      <div class="nli-pill nli-override">AMYGDALA OVERRIDE · &gt; 0.85</div>
+    </div>
+  </div>
+</div>
+
+<!-- TWO MODES -->
+<div class="stripe">
+<div class="section" id="simulation">
+  <div class="center" style="margin-bottom:48px">
+    <div class="section-label">How It Works</div>
+    <h2 class="section-heading">Two simulation modes.</h2>
+    <p class="section-sub center">
+      One scripted, one live. Both running the same 7 DSA structures underneath.
+    </p>
+  </div>
+  <div class="modes-grid">
+    <div class="mode-card">
+      <div class="mode-badge default">Default Mode</div>
+      <h3>The Scripted Simulation</h3>
+      <p>A 23-move narrative with Umm-e-Laila and Hani. Three unlabelled choices per move — you do not know which is SOFT, which is AGGRESSIVE, which is SILENT. You find out in the report.</p>
+      <ul class="mode-detail">
+        <li>Fixed 23-move story arc</li>
+        <li>Choices unlabelled — full psychological authenticity</li>
+        <li>All 7 DSA structures active simultaneously</li>
+        <li>Chess engine running The Immortal Game alongside</li>
+        <li>Full report generated at end of session</li>
+      </ul>
+    </div>
+    <div class="mode-card">
+      <div class="mode-badge custom">Custom Mode</div>
+      <h3>Your Real Relationship</h3>
+      <p>Enter real names, a real situation, a real relationship type. The AI plays the other person — not generically, but based on their relationship's psychological profile. Every message you send is classified in real time.</p>
+      <ul class="mode-detail">
+        <li>10 relationship types — partner to rival to ex</li>
+        <li>AI character reacts to NLI and trust state</li>
+        <li>Move classification: SOFT / AGGRESSIVE / SILENT</li>
+        <li>Gottman tone vectors per message</li>
+        <li>Repair window indicator — live</li>
+        <li>Hair Band guide available throughout</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</div>
+
 <!-- FEATURES -->
 <div class="section" id="features">
-  <div class="section-title">
-    <h2>Built different. Psychologically precise.</h2>
-    <p>Every feature maps to a real neurological or relational mechanism.</p>
+  <div class="center" style="margin-bottom:0">
+    <div class="section-label">What's Inside</div>
+    <h2 class="section-heading">Built for precision.</h2>
+    <p class="section-sub center">Every feature maps to a real neurological or relational mechanism — not metaphor, math.</p>
   </div>
   <div class="features-grid">
-    <div class="feature-card">
-      <div class="feature-icon">🧠</div>
-      <h3>Neurological Load Index (NLI)</h3>
-      <p>A real-time score tracking PFC degradation, cortisol accumulation, and dopamine levels — computed from your conversation choices.</p>
+    <div class="feat-card">
+      <div class="feat-icon">🧠</div>
+      <h3>Neurological Load Index</h3>
+      <p>NLI = (PFC × 0.4) + (Cortisol × 0.4) + (1 − Dopamine) × 0.2. Computed live from your choices. The single most important number in the simulation.</p>
     </div>
-    <div class="feature-card">
-      <div class="feature-icon">🤖</div>
-      <h3>AI-Powered Simulation</h3>
-      <p>Simulate real conversations with a psychologically reactive AI character. The AI adapts based on your NLI and trust state — harder when you're already losing.</p>
+    <div class="feat-card">
+      <div class="feat-icon">🃏</div>
+      <h3>Three-Card System</h3>
+      <p>Devotion, Excitement, and Presence track three independent dimensions of relational health. Each drops under specific, computable conditions.</p>
     </div>
-    <div class="feature-card">
-      <div class="feature-icon">📊</div>
-      <h3>Deep Psychological Report</h3>
-      <p>After each session, receive a detailed analysis of your relational patterns, card drop events, and neurological state trajectory.</p>
+    <div class="feat-card">
+      <div class="feat-icon">♟️</div>
+      <h3>Chess Engine</h3>
+      <p>A minimax algorithm replays The Immortal Game (Anderssen, 1851) alongside your conversation. Your moves shift the position. Eval ≤ −7.5 is CHECKMATE.</p>
     </div>
-    <div class="feature-card">
-      <div class="feature-icon">♟️</div>
-      <h3>Chess Engine Integration</h3>
-      <p>A minimax algorithm mirrors the Immortal Game (1851). Your moves shift the position. Checkmate is not metaphorical — it is computed.</p>
+    <div class="feat-card">
+      <div class="feat-icon">📊</div>
+      <h3>Session Report</h3>
+      <p>Five-part analysis after every session: DSA data, psychological profile, mistakes report, chess report, and move-by-move replay. No session goes unread.</p>
     </div>
-    <div class="feature-card">
-      <div class="feature-icon">🔗</div>
-      <h3>7 Live DSA Structures</h3>
-      <p>Weighted DAG, LIFO Stack, Min-Heap, Linked List, Hash Map, Finite State Machine, and Minimax — all simultaneously active in every session.</p>
+    <div class="feat-card">
+      <div class="feat-icon">🎭</div>
+      <h3>Relational Archetype</h3>
+      <p>After every session, the system assigns your archetype — Calm Aggressor, Silent Accumulator, Flooded Fixer, Over-Investor, and more. Based on your actual move data.</p>
     </div>
-    <div class="feature-card">
-      <div class="feature-icon">🔒</div>
-      <h3>Custom Relationship Simulations</h3>
-      <p>Recreate any relationship dynamic with custom names and context. The AI learns the setup and responds according to the psychological state.</p>
+    <div class="feat-card">
+      <div class="feat-icon">💯</div>
+      <h3>Health Score</h3>
+      <p>A 0–100 composite score from card retention, trust, NLI, and harmony ratio. Graded A+ to F. Includes a one-line verdict on the session.</p>
     </div>
-  </div>
-
-  <!-- THREE CARDS -->
-  <div style="text-align:center;margin-top:60px;margin-bottom:20px">
-    <h2 style="font-size:26px;font-weight:800;margin-bottom:8px">The Three Relational Cards</h2>
-    <p style="color:#8B949E;font-size:14px">Every relationship runs on three finite psychological resources.</p>
-  </div>
-  <div class="cards-row">
-    <div class="rcard rcard-devotion">
-      <h3>Devotion</h3>
-      <p>Emotional investment & boundary-setting. Lost through habitual aggression at low neurological load.</p>
+    <div class="feat-card">
+      <div class="feat-icon">🔧</div>
+      <h3>Pattern Interrupt</h3>
+      <p>A once-per-session move that simulates genuine honesty. At trust ≥ 0.60 it resets the conflict stack. Below that threshold, it backfires — vulnerability at low trust reads as desperation.</p>
     </div>
-    <div class="rcard rcard-excitement">
-      <h3>Excitement</h3>
-      <p>Relational energy & curiosity. Lost through reactive escalation or consecutive aggressive moves.</p>
+    <div class="feat-card">
+      <div class="feat-icon">💌</div>
+      <h3>The Final Letter</h3>
+      <p>When a session ends in collapse, the AI character writes a closing letter — from their perspective, about what they experienced in the conversation. Not analysis. A letter.</p>
     </div>
-    <div class="rcard rcard-presence">
-      <h3>Presence</h3>
-      <p>Psychological availability. Lost through repeated withdrawal and prolonged high-stress states.</p>
+    <div class="feat-card">
+      <div class="feat-icon">👁️</div>
+      <h3>Repair Window Indicator</h3>
+      <p>A live badge showing whether your cortisol stack can be cleared right now. OPEN means a SOFT move will land. CLOSED means you are too stressed to receive repair — cool down first.</p>
     </div>
-  </div>
-</div>
-
-<!-- TECH / DSA -->
-<div style="background:#161B22;border-top:1px solid rgba(255,255,255,.07);border-bottom:1px solid rgba(255,255,255,.07);padding:60px 20px">
-  <div class="section" style="padding:0">
-    <div class="section-title">
-      <h2>7 Data Structures. 1 Relationship.</h2>
-      <p>Each DSA concept maps to a real psychological mechanism, running simultaneously.</p>
+    <div class="feat-card">
+      <div class="feat-icon">🔬</div>
+      <h3>Gottman Tone Vectors</h3>
+      <p>Each message is classified beyond SOFT/AGGRESSIVE/SILENT into specific Gottman subtypes — Contempt, Vulnerability, Repair Attempt, Stonewalling, and more.</p>
     </div>
-    <div class="tech-grid">
-      <div class="tech-item">
-        <div class="tech-num">DSA 1</div>
-        <div>
-          <h4>Weighted DAG + Dijkstra</h4>
-          <p>Hippocampal memory decay — edge weights degrade with aggression</p>
-        </div>
-      </div>
-      <div class="tech-item">
-        <div class="tech-num">DSA 2</div>
-        <div>
-          <h4>LIFO Stack</h4>
-          <p>Cortisol accumulation — NLI-gated conflict resolution</p>
-        </div>
-      </div>
-      <div class="tech-item">
-        <div class="tech-num">DSA 3</div>
-        <div>
-          <h4>Min-Heap Priority Queue</h4>
-          <p>PFC corruption — stress-weighted choice ranking</p>
-        </div>
-      </div>
-      <div class="tech-item">
-        <div class="tech-num">DSA 4</div>
-        <div>
-          <h4>Singly Linked List</h4>
-          <p>Default Mode Network — intentional memory leak as longing</p>
-        </div>
-      </div>
-      <div class="tech-item">
-        <div class="tech-num">DSA 5</div>
-        <div>
-          <h4>Hash Map</h4>
-          <p>Identity keys — O(1) access to protected relational memory</p>
-        </div>
-      </div>
-      <div class="tech-item">
-        <div class="tech-num">DSA 6</div>
-        <div>
-          <h4>Finite State Machine</h4>
-          <p>Phase transitions — Harmony → Fracture → Collapse → Terminal</p>
-        </div>
-      </div>
-      <div class="tech-item">
-        <div class="tech-num">DSA 7</div>
-        <div>
-          <h4>Minimax Algorithm</h4>
-          <p>Game theory — chess position eval per move, O(b^d)</p>
-        </div>
-      </div>
+    <div class="feat-card">
+      <div class="feat-icon">👻</div>
+      <h3>Ghost Session</h3>
+      <p>In Ex chat, the AI may show a typing indicator and go silent. Models the psychological experience of intermittent non-response — anticipation without resolution.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🪢</div>
+      <h3>Hair Band Guide</h3>
+      <p>An AI companion built into the app. Knows every feature, every theory, every data structure — and understands what happens between people. Ask it anything.</p>
     </div>
   </div>
 </div>
 
-<!-- PRICING -->
-<div class="section" id="pricing">
-  <div class="section-title">
-    <h2>Simple, transparent pricing</h2>
-    <p>Start free. Upgrade when you need unlimited access.</p>
+<!-- 7 DSA -->
+<div class="stripe">
+<div class="section">
+  <div class="center" style="margin-bottom:0">
+    <div class="section-label">Architecture</div>
+    <h2 class="section-heading">7 data structures. 1 relationship.</h2>
+    <p class="section-sub center">All seven run simultaneously. Every move updates all of them at once.</p>
   </div>
-  <div class="pricing-grid">
-    <div class="price-card">
-      <div class="price-name">Free</div>
-      <div class="price-amount">$0</div>
-      <div class="price-desc">Forever free</div>
-      <ul class="price-features">
-        <li>50 AI messages total</li>
-        <li>Default simulation mode</li>
-        <li>Custom chat (shared limit)</li>
-        <li>Psychological analysis report</li>
-      </ul>
-      <a href="./index.html" class="price-btn free">Get Started Free</a>
+  <div class="dsa-grid">
+    <div class="dsa-card">
+      <div class="dsa-num">01</div>
+      <div>
+        <h4>Weighted DAG + Dijkstra</h4>
+        <p>Hippocampal memory network. 22 nodes. Aggression degrades edges. Soft moves repair them. Exit path length = distance to decoupling.</p>
+      </div>
     </div>
-    <div class="price-card popular">
-      <div class="popular-badge">MOST POPULAR</div>
-      <div class="price-name">Monthly</div>
-      <div class="price-amount">$5 <span>/ month</span></div>
-      <div class="price-desc">Cancel anytime</div>
-      <ul class="price-features">
-        <li>Unlimited AI messages</li>
-        <li>Default + Custom simulation</li>
-        <li>Full psychological reports</li>
-        <li>Priority AI responses</li>
-      </ul>
-      <a href="./index.html" class="price-btn">Upgrade Now</a>
+    <div class="dsa-card">
+      <div class="dsa-num">02</div>
+      <div>
+        <h4>LIFO Stack</h4>
+        <p>Cortisol accumulation. Max depth 7. NLI-gated pop — repair only works when you are calm enough to receive it. Overflow loses Excitement.</p>
+      </div>
     </div>
-    <div class="price-card">
-      <div class="price-name">Annual</div>
-      <div class="price-amount">$35 <span>/ year</span></div>
-      <div class="price-desc">Best value — save 42%</div>
-      <ul class="price-features">
-        <li>Unlimited AI messages</li>
-        <li>Default + Custom simulation</li>
-        <li>Full psychological reports</li>
-        <li>Priority AI responses</li>
-      </ul>
-      <a href="./index.html" class="price-btn">Upgrade Now</a>
+    <div class="dsa-card">
+      <div class="dsa-num">03</div>
+      <div>
+        <h4>Min-Heap Priority Queue</h4>
+        <p>PFC corruption. At NLI ≥ 0.85, the amygdala overrides — AGGRESSIVE is ranked first by the stress-modified comparator, not by choice.</p>
+      </div>
+    </div>
+    <div class="dsa-card">
+      <div class="dsa-num">04</div>
+      <div>
+        <h4>Singly Linked List</h4>
+        <p>Default Mode Network — longing. Lost relational memories are orphaned pointers. Not freed. That is intentional. That is the architecture of longing.</p>
+      </div>
+    </div>
+    <div class="dsa-card">
+      <div class="dsa-num">05</div>
+      <div>
+        <h4>Hash Map</h4>
+        <p>Sovereign Key — identity and protected memory. Some truths in a relationship are only accessible through specific keys. O(1) lookup.</p>
+      </div>
+    </div>
+    <div class="dsa-card">
+      <div class="dsa-num">06</div>
+      <div>
+        <h4>Finite State Machine</h4>
+        <p>Phase transitions — HARMONY → FRACTURE → COLLAPSE → TERMINAL. Driven by NLI thresholds. Discrete and deterministic.</p>
+      </div>
+    </div>
+    <div class="dsa-card">
+      <div class="dsa-num">07</div>
+      <div>
+        <h4>Minimax Algorithm</h4>
+        <p>The Immortal Game (1851). Position evaluation per move. SOFT improves. AGGRESSIVE damages. At eval ≤ −7.5 — CHECKMATE.</p>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- HAIR BAND -->
+<div class="section">
+  <div class="hb-section">
+    <div class="hb-visual">
+      <div class="hb-msg">
+        <div class="hb-label">Hair Band 🪢</div>
+        <div class="hb-them">Hey. I know this app inside out, and I understand what happens between people. Ask me anything, or just tell me what's going on.</div>
+      </div>
+      <div class="hb-msg">
+        <div class="hb-label hb-you-label">You</div>
+        <div class="hb-you">My partner goes completely silent whenever I try to bring up something serious. I don't know if it's me.</div>
+      </div>
+      <div class="hb-msg">
+        <div class="hb-label">Hair Band 🪢</div>
+        <div class="hb-them">What you're describing sounds like stonewalling — one of the four patterns Gottman's research links directly to relationship breakdown. It's almost never about you. It's a flooded nervous system doing the only thing it knows: shut down. That's not contempt. That's collapse. Here's what that means for what to do next...</div>
+      </div>
+    </div>
+    <div class="hb-info">
+      <div class="section-label">Hair Band</div>
+      <h3 class="section-heading" style="margin-bottom:10px">Your guide to everything.</h3>
+      <p>Hair Band knows every feature, every algorithm, and every data structure in this app. It also understands cognitive psychology, attachment theory, Gottman's research, and how relationships actually work under pressure.</p>
+      <p style="margin-top:10px">Talk to it about the app. Talk to it about your situation. Ask it to explain what your session report means. Ask it what to say before a hard conversation.</p>
+      <div class="hb-tags" style="margin-top:20px">
+        <span class="hb-tag">App Guide</span>
+        <span class="hb-tag">Relationship Analysis</span>
+        <span class="hb-tag">Attachment Theory</span>
+        <span class="hb-tag">NVC Scripts</span>
+        <span class="hb-tag">Emotion Regulation</span>
+        <span class="hb-tag">Gottman Framework</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SESSION REPORT -->
+<div class="stripe">
+<div class="section center">
+  <div class="section-label">After Every Session</div>
+  <h2 class="section-heading">The report that reads you back.</h2>
+  <p class="section-sub center">Every session generates a five-part analysis. Not generic feedback — data from your specific conversation.</p>
+  <div class="report-grid">
+    <div class="report-item">
+      <div class="ri-icon">📐</div>
+      <h4>DSA Report</h4>
+      <p>What the 7 data structures recorded. Stack depth, DAG edge degradation, exit path length, FSM transitions.</p>
+    </div>
+    <div class="report-item">
+      <div class="ri-icon">🧬</div>
+      <h4>Psychology Report</h4>
+      <p>Your NLI trajectory across all moves. Peak cortisol. Dopamine depletion points. Amygdala override moments.</p>
+    </div>
+    <div class="report-item">
+      <div class="ri-icon">⚠️</div>
+      <h4>Mistakes Report</h4>
+      <p>Exactly which moves caused damage, why they registered as harm, and what the alternative was at that NLI level.</p>
+    </div>
+    <div class="report-item">
+      <div class="ri-icon">♟️</div>
+      <h4>Chess Report</h4>
+      <p>Position evaluation across all 23 moves. Which decision most damaged the game. The minimax verdict.</p>
+    </div>
+    <div class="report-item">
+      <div class="ri-icon">🔁</div>
+      <h4>Move Replay</h4>
+      <p>Your full conversation mapped move by move — choice, classification, NLI at the moment, Gottman tone.</p>
+    </div>
+    <div class="report-item">
+      <div class="ri-icon">🏷️</div>
+      <h4>Relational Archetype</h4>
+      <p>The pattern your moves produced — named, described, and connected to what it means in real relationships.</p>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- RELATIONSHIP TYPES -->
+<div class="section">
+  <div class="center" style="margin-bottom:0">
+    <div class="section-label">Custom Mode</div>
+    <h2 class="section-heading">Simulate any relationship.</h2>
+    <p class="section-sub center">Enter real names, a real situation, and a relationship type. The AI plays the other person based on that relationship's psychological profile.</p>
+  </div>
+  <div class="rel-grid">
+    <div class="rel-item">
+      <div class="rel-emoji">👫</div>
+      <div><div class="rel-name">Best Friend</div><div class="rel-sub">Deep familiarity</div></div>
+    </div>
+    <div class="rel-item">
+      <div class="rel-emoji">👥</div>
+      <div><div class="rel-name">Friend</div><div class="rel-sub">Social connection</div></div>
+    </div>
+    <div class="rel-item">
+      <div class="rel-emoji">❤️</div>
+      <div><div class="rel-name">Partner</div><div class="rel-sub">Romantic intimacy</div></div>
+    </div>
+    <div class="rel-item">
+      <div class="rel-emoji">🏠</div>
+      <div><div class="rel-name">Family</div><div class="rel-sub">Inherited bonds</div></div>
+    </div>
+    <div class="rel-item">
+      <div class="rel-emoji">💼</div>
+      <div><div class="rel-name">Colleague</div><div class="rel-sub">Professional dynamic</div></div>
+    </div>
+    <div class="rel-item">
+      <div class="rel-emoji">🌱</div>
+      <div><div class="rel-name">Childhood Friend</div><div class="rel-sub">Shared history</div></div>
+    </div>
+    <div class="rel-item">
+      <div class="rel-emoji">🧭</div>
+      <div><div class="rel-name">Mentor</div><div class="rel-sub">Guidance & growth</div></div>
+    </div>
+    <div class="rel-item">
+      <div class="rel-emoji">⚔️</div>
+      <div><div class="rel-name">Rival</div><div class="rel-sub">Competition & respect</div></div>
+    </div>
+    <div class="rel-item">
+      <div class="rel-emoji">💔</div>
+      <div><div class="rel-name">Ex / Former</div><div class="rel-sub">Aftermath of love</div></div>
+    </div>
+    <div class="rel-item">
+      <div class="rel-emoji">🌐</div>
+      <div><div class="rel-name">Online Friend</div><div class="rel-sub">Digital intimacy</div></div>
     </div>
   </div>
 </div>
 
 <!-- AUTHOR -->
-<div style="padding:0 20px 70px">
-  <div class="section-title" style="margin-bottom:30px">
-    <h2>Built on original theory</h2>
+<div class="stripe">
+<div class="section center" style="padding-bottom:80px">
+  <div class="section-label">The Creator</div>
+  <h2 class="section-heading">Built on original theory.</h2>
+  <div class="author-card">
+    <div class="author-avatar">M</div>
+    <div>
+      <div class="author-name">S. M. Minhal Abbas Rizvi</div>
+      <div class="author-role">Creator of LOST CARD · Author</div>
+      <div class="author-bio">
+        LOST CARD is a computational implementation of an original theoretical framework called
+        <strong>The Bet of Belief</strong> — a model of how relational belief decays following
+        computable, deterministic rules. The core theorem: relationships do not break from a single moment.
+        They break from patterns that repeat until no card remains.
+        <br/><br/>
+        The theory is part of a forthcoming book, <em>The Bet of Belief</em>, scheduled for 2028.
+        All algorithms, psychological mappings, and simulation structures are original work.
+      </div>
+      <div class="author-chips">
+        <span class="author-chip">BSSE · MAJU</span>
+        <span class="author-chip">Cognitive Psychology · 8.5 yrs</span>
+        <span class="author-chip">The Bet of Belief · 2028</span>
+        <span class="author-chip">C++17 · Web · Firebase</span>
+      </div>
+    </div>
   </div>
-  <div class="author-section">
-    <h3>S. M. Minhal Abbas Rizvi</h3>
-    <div class="role">BSSE Student · Author · Data Structures & Algorithms</div>
-    <p>LOST CARD is a computational implementation of the <strong>Lost Card Theory</strong> and <strong>The Bet of Belief</strong> framework — an original theoretical model of relational belief decay. All algorithms, psychological mappings, and simulation structures are original work.</p>
+</div>
+</div>
+
+<!-- PRICING -->
+<div class="section center" id="pricing">
+  <div class="section-label">Pricing</div>
+  <h2 class="section-heading">Start free. Stay as long as you need.</h2>
+  <p class="section-sub center">50 free AI messages shared across all features. Upgrade for unlimited access.</p>
+  <div class="pricing-grid">
+    <div class="price-card">
+      <div class="price-name">Free</div>
+      <div class="price-amount">PKR 0</div>
+      <div class="price-desc">Always free, no expiry</div>
+      <ul class="price-list">
+        <li>50 AI messages (shared)</li>
+        <li>Default simulation mode</li>
+        <li>Custom chat access</li>
+        <li>Full session report</li>
+        <li>Hair Band guide</li>
+      </ul>
+      <a href="./index.html" class="price-btn ghost">Get Started</a>
+    </div>
+    <div class="price-card featured">
+      <div class="price-popular">Most Popular</div>
+      <div class="price-name">15 Days</div>
+      <div class="price-amount">PKR 560</div>
+      <div class="price-desc">One-time · 15 days access</div>
+      <ul class="price-list">
+        <li>Unlimited AI messages</li>
+        <li>All simulation modes</li>
+        <li>Full reports + archetype</li>
+        <li>Hair Band unlimited</li>
+      </ul>
+      <a href="./index.html" class="price-btn blue">Upgrade</a>
+    </div>
+    <div class="price-card">
+      <div class="price-name">Monthly</div>
+      <div class="price-amount">PKR 1,400</div>
+      <div class="price-desc">Per month · cancel anytime</div>
+      <ul class="price-list">
+        <li>Unlimited AI messages</li>
+        <li>All simulation modes</li>
+        <li>Full reports + archetype</li>
+        <li>Hair Band unlimited</li>
+      </ul>
+      <a href="./index.html" class="price-btn blue">Upgrade</a>
+    </div>
   </div>
 </div>
 
 <!-- CTA -->
-<div style="background:linear-gradient(135deg,rgba(88,166,255,.08),rgba(198,120,221,.06));border-top:1px solid rgba(88,166,255,.15);border-bottom:1px solid rgba(88,166,255,.15);padding:70px 20px;text-align:center">
-  <h2 style="font-size:32px;font-weight:900;margin-bottom:12px">Ready to understand your relationships?</h2>
-  <p style="color:#8B949E;font-size:16px;margin-bottom:30px">50 free AI messages. No credit card required.</p>
-  <a href="./index.html" class="btn-primary" style="font-size:16px;padding:16px 36px">Start for Free →</a>
+<div class="cta-section">
+  <h2>Ready to see your relationship in data?</h2>
+  <p>50 free AI messages. No card required. Start in seconds.</p>
+  <a href="./index.html" class="btn-primary" style="font-size:15px;padding:14px 34px;display:inline-block">Open LOST CARD</a>
 </div>
 
 <!-- FOOTER -->
 <footer>
-  <div class="footer-left">© 2026 LOST CARD · S. M. Minhal Abbas Rizvi · For educational purposes only.</div>
+  <div class="footer-left">© 2026 LOST CARD · S. M. Minhal Abbas Rizvi · For educational and research purposes.</div>
   <div class="footer-right">
     <a href="./terms.html">Terms</a>
     <a href="./privacy.html">Privacy</a>
