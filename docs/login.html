@@ -398,6 +398,9 @@ window.addEventListener('DOMContentLoaded', () => {
   if (params.get('unverified') === '1') {
     showAuthMsg('📧 Please verify your email before signing in. Check your inbox (and spam folder).', 'error');
   }
+  if (params.get('verified') === '1') {
+    showAuthMsg('✅ Email verified! Please sign in to continue.', 'success');
+  }
   if (!initFirebase()) return;
 
   // If bypass URL was used (?dev=...), force sign out so login form always shows
@@ -725,8 +728,9 @@ function _startPolling() {
           lastLogin:     firebase.firestore.FieldValue.serverTimestamp()
         }).catch(() => {});
 
-        // Redirect after brief success flash
-        setTimeout(() => { window.location.href = 'index.html'; }, 1500);
+        // Sign out and redirect to login so user manually signs in
+        await auth.signOut().catch(() => {});
+        setTimeout(() => { window.location.href = 'login.html?verified=1'; }, 1500);
       }
     } catch(e) { /* network blip — keep polling */ }
   }, POLL_EVERY_MS);

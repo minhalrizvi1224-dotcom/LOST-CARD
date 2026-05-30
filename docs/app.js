@@ -1221,17 +1221,23 @@ async function _loadAdminMessages() {
   } catch(e) { /* non-critical */ }
 }
 
-// Called on auth ready — check for unread admin messages and show badge
-async function _checkAdminMessagesBadge() {
+// Real-time listener for unread admin messages — updates badge instantly when admin sends
+let _adminMsgUnsubscribe = null;
+function _checkAdminMessagesBadge() {
   if (!firebaseDB || !currentUser || !currentUser.uid) return;
-  try {
-    const snap = await firebaseDB
-      .collection('users').doc(currentUser.uid)
-      .collection('adminMessages')
-      .where('read', '==', false)
-      .get();
-    _updateAdminMsgBadge(snap.size);
-  } catch(e) { /* non-critical */ }
+  if (_adminMsgUnsubscribe) _adminMsgUnsubscribe(); // detach old listener
+  _adminMsgUnsubscribe = firebaseDB
+    .collection('users').doc(currentUser.uid)
+    .collection('adminMessages')
+    .where('read', '==', false)
+    .onSnapshot(snap => {
+      _updateAdminMsgBadge(snap.size);
+      // If complaints panel is already open, reload messages immediately
+      const panel = document.getElementById('complaintsPanel');
+      if (panel && panel.style.display === 'flex' && snap.size > 0) {
+        _loadAdminMessages();
+      }
+    }, () => {});
 }
 
 function _updateAdminMsgBadge(count) {
