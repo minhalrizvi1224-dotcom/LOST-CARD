@@ -2040,24 +2040,37 @@ function selectPlan(plan) {
     if (payNum) {
       sec.innerHTML = '<div class="up-pay-title">Pay for ' + names[plan] + ' — <strong>' + prices[plan] + '</strong></div>'
         + '<div style="background:var(--bg3,#0d1117);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px">'
-        + '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:14px">Step 1 — Send Payment</div>'
-        + '<div style="background:var(--surface);border:1px solid rgba(88,166,255,.25);border-radius:10px;padding:14px 16px;margin-bottom:14px">'
-        + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
-        + '<span style="font-size:12px;color:var(--muted)">Send payment to</span>'
-        + '</div>'
-        + (jcTitle ? '<div style="font-size:13px;font-weight:700;margin-bottom:4px">' + jcTitle + '</div>' : '')
-        + '<div style="font-size:18px;font-weight:800;font-family:monospace;letter-spacing:2px;color:var(--accent)">' + payNum + '</div>'
-        + '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">'
-        + '<span style="font-size:12px;color:var(--muted)">Amount</span>'
-        + '<span style="font-size:20px;font-weight:800;color:var(--green)">Rs ' + pkr.toLocaleString() + '</span>'
-        + '</div>'
-        + '</div>'
-        + '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px">Step 2 — Confirm Payment</div>'
-        + '<div style="display:flex;gap:10px;flex-wrap:wrap">'
-        + (waLink ? '<a href="' + waLink + '" target="_blank" class="up-wa-btn">💬 WhatsApp Us</a>' : '')
-        + '<button class="up-confirm-btn" onclick="confirmUpgradeRequest()">✓ I\'ve Sent Payment</button>'
-        + '</div>'
-        + '<div style="font-size:11px;color:var(--muted);margin-top:12px;opacity:.7">⏰ Plan activated within a few hours of payment confirmation.</div>'
+
+        // Step 1 — Payment details
+        + '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px">Step 1 — Send Payment</div>'
+        + '<div style="background:var(--surface);border:1px solid rgba(88,166,255,.25);border-radius:10px;padding:14px 16px;margin-bottom:16px">'
+        + (jcTitle ? '<div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:3px">Account Holder</div><div style="font-size:14px;font-weight:800;margin-bottom:10px">' + jcTitle + '</div>' : '')
+        + '<div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:3px">Account Number (SadaPay)</div>'
+        + '<div style="font-size:20px;font-weight:800;font-family:monospace;letter-spacing:3px;color:var(--accent);margin-bottom:10px">' + payNum + '</div>'
+        + '<div style="padding-top:10px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">'
+        + '<span style="font-size:12px;color:var(--muted)">Amount to send</span>'
+        + '<span style="font-size:22px;font-weight:800;color:var(--green)">Rs ' + pkr.toLocaleString() + '</span>'
+        + '</div></div>'
+
+        // Step 2 — User enters their own account number
+        + '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px">Step 2 — Enter Your Account Number</div>'
+        + '<div style="font-size:11px;color:var(--muted);margin-bottom:8px">So we can verify your payment</div>'
+        + '<input id="upUserAccount" type="text" placeholder="Your SadaPay account number" maxlength="30"'
+        + ' style="width:100%;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;font-family:monospace;letter-spacing:1px;outline:none;margin-bottom:16px;box-sizing:border-box"/>'
+
+        // Step 3 — Upload payment screenshot
+        + '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px">Step 3 — Upload Payment Screenshot</div>'
+        + '<div style="font-size:11px;color:var(--muted);margin-bottom:8px">Take a screenshot of your payment confirmation and upload it here</div>'
+        + '<label style="display:flex;align-items:center;gap:10px;background:var(--surface);border:1px dashed rgba(88,166,255,.35);border-radius:8px;padding:12px 14px;cursor:pointer;margin-bottom:16px">'
+        + '<svg width="18" height="18" fill="none" stroke="var(--muted)" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>'
+        + '<span id="upSSName" style="font-size:12px;color:var(--muted);flex:1">Click to choose screenshot…</span>'
+        + '<input id="upSSFile" type="file" accept="image/*" style="display:none" onchange="document.getElementById(\'upSSName\').textContent=this.files[0]?this.files[0].name:\'Click to choose screenshot…\'">'
+        + '</label>'
+
+        // Step 4 — Submit
+        + '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px">Step 4 — Confirm</div>'
+        + '<button class="up-confirm-btn" onclick="confirmUpgradeRequest()" style="width:100%">✓ I\'ve Sent Payment — Activate My Plan</button>'
+        + '<div style="font-size:11px;color:var(--muted);margin-top:10px;opacity:.7">⏰ Your plan will be activated once payment is verified. You\'ll receive a notification in the app.</div>'
         + '</div>';
     } else {
       sec.innerHTML = '<div class="up-pay-methods" style="text-align:center;padding:20px 0;color:var(--muted)">'
@@ -2073,28 +2086,47 @@ async function confirmUpgradeRequest() {
   if (!firebaseDB || !currentUser || !currentUser.uid) {
     showToast('Sign in to request upgrade.', 'error'); return;
   }
+  const userAccountEl = document.getElementById('upUserAccount');
+  const userAccount   = userAccountEl ? userAccountEl.value.trim() : '';
+  if (!userAccount) { showToast('Enter your account number first.', 'error'); return; }
+
+  const fileInput = document.getElementById('upSSFile');
+  const ssFile    = fileInput && fileInput.files[0] ? fileInput.files[0] : null;
+  if (!ssFile) { showToast('Please upload your payment screenshot.', 'error'); return; }
+
   const btn = document.querySelector('.up-confirm-btn');
-  if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+  if (btn) { btn.disabled = true; btn.textContent = 'Uploading screenshot…'; }
   try {
+    // Upload screenshot to Firebase Storage
+    const storageRef = firebase.storage().ref(`paymentScreenshots/${currentUser.uid}_${Date.now()}`);
+    await storageRef.put(ssFile);
+    const screenshotURL = await storageRef.getDownloadURL();
+
+    if (btn) btn.textContent = 'Sending request…';
     await firebaseDB.collection('users').doc(currentUser.uid).update({
-      upgradeRequested:     true,
-      upgradeRequestedPlan: _selectedPlan,
-      upgradeRequestedAt:   firebase.firestore.FieldValue.serverTimestamp()
+      upgradeRequested:        true,
+      upgradeRequestedPlan:    _selectedPlan,
+      upgradeRequestedAt:      firebase.firestore.FieldValue.serverTimestamp(),
+      userPaymentAccount:      userAccount,
+      paymentScreenshotURL:    screenshotURL
     });
     currentUser.upgradeRequested     = true;
     currentUser.upgradeRequestedPlan = _selectedPlan;
     const sec = document.getElementById('upPaymentSection');
     sec.innerHTML = `
-      <div style="text-align:center;padding:20px 0">
-        <div style="font-size:36px;margin-bottom:10px">✅</div>
-        <div style="font-size:15px;font-weight:700;margin-bottom:6px">Request Sent!</div>
-        <div style="font-size:13px;color:var(--muted)">Once we confirm your payment, your plan will be activated.
-          We'll notify you at <strong>${currentUser.email}</strong>.</div>
+      <div style="text-align:center;padding:24px 0">
+        <div style="font-size:40px;margin-bottom:12px">✅</div>
+        <div style="font-size:16px;font-weight:800;margin-bottom:8px">Payment Request Sent!</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.7">
+          Your request is being reviewed.<br>
+          Once confirmed, your <strong style="color:var(--text)">${_selectedPlan}</strong> plan will be activated
+          and you'll receive a notification in the app.
+        </div>
       </div>`;
-    showToast('Upgrade request sent!', 'success');
+    showToast('Request sent! We\'ll activate your plan after verifying.', 'success');
   } catch(e) {
     showToast('Could not send request. Try again.', 'error');
-    if (btn) { btn.disabled = false; btn.textContent = '✓ I\'ve Sent Payment'; }
+    if (btn) { btn.disabled = false; btn.textContent = '✓ I\'ve Sent Payment — Activate My Plan'; }
   }
 }
 

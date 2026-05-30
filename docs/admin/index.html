@@ -695,6 +695,7 @@
             <button id="addGeminiPoolKeyBtn" class="btn-sm" style="border-color:#42C878;color:#42C878;white-space:nowrap" onclick="addGeminiPoolKey()">+ Add</button>
           </div>
           <div id="geminiPoolKeySaveStatus" style="font-size:11px;margin-top:8px;color:var(--muted)"></div>
+          <button onclick="syncGeminiKeysToPublic()" style="margin-top:12px;width:100%;padding:9px;background:rgba(66,200,120,.08);border:1px solid rgba(66,200,120,.3);border-radius:8px;color:#42C878;font-size:12px;font-weight:700;cursor:pointer">🔄 Sync Keys to Users (Fix HB for regular users)</button>
         </div>
 
         <!-- Stripe Payment Links -->
@@ -798,6 +799,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 <script src="../firebase-config.js"></script>
 
 <script>
@@ -1006,14 +1008,12 @@ async function loadComplaints() {
   container.innerHTML = '<div class="loading"><span class="spinner"></span>Loading...</div>';
   const filterStatus = document.getElementById('complaintFilterStatus')?.value || 'unresolved';
   try {
-    let q = adDB.collection('complaints').orderBy('createdAt', 'desc');
-    if (filterStatus === 'unresolved') {
-      // Show new + seen (not resolved)
-      q = adDB.collection('complaints').where('status', 'in', ['new', 'seen']).orderBy('createdAt', 'desc');
-    } else if (filterStatus !== 'all') {
-      q = q.where('status', '==', filterStatus);
-    }
-    const snap = await q.limit(100).get();
+    // Always fetch all (ordered by date) — filter client-side to avoid composite index requirement
+    const snap = await adDB.collection('complaints').orderBy('createdAt', 'desc').limit(200).get();
+    const filteredDocs = filterStatus === 'unresolved'
+      ? snap.docs.filter(d => ['new','seen'].includes(d.data().status))
+      : filterStatus === 'all' ? snap.docs
+      : snap.docs.filter(d => d.data().status === filterStatus);
 
     // Auto-delete oldest if total complaints >= 100
     _autoDeleteOldComplaints();
@@ -1023,12 +1023,12 @@ async function loadComplaints() {
     const badge = document.getElementById('complaintsBadge');
     if (badge) { badge.textContent = newCount; badge.style.display = newCount ? 'inline' : 'none'; }
 
-    if (snap.empty) { container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)">No complaints yet.</div>'; return; }
+    if (filteredDocs.length === 0) { container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)">No complaints found.</div>'; return; }
 
     const statusColor = { new:'var(--red)', seen:'var(--yellow)', resolved:'var(--green)' };
     const statusLabel = { new:'🔴 New', seen:'🟡 Seen', resolved:'🟢 Resolved' };
 
-    container.innerHTML = snap.docs.map(doc => {
+    container.innerHTML = filteredDocs.map(doc => {
       const d = doc.data();
       const date = d.createdAt ? new Date(d.createdAt.seconds * 1000).toLocaleString() : '—';
       const uidAttr = d.uid ? `data-uid="${d.uid}"` : '';
@@ -2028,15 +2028,20 @@ async function loadUpgrades() {
   if (!pending.length) {
     pe.innerHTML = '<div class="empty"><div class="empty-icon">✅</div>No pending requests.</div>';
   } else {
-    let h = `<table class="data-table"><thead><tr><th>Name</th><th>Email</th><th>Plan</th><th>Requested</th><th>Action</th></tr></thead><tbody>`;
+    let h = `<table class="data-table"><thead><tr><th>Name</th><th>Email</th><th>Plan</th><th>Account#</th><th>Screenshot</th><th>Requested</th><th>Action</th></tr></thead><tbody>`;
     pending.forEach((u,i) => {
       const plan = PLAN_LABELS[u.upgradeRequestedPlan] || u.upgradeRequestedPlan || '—';
       const when = u.upgradeRequestedAt?.seconds ? fmtDateTime(u.upgradeRequestedAt.seconds) : '—';
       const idx  = allUsers.indexOf(u);
+      const ssCell = u.paymentScreenshotURL
+        ? `<a href="${u.paymentScreenshotURL}" target="_blank" style="color:var(--accent);font-size:11px;font-weight:700">📷 View</a>`
+        : `<span style="color:var(--muted);font-size:11px">—</span>`;
       h += `<tr>
         <td><strong>${esc(u.displayName||'—')}</strong></td>
         <td style="color:var(--muted)">${esc(u.email||'—')}</td>
         <td><span class="badge badge-orange">${esc(plan)}</span></td>
+        <td style="color:var(--muted);font-family:monospace;font-size:11px">${esc(u.userPaymentAccount||'—')}</td>
+        <td>${ssCell}</td>
         <td style="color:var(--muted)">${when}</td>
         <td>
           <button class="btn-sm" style="border-color:var(--green);color:var(--green)" onclick="approveUpgrade('${u.id}','${u.upgradeRequestedPlan||'monthly'}',${idx})">✅ Approve</button>
@@ -2114,13 +2119,24 @@ async function approveUpgrade(uid, planKey, idx) {
       upgradeRequested: false,
       upgradeApprovedBy:adUser.uid
     });
+
+    // Send in-app notification to user
+    const planLabel = PLAN_LABELS[planKey] || planKey;
+    await adDB.collection('users').doc(uid).collection('adminMessages').add({
+      type:      'upgrade_approved',
+      message:   `🎉 Your ${planLabel} plan has been activated! You now have unlimited access to Hair Band and all custom chats. Valid until ${expiry.toLocaleDateString()}. Thank you for upgrading!`,
+      fromAdmin: true,
+      read:      false,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).catch(() => {});
+
     if (allUsers[idx]) {
       allUsers[idx].hbPlan = 'upgraded';
       allUsers[idx].upgradePlan = planKey;
       allUsers[idx].upgradeRequested = false;
       allUsers[idx].planExpiry = { seconds: Math.floor(expiry.getTime()/1000) };
     }
-    showAdminToast(`✅ ${user?.displayName||uid} upgraded to ${PLAN_LABELS[planKey]}.`);
+    showAdminToast(`✅ ${user?.displayName||uid} upgraded to ${planLabel}. Notification sent.`);
     loadUpgrades();
     loadStats();
   } catch(e) { alert('Error: ' + e.message); }
@@ -2367,6 +2383,16 @@ async function removeGeminiPoolKey(idx) {
     if (status) { status.style.color='var(--accent2)'; status.textContent=`Key removed. Gemini pool: ${_poolGeminiKeys.length} key(s).`; setTimeout(()=>{status.textContent='';},3000); }
   } catch(e) {
     if (status) { status.style.color='var(--red)'; status.textContent='Error: '+e.message; }
+  }
+}
+
+async function syncGeminiKeysToPublic() {
+  const status = document.getElementById('geminiPoolKeySaveStatus');
+  try {
+    await adDB.collection('publicConfig').doc('hb').set({ geminiKeys: _poolGeminiKeys }, { merge: true });
+    if (status) { status.style.color='var(--green)'; status.textContent=`✅ Synced ${_poolGeminiKeys.length} key(s) to users!`; setTimeout(()=>{status.textContent='';},4000); }
+  } catch(e) {
+    if (status) { status.style.color='var(--red)'; status.textContent='Sync failed: '+e.message; }
   }
 }
 
