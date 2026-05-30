@@ -649,29 +649,120 @@ const SCENARIOS = [
 
 // ─── Scenario 2: Ayla & Reza (ex-couple trying friendship) ──────────────────
 const SCENARIOS_REZA = [
-  { hani: "Hey. Thanks for agreeing to meet. I wasn't sure you would.", subtext: "(He's been rehearsing this moment for three weeks. He didn't expect her to actually say yes.)", conflict: "Dismissing his gratitude", salvation: false },
-  { hani: "I know this is weird. I'm not going to pretend it isn't.", subtext: "(He's trying to name the awkwardness before she can use it against him.)", conflict: "Weaponizing the awkwardness", salvation: false },
-  { hani: "I've been thinking about a lot of things. Not about us — about how I handled things. I think I owe you an honest conversation.", subtext: "(He's been journaling about this for months. He won't say that.)", conflict: "Dismissing his accountability", salvation: true },
-  { hani: "You were always better at remembering the good parts. I'd get stuck in what wasn't working. I think that was unfair.", subtext: "(He's said this to a therapist already. This is the first time he's said it to her.)", conflict: "Minimizing his acknowledgment", salvation: true },
-  { hani: "I don't want to reopen everything. I just — I missed talking to you. Not the way we were. Just — talking.", subtext: "(He's terrified this sounds like he wants her back. He doesn't. He thinks.)", conflict: "Misreading his intention", salvation: false },
-  { hani: "You were my best friend before everything else. I think I forgot that. I think we both did.", subtext: "(He's not sure she sees it this way. He hopes she does.)", conflict: "Denying the friendship foundation", salvation: true },
-  { hani: "Can I ask you something? And you don't have to answer if you don't want to.", subtext: "(He has a specific question. He's been building to it since they sat down.)", conflict: "Shutting down the question", salvation: false },
-  { hani: "Were you okay? After. Because I told myself you were, and I'm not sure I actually checked.", subtext: "(He didn't check. He knows that. He's saying it because the guilt became too loud.)", conflict: "Dismissing his concern as guilt", salvation: true },
-  { hani: "I think I made myself into the villain in the story because it was easier than admitting I just — stopped knowing how to be with you.", subtext: "(This is the most honest he's been with anyone about this. His hands are steady but his voice isn't.)", conflict: "Using his honesty against him", salvation: true },
-  { hani: "I'm not asking you to forgive me. I'm not even sure that's the right word for what I'm asking.", subtext: "(He went through four different words before this conversation. Forgive. Understand. Release. None of them fit.)", conflict: "Demanding clarity he can't give", salvation: false },
-  { hani: "There were things I should have said while it was still something I could fix. I didn't. That's on me.", subtext: "(He had the conversations in his head a hundred times. They never made it out.)", conflict: "Refusing to acknowledge the gap", salvation: true },
-  { hani: "I'm not the same person who ended things. I don't know if that matters to you. I think it matters to me.", subtext: "(He's been in therapy for seven months. He hasn't told anyone that either.)", conflict: "Dismissing his growth", salvation: false },
-  { hani: "I keep thinking about that drive back from the mountains. We didn't talk the whole two hours and it wasn't uncomfortable. I miss that.", subtext: "(He's shared this memory with no one. He's been protecting it.)", conflict: "Turning the memory into a weapon", salvation: true },
-  { hani: "I'm not trying to make this about what we were. I'm trying to figure out what we could still be.", subtext: "(He means it. He's not romanticizing it. He's genuinely asking.)", conflict: "Collapsing the distinction", salvation: false },
-  { hani: "I think you're still angry. Which is fair. I just want to know if there's space underneath that for something else.", subtext: "(He can read her. He always could. That's part of what made it hard.)", conflict: "Denying the anger or weaponizing it", salvation: true },
-  { hani: "Because I don't want to keep carrying the version of this that ended badly as the only version I have of us.", subtext: "(He's been carrying it. It's heavier than he expected.)", conflict: "Refusing to offer a different version", salvation: true },
-  { hani: "Okay. I hear you. I think what I'm understanding is that maybe I'm not the only one who still needs to figure some things out.", subtext: "(He's not accusing. He's observing. The difference matters to him.)", conflict: "Taking it as an accusation", salvation: false },
-  { hani: "I didn't come here to fight. I came here because I thought we were both tired of the version of this that's been playing on loop.", subtext: "(He's right. He knows he's right. He's waiting to see if she does too.)", conflict: "Continuing the loop", salvation: true },
-  { hani: "I think friendship is possible. But not if one of us is still hoping for something the other one can't give.", subtext: "(He's talking about her. He's also a little bit talking about himself.)", conflict: "Refusing to name what you're hoping for", salvation: true },
-  { hani: "Say it. Whatever you're not saying. I'd rather have the real conversation than this one.", subtext: "(He's been watching her hold something back since they sat down.)", conflict: "Continuing to hold back", salvation: true },
-  { hani: "I think we're both scared of what happens if we're completely honest. But I think we're more scared of staying stuck here.", subtext: "(He made a decision before this meeting: he would rather lose her clearly than keep her vaguely.)", conflict: "Choosing vagueness", salvation: false },
-  { hani: "I still think about you as someone I can call when something important happens. I don't know if that's earned yet. I'm asking if we can earn it back.", subtext: "(He's offering something real. He doesn't know if she'll take it.)", conflict: "Dismissing the offer", salvation: true },
-  { hani: "Then — okay. I'm not going anywhere. Neither are you, apparently. So — let's just see what this actually is.", subtext: "(He's terrified and relieved in equal measure. He doesn't let either show.)", conflict: "Final withdrawal", salvation: true }
+  { hani: "Hey. Thanks for agreeing to meet. I wasn't sure you would.", subtext: "(He's been rehearsing this moment for three weeks. He didn't expect her to actually say yes.)", conflict: "Dismissing his gratitude", salvation: false,
+    soft: ["Honestly I wasn't sure either. But I'm here. That has to mean something.", "Of course I came, Reza. We were a lot to each other once.", "I almost didn't. But I wanted to. I think I needed to."],
+    aggressive: ["Don't thank me like I did you some big favour.", "I'm here. Don't make a whole thing out of it.", "You sound surprised I'd show basic decency."],
+    silent: ["Yeah. Well. I'm here.", "Mm.", "Let's just get on with it."] },
+
+  { hani: "I know this is weird. I'm not going to pretend it isn't.", subtext: "(He's trying to name the awkwardness before she can use it against him.)", conflict: "Weaponizing the awkwardness", salvation: false,
+    soft: ["It is weird. But I'd rather sit in the weird than not have this at all.", "Yeah, it's strange. We'll figure out how to talk again.", "Weird's fine. We don't need it all figured out today."],
+    aggressive: ["Weird is one word for what you did, sure.", "And whose fault is it that it's weird?", "You made it weird. Let's at least be honest about that."],
+    silent: ["It's fine.", "Sure.", "If you say so."] },
+
+  { hani: "I've been thinking about a lot of things. Not about us — about how I handled things. I think I owe you an honest conversation.", subtext: "(He's been journaling about this for months. He won't say that.)", conflict: "Dismissing his accountability", salvation: true,
+    soft: ["That actually means a lot. I waited a long time to hear you say that.", "Okay. I'm listening. Properly listening this time.", "Thank you for owning it. I really didn't expect that from you."],
+    aggressive: ["A bit late for an honest conversation, isn't it.", "You owe me a lot more than a conversation, Reza.", "Now you want to be accountable. Convenient."],
+    silent: ["Go on then.", "Okay.", "If you need to say it, say it."] },
+
+  { hani: "You were always better at remembering the good parts. I'd get stuck in what wasn't working. I think that was unfair.", subtext: "(He's said this to a therapist already. This is the first time he's said it to her.)", conflict: "Minimizing his acknowledgment", salvation: true,
+    soft: ["We balanced each other that way. I'm glad you can finally see it.", "It was unfair. But thank you for seeing it now. That matters.", "I held the good memories because they were worth holding. They still are."],
+    aggressive: ["Unfair is a very soft word for it.", "You got stuck in the bad on purpose. Don't dress it up.", "Nice of you to notice. Years too late."],
+    silent: ["I suppose.", "Hm.", "Okay."] },
+
+  { hani: "I don't want to reopen everything. I just — I missed talking to you. Not the way we were. Just — talking.", subtext: "(He's terrified this sounds like he wants her back. He doesn't. He thinks.)", conflict: "Misreading his intention", salvation: false,
+    soft: ["I missed talking to you too. Just talking. I never stopped missing that part.", "I get it. I'm not trying to reopen anything either. Just this.", "Just talking. Yeah. I think I can do that."],
+    aggressive: ["So you missed me when it was convenient for you.", "You don't get to just 'miss talking' after how you left.", "Talking led somewhere last time. I'm not that naive anymore."],
+    silent: ["Okay.", "We're talking now, aren't we.", "Sure. Talking."] },
+
+  { hani: "You were my best friend before everything else. I think I forgot that. I think we both did.", subtext: "(He's not sure she sees it this way. He hopes she does.)", conflict: "Denying the friendship foundation", salvation: true,
+    soft: ["You were mine too. Before all of it. I forgot that on purpose for a while.", "We did forget. Maybe that's the part actually worth getting back.", "Best friends first. God, we really were, weren't we."],
+    aggressive: ["Best friends don't do what you did, Reza.", "You forgot a lot of things. That was always the problem.", "Don't rewrite us into something gentler than it was."],
+    silent: ["Maybe.", "That was a long time ago.", "If you say so."] },
+
+  { hani: "Can I ask you something? And you don't have to answer if you don't want to.", subtext: "(He has a specific question. He's been building to it since they sat down.)", conflict: "Shutting down the question", salvation: false,
+    soft: ["You can ask me anything. You always could.", "Go ahead. I'd rather you ask than sit there wondering.", "Ask. I'll be honest with you, I promise."],
+    aggressive: ["Depends on the question. Don't push your luck.", "You're already making me nervous. What is it.", "Careful what you ask. You might not like the answer."],
+    silent: ["I guess.", "Ask, then.", "We'll see."] },
+
+  { hani: "Were you okay? After. Because I told myself you were, and I'm not sure I actually checked.", subtext: "(He didn't check. He knows that. He's saying it because the guilt became too loud.)", conflict: "Dismissing his concern as guilt", salvation: true,
+    soft: ["No. I wasn't, for a long time. But it means something that you're asking now.", "Honestly? Not really. Thank you for finally wanting to know.", "I wasn't okay. But I'm getting there. And you asking actually helps."],
+    aggressive: ["You're only asking now to feel better about yourself.", "You didn't check because you didn't want the answer.", "Don't ask if you weren't there for the answer."],
+    silent: ["I managed.", "I was fine.", "Does it even matter now?"] },
+
+  { hani: "I think I made myself into the villain in the story because it was easier than admitting I just — stopped knowing how to be with you.", subtext: "(This is the most honest he's been with anyone about this. His hands are steady but his voice isn't.)", conflict: "Using his honesty against him", salvation: true,
+    soft: ["That's the most honest thing you've ever said to me. I needed to hear it.", "You weren't a villain. You were just lost. I can see that now.", "Thank you for telling me the real reason. It changes something."],
+    aggressive: ["Villain's a strong word. You weren't that important.", "So you admit you just gave up. Good to have on record.", "You always find the version that lets you off the hook."],
+    silent: ["Okay.", "That's something, I guess.", "Hm."] },
+
+  { hani: "I'm not asking you to forgive me. I'm not even sure that's the right word for what I'm asking.", subtext: "(He went through four different words before this conversation. Forgive. Understand. Release. None of them fit.)", conflict: "Demanding clarity he can't give", salvation: false,
+    soft: ["Then let's not name it yet. Let's just see what this is.", "You don't have to know the word. We can figure it out together.", "I might not be ready to forgive. But I'm ready to talk. That's something."],
+    aggressive: ["Then what ARE you asking? Be clear for once.", "You can't even name what you want. So typical.", "Don't ask me for something you can't define."],
+    silent: ["Okay.", "Right.", "Whatever it is, just go on."] },
+
+  { hani: "There were things I should have said while it was still something I could fix. I didn't. That's on me.", subtext: "(He had the conversations in his head a hundred times. They never made it out.)", conflict: "Refusing to acknowledge the gap", salvation: true,
+    soft: ["The silence hurt more than anything you could've said. But thank you for owning it.", "It is on you. And it means a lot that you're actually saying so.", "I waited for those words for so long. I'm glad they finally came."],
+    aggressive: ["Yeah, it's on you. Glad we agree.", "Saying it now doesn't undo the silence then.", "You always knew what to say. You just chose not to."],
+    silent: ["Mm.", "Okay.", "Bit late, but okay."] },
+
+  { hani: "I'm not the same person who ended things. I don't know if that matters to you. I think it matters to me.", subtext: "(He's been in therapy for seven months. He hasn't told anyone that either.)", conflict: "Dismissing his growth", salvation: false,
+    soft: ["It does matter. People can change. I'd actually like to meet who you are now.", "I can tell you're different. That's not nothing to me.", "It matters. I'm not the same either. Maybe that's okay."],
+    aggressive: ["Everyone says they've changed. Prove it.", "The person who ended things is still in there somewhere.", "Convenient timing for a whole personality transplant."],
+    silent: ["We'll see.", "Okay.", "People always say that."] },
+
+  { hani: "I keep thinking about that drive back from the mountains. We didn't talk the whole two hours and it wasn't uncomfortable. I miss that.", subtext: "(He's shared this memory with no one. He's been protecting it.)", conflict: "Turning the memory into a weapon", salvation: true,
+    soft: ["That drive. God, the silence was so easy. I miss it too.", "We didn't need words back then. I've missed being that comfortable with someone.", "I think about that drive too. It was one of the good ones."],
+    aggressive: ["Funny, I remember the silences after that very differently.", "You're using a nice memory to soften me up. I see it.", "Don't bring up the mountains like it makes any of this okay."],
+    silent: ["Yeah.", "I barely remember it.", "That was a long time ago."] },
+
+  { hani: "I'm not trying to make this about what we were. I'm trying to figure out what we could still be.", subtext: "(He means it. He's not romanticizing it. He's genuinely asking.)", conflict: "Collapsing the distinction", salvation: false,
+    soft: ["What we could be. I like that you're asking that instead of the other thing.", "Okay. Let's figure that out. No pressure to be what we were.", "I don't know what we could be yet. But I'm open to finding out."],
+    aggressive: ["'What we could be' is just code for what you want.", "There's no 'still be.' That ended when you ended it.", "You keep talking like the past doesn't count."],
+    silent: ["Maybe.", "We'll see.", "Okay."] },
+
+  { hani: "I think you're still angry. Which is fair. I just want to know if there's space underneath that for something else.", subtext: "(He can read her. He always could. That's part of what made it hard.)", conflict: "Denying the anger or weaponizing it", salvation: true,
+    soft: ["I am still angry. But yeah — there's something underneath it. There always was.", "You're right, I'm angry. And tired of being only angry. So… maybe.", "There's space. The anger's just been standing guard over it."],
+    aggressive: ["Don't tell me how I feel.", "Of course I'm angry. You don't get to manage that for me.", "There's no 'space underneath.' There's just what you did."],
+    silent: ["I'm not angry.", "Maybe.", "Don't analyse me."] },
+
+  { hani: "Because I don't want to keep carrying the version of this that ended badly as the only version I have of us.", subtext: "(He's been carrying it. It's heavier than he expected.)", conflict: "Refusing to offer a different version", salvation: true,
+    soft: ["I don't want that to be the only version either. We were more than the ending.", "Then let's make a better one. Slowly. I'd like that.", "Me neither. The bad ending was never the whole story of us."],
+    aggressive: ["Maybe the bad version is just the true one.", "You don't get to pick a nicer ending now.", "It ended badly because of you. Carry that."],
+    silent: ["Hm.", "Okay.", "If you say so."] },
+
+  { hani: "Okay. I hear you. I think what I'm understanding is that maybe I'm not the only one who still needs to figure some things out.", subtext: "(He's not accusing. He's observing. The difference matters to him.)", conflict: "Taking it as an accusation", salvation: false,
+    soft: ["You're not wrong. I've got my own things to untangle too.", "Fair. I'm not pretending I have it all sorted either.", "Yeah. It's not all on you. I've got work to do as well."],
+    aggressive: ["Don't you dare turn this around on me.", "So now I'm the one with problems? Classic Reza.", "Nice try. This is about what you did."],
+    silent: ["Maybe.", "Okay.", "If that's how you see it."] },
+
+  { hani: "I didn't come here to fight. I came here because I thought we were both tired of the version of this that's been playing on loop.", subtext: "(He's right. He knows he's right. He's waiting to see if she does too.)", conflict: "Continuing the loop", salvation: true,
+    soft: ["I am tired of it. So tired. Let's not run the loop again.", "You're right. I don't want to fight either. I want out of the loop too.", "Same. I'm exhausted by replaying the worst of us."],
+    aggressive: ["Maybe I'm not done fighting it.", "You started the loop. Don't act above it now.", "Tired or not, some things need to be said angry."],
+    silent: ["Okay.", "Hm.", "Sure."] },
+
+  { hani: "I think friendship is possible. But not if one of us is still hoping for something the other one can't give.", subtext: "(He's talking about her. He's also a little bit talking about himself.)", conflict: "Refusing to name what you're hoping for", salvation: true,
+    soft: ["Then let me be honest about what I'm hoping for. I owe us that.", "You're right. So let's both name it. No more guessing games.", "Friendship. I think that's what I want too. Genuinely just that."],
+    aggressive: ["And which one of us is that, Reza? Say it.", "Don't put the hoping on me. You called this meeting.", "Convenient, setting the terms so you come out safe."],
+    silent: ["Maybe.", "We'll see.", "Okay."] },
+
+  { hani: "Say it. Whatever you're not saying. I'd rather have the real conversation than this one.", subtext: "(He's been watching her hold something back since they sat down.)", conflict: "Continuing to hold back", salvation: true,
+    soft: ["Okay. Here it is — I missed you, and I've been terrified to admit it.", "You're right, I've been holding back. The truth is I still care. There.", "Fine. The real version: I'm hurt, but I don't want to lose you entirely."],
+    aggressive: ["You want it real? Fine. You broke me and strolled back in.", "Don't demand my honesty like you're owed it.", "The real conversation is that I still don't trust you."],
+    silent: ["There's nothing I'm not saying.", "I'm saying everything I want to.", "Just drop it."] },
+
+  { hani: "I think we're both scared of what happens if we're completely honest. But I think we're more scared of staying stuck here.", subtext: "(He made a decision before this meeting: he would rather lose her clearly than keep her vaguely.)", conflict: "Choosing vagueness", salvation: false,
+    soft: ["Then let's be honest. Fully. I'd rather risk it than stay stuck.", "You're right. Stuck is worse than scared. Ask me anything.", "Okay. Complete honesty. I'm ready if you are."],
+    aggressive: ["Maybe I like vague. It's safer with you.", "Honesty is exactly what broke us last time.", "You first, then. Be completely honest. I'll wait."],
+    silent: ["I'm honest enough.", "Hm.", "Let's not push it."] },
+
+  { hani: "I still think about you as someone I can call when something important happens. I don't know if that's earned yet. I'm asking if we can earn it back.", subtext: "(He's offering something real. He doesn't know if she'll take it.)", conflict: "Dismissing the offer", salvation: true,
+    soft: ["I'd want to be that person again. Let's earn it back. Both of us.", "That's a beautiful thing to ask for. Yeah. Let's try.", "I still reach for my phone to call you sometimes. So… yes."],
+    aggressive: ["You lost the right to call me when you left.", "Earn it back? You have no idea how much that would take.", "I'm not a contact you get to re-add when you're lonely."],
+    silent: ["Maybe.", "We'll see.", "That's a big ask."] },
+
+  { hani: "Then — okay. I'm not going anywhere. Neither are you, apparently. So — let's just see what this actually is.", subtext: "(He's terrified and relieved in equal measure. He doesn't let either show.)", conflict: "Final withdrawal", salvation: true,
+    soft: ["Okay. Let's see what it is. No labels. Just us, trying.", "I'm not going anywhere either. Let's find out, slowly.", "Then we stay. And we see. I'd like that, Reza."],
+    aggressive: ["Don't assume I'm staying. I haven't decided.", "We'll 'see' right up until you bail again, you mean.", "I'm here for now. Don't read too much into it."],
+    silent: ["Okay.", "Sure.", "We'll see, I guess."] }
 ];
 
 // ─── Scenario 3: Noor & Mama (Mother/Daughter — BRUTAL difficulty) ──────────
