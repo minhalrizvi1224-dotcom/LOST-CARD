@@ -6135,8 +6135,8 @@ function saveSession(summary, chatId) {
     summary
   };
   // Track default chat completion + play count
-  // Requires at least 5 moves played — stalemate/goodbye with 0-4 moves doesn't count
-  if (DEFAULT_CHAT_IDS.includes(chatId) && (summary.moves || 0) >= 5) {
+  // Requires 21+ moves — just opening/stalemate/early exit doesn't count
+  if (DEFAULT_CHAT_IDS.includes(chatId) && (summary.moves || 0) >= 21) {
     _recordDefaultCompletion(chatId);
   }
 
