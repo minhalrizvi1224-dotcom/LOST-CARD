@@ -892,29 +892,120 @@ const SCENARIOS_MAMA = [
 // Every soft response reads as weakness. Every silence confirms his fears.
 // Almost nobody reaches move 23 — the damage accumulates before the user understands the pattern.
 const SCENARIOS_BABA = [
-  { hani: "You came. I wasn't sure you would.", subtext: "(He has been sitting in the same chair for two hours. He won't say that. He checks his phone when he hears the door — not because he expected a call, but because he'd stopped expecting you.)", conflict: "Treating it as routine", salvation: false },
-  { hani: "Your uncle's son got posted in Karachi. Big position. Government sector.", subtext: "(He is not talking about your uncle's son. He is talking about you. He will never say he is talking about you.)", conflict: "Responding to the cousin instead of the subtext", salvation: false },
-  { hani: "I'm not saying anything. I'm just telling you what's happening in the family. People ask about you. I don't always know what to say.", subtext: "(He knows exactly what to say. He has been saying it for years. 'He's still figuring things out.' He is tired of that sentence.)", conflict: "Getting defensive about what people say", salvation: false },
-  { hani: "Your mother worries. I tell her not to. But she worries.", subtext: "(He worries. He has been using your mother as a proxy for his own feelings for thirty years. He doesn't know another way.)", conflict: "Addressing Mama instead of him", salvation: false },
-  { hani: "When I was your age I had already — never mind. Different time. Different situation. I understand.", subtext: "(He doesn't understand. He is trying to. The 'never mind' is where the real sentence lives.)", conflict: "Letting the 'never mind' go", salvation: true },
-  { hani: "I'm not asking for much. I just want to know you have a plan. That's all. A plan.", subtext: "(He is asking for much. He is asking for proof that the years he spent were not wasted. He doesn't have the language for that. So he says: a plan.)", conflict: "Defending that you have a plan", salvation: false },
-  { hani: "Your dada used to say — a man who doesn't know where he's going will end up somewhere he didn't choose.", subtext: "(He is telling you something his father told him when he was afraid. He has never been this honest with you. He doesn't know that's what he's doing.)", conflict: "Dismissing the proverb", salvation: true },
-  { hani: "I'm not criticizing. I'm asking. There's a difference.", subtext: "(There is no difference right now. But he believes there is, and that belief is the only thing keeping him from saying what he actually feels.)", conflict: "Pointing out that it feels like criticism", salvation: false },
-  { hani: "You know I never — I didn't have what you have. The opportunities. The time. I had to start working at your age.", subtext: "(He is giving you something he has never given before: context. He is trying to explain himself without saying 'I needed you to do better because I couldn't.' He doesn't finish the sentence because he doesn't know how.)", conflict: "Apologizing for your advantages", salvation: true },
-  { hani: "I'm not angry. I want you to know that. Whatever happens, I'm not angry.", subtext: "(He is not angry. He is something worse than angry. He is resigned. And he is telling you this because he doesn't want you to carry the guilt of his anger — which means, somewhere, he is still protecting you.)", conflict: "Testing whether he really isn't angry", salvation: true },
-  { hani: "Your sister calls every Sunday. Did you know that? Every Sunday without fail.", subtext: "(He is not comparing you to your sister. He is telling you that connection is possible, that people do maintain it, that it is a choice. He doesn't understand why you haven't chosen it.)", conflict: "Defending why you don't call as often", salvation: false },
-  { hani: "I'm getting older, Zain. I don't say this for sympathy. I just — time passes differently now. I notice it.", subtext: "(He has been noticing it for years. The body slows before the mind accepts it. He is telling you this because he wants you to know there is a window and it is moving.)", conflict: "Reassuring him that he's fine", salvation: true },
-  { hani: "I had a dream about you last week. You were young. Maybe eight years old. You used to follow me everywhere. You'd wait by the door when I came home.", subtext: "(He is grieving the version of you that needed him without complication. He is also telling you that he remembers who you were before things became difficult between you. This is the closest he will come to saying: I miss you.)", conflict: "Moving past the memory quickly", salvation: true },
-  { hani: "I know I wasn't always — I worked. That was what I knew. I thought that was enough.", subtext: "(He is apologizing. He will not say the word. But this is the apology. It is the only one he has.)", conflict: "Accepting it too quickly or not at all", salvation: true },
-  { hani: "I don't need you to agree with my choices. I need you to make yours.", subtext: "(He has just released you from something. He doesn't know it. He spent thirty years preparing this sentence and delivered it like it was nothing.)", conflict: "Debating his choices instead of hearing the release", salvation: true },
-  { hani: "You're more like me than you want to admit. That's not a bad thing. That's just — what it is.", subtext: "(He is saying: I see myself in you and I am not ashamed of what I see. This is love in the only dialect he speaks.)", conflict: "Rejecting the comparison", salvation: true },
-  { hani: "I don't ask for things, Zain. You know that about me. But if you could — call your mother more. She doesn't say it but she counts the days.", subtext: "(He is asking for himself. He is routing the request through your mother because asking for himself is not something he knows how to do.)", conflict: "Focusing only on the practical request", salvation: true },
-  { hani: "I told your uncle you're doing well. I hope that's true. I want it to be true.", subtext: "(He has been saying this to everyone. He wants to believe it. The 'I hope' and 'I want' are the crack in the wall he has built. He is letting you see through it.)", conflict: "Correcting what he told uncle", salvation: false },
-  { hani: "When you were small you used to ask me questions about everything. Why is the sky that color. Why do people fight. I didn't always have answers. But I liked that you asked.", subtext: "(He is telling you that he was happiest when you needed him to have answers, even when he didn't. He is telling you that presence was enough once. He wants to know if it still can be.)", conflict: "Making it about the questions not the presence", salvation: true },
-  { hani: "I'm proud of you. I don't know if I say it enough. I'm saying it now.", subtext: "(He has never said this before. He practiced it once, driving home from your cousin's wedding three years ago. He never found the moment. He is creating the moment now because he has decided he will not wait for the right one anymore.)", conflict: "Deflecting or minimizing it", salvation: true },
-  { hani: "I know things haven't always been easy between us. I know that. I'm not — I don't have the words for everything. But I want you to know I tried. In my own way. I tried.", subtext: "(He means it. He is describing his whole life in two sentences. He is not asking for forgiveness. He is asking to be understood — and that is harder.)", conflict: "Evaluating whether he tried enough", salvation: true },
-  { hani: "Come for Eid. Just — come. Don't make it complicated. Just come home.", subtext: "(He is not talking about Eid. He is talking about every time you found a reason not to come. He is letting all of it go and asking for one thing. This is the most he has ever asked.)", conflict: "Making conditions or excuses", salvation: true },
-  { hani: "Okay. Good. Then it's settled. I'll tell your mother.", subtext: "(He is relieved in a way he will never show. He will walk back to the kitchen and say 'he's coming' and your mother will ask 'did you talk to him' and he will say 'a little' and that will be all. But tonight he will sleep a bit better.)", conflict: "Reopening any part of the conversation", salvation: true }
+  { hani: "You came. I wasn't sure you would.", subtext: "(He has been sitting in the same chair for two hours. He won't say that. He checks his phone when he hears the door — not because he expected a call, but because he'd stopped expecting you.)", conflict: "Treating it as routine", salvation: false,
+    soft: ["Of course I came, Baba. I'll always come when you ask.", "I wasn't sure I would either, honestly. But I wanted to see you.", "You say that like you'd stopped expecting me. I'm here."],
+    aggressive: ["Why wouldn't I come? It's not a big deal.", "You make it sound like I never show up.", "It's just dinner, Baba. Don't turn it into something."],
+    silent: ["Yeah. I'm here.", "Mm.", "Where else would I be."] },
+
+  { hani: "Your uncle's son got posted in Karachi. Big position. Government sector.", subtext: "(He is not talking about your uncle's son. He is talking about you. He will never say he is talking about you.)", conflict: "Responding to the cousin instead of the subtext", salvation: false,
+    soft: ["You don't have to go through him, Baba. If it's about me, just ask me.", "I know that's not really about him. Say what you mean — I can take it.", "Good for him. But I think you're worried about me, aren't you."],
+    aggressive: ["Good for him. Want me to send a card?", "Here we go with the cousin comparisons.", "So that's the bar now? A government posting?"],
+    silent: ["That's nice for him.", "Okay.", "Good for him, I guess."] },
+
+  { hani: "I'm not saying anything. I'm just telling you what's happening in the family. People ask about you. I don't always know what to say.", subtext: "(He knows exactly what to say. He has been saying it for years. 'He's still figuring things out.' He is tired of that sentence.)", conflict: "Getting defensive about what people say", salvation: false,
+    soft: ["Tell them I'm finding my way — and that my father stood by me while I did.", "I'm sorry you've had to keep answering for me. That isn't fair to you.", "What do you wish you could tell them, Baba? Tell me. I'll try to get there."],
+    aggressive: ["Tell people to mind their own business.", "Since when do I owe the family a status update?", "So this is about what people think now?"],
+    silent: ["Tell them whatever you want.", "Okay.", "People talk. So what."] },
+
+  { hani: "Your mother worries. I tell her not to. But she worries.", subtext: "(He worries. He has been using your mother as a proxy for his own feelings for thirty years. He doesn't know another way.)", conflict: "Addressing Mama instead of him", salvation: false,
+    soft: ["I know it's not only Mama who worries, Baba. It's okay if you do too.", "I'll call her. And you — you can tell me directly, you know.", "She worries because you both care. I don't take that for granted."],
+    aggressive: ["Then tell Mama I'm fine.", "Why are we always talking through Mama?", "If she's worried, she can call me herself."],
+    silent: ["I'll call her.", "Okay.", "She doesn't need to worry."] },
+
+  { hani: "When I was your age I had already — never mind. Different time. Different situation. I understand.", subtext: "(He doesn't understand. He is trying to. The 'never mind' is where the real sentence lives.)", conflict: "Letting the 'never mind' go", salvation: true,
+    soft: ["Don't say never mind, Baba. Finish it. I want to hear it.", "At my age you'd already what? Tell me. I'd rather know than guess.", "You can say it. I want to understand your life too, not just defend mine."],
+    aggressive: ["Already what, Baba? Go on, say it.", "Different time, exactly. So stop measuring me by it.", "If you're going to compare, at least finish the sentence."],
+    silent: ["Okay.", "Sure.", "If you say so."] },
+
+  { hani: "I'm not asking for much. I just want to know you have a plan. That's all. A plan.", subtext: "(He is asking for much. He is asking for proof that the years he spent were not wasted. He doesn't have the language for that. So he says: a plan.)", conflict: "Defending that you have a plan", salvation: false,
+    soft: ["I know you need to see that your years weren't wasted. They weren't, Baba.", "I'm working on it. And I'd like you to be part of figuring it out.", "A plan. Okay. Let me actually walk you through where my head is."],
+    aggressive: ["I have a plan. Just not the one you'd write for me.", "Not every life fits on a timeline, Baba.", "Why does it only count if it's a 'plan'?"],
+    silent: ["I have a plan.", "I'm figuring it out.", "It's handled."] },
+
+  { hani: "Your dada used to say — a man who doesn't know where he's going will end up somewhere he didn't choose.", subtext: "(He is telling you something his father told him when he was afraid. He has never been this honest with you. He doesn't know that's what he's doing.)", conflict: "Dismissing the proverb", salvation: true,
+    soft: ["Dada told you that when you were scared, didn't he. Thank you for passing it to me.", "That's good advice, Baba. I can hear it came from somewhere that mattered.", "I'll hold onto that. It means more knowing it's his words, through you."],
+    aggressive: ["Dada had a proverb for everything.", "I don't need a dead man's advice, Baba.", "Plenty of people who 'know where they're going' end up trapped too."],
+    silent: ["Okay.", "Sure.", "I've heard it before."] },
+
+  { hani: "I'm not criticizing. I'm asking. There's a difference.", subtext: "(There is no difference right now. But he believes there is, and that belief is the only thing keeping him from saying what he actually feels.)", conflict: "Pointing out that it feels like criticism", salvation: false,
+    soft: ["Okay. Then ask me. Properly. I'm listening.", "I believe you mean it as a question. So ask, and I'll answer honestly.", "Then let's do that — you ask, I answer. No defenses up."],
+    aggressive: ["It doesn't feel like a question, Baba.", "There's no difference from where I'm sitting.", "Asking and judging sound the same coming from you."],
+    silent: ["Okay.", "Fine. Ask.", "If you say so."] },
+
+  { hani: "You know I never — I didn't have what you have. The opportunities. The time. I had to start working at your age.", subtext: "(He is giving you something he has never given before: context. He is trying to explain himself without saying 'I needed you to do better because I couldn't.' He doesn't finish the sentence because he doesn't know how.)", conflict: "Apologizing for your advantages", salvation: true,
+    soft: ["I know you started with nothing, Baba. Everything I have, you built first.", "You gave me the time you never got. I don't forget that.", "I never want to waste what you didn't get to have. I mean that."],
+    aggressive: ["So now I should feel guilty for what you gave me?", "You bring that up every single time.", "I didn't ask to have it easier, Baba."],
+    silent: ["I know, Baba.", "Okay.", "I'm grateful, alright."] },
+
+  { hani: "I'm not angry. I want you to know that. Whatever happens, I'm not angry.", subtext: "(He is not angry. He is something worse than angry. He is resigned. And he is telling you this because he doesn't want you to carry the guilt of his anger — which means, somewhere, he is still protecting you.)", conflict: "Testing whether he really isn't angry", salvation: true,
+    soft: ["I believe you, Baba. That means more than you know.", "Not angry — just tired, maybe. I get it. I'm sorry it's been heavy.", "Thank you for telling me. I've carried the worry that you were."],
+    aggressive: ["You sure sound like you're holding something back.", "Not angry, just disappointed. I know the difference.", "You don't have to say it for me to feel it, Baba."],
+    silent: ["Okay.", "Good.", "If you say so."] },
+
+  { hani: "Your sister calls every Sunday. Did you know that? Every Sunday without fail.", subtext: "(He is not comparing you to your sister. He is telling you that connection is possible, that people do maintain it, that it is a choice. He doesn't understand why you haven't chosen it.)", conflict: "Defending why you don't call as often", salvation: false,
+    soft: ["You're right — connection is a choice, and I haven't been choosing it. I'll fix that.", "I should call like she does. Not because she does — because you deserve it.", "I've let the distance grow, Baba. That's on me. I'll do better."],
+    aggressive: ["So now I'm being graded against my sister?", "Good for her. We're different people.", "I'm busy, Baba. It's not a contest."],
+    silent: ["I'll call more.", "Okay.", "Good for her."] },
+
+  { hani: "I'm getting older, Zain. I don't say this for sympathy. I just — time passes differently now. I notice it.", subtext: "(He has been noticing it for years. The body slows before the mind accepts it. He is telling you this because he wants you to know there is a window and it is moving.)", conflict: "Reassuring him that he's fine", salvation: true,
+    soft: ["I notice it too, Baba. That's why I don't want to keep missing the time we have.", "You're telling me there's a window. I hear it. I don't want to waste it.", "That scares me, honestly. I want more years with you, not fewer."],
+    aggressive: ["Don't get morbid, Baba.", "You're fine. Stop talking like that.", "Is this the guilt route now?"],
+    silent: ["You're fine, Baba.", "Everyone gets older.", "Okay."] },
+
+  { hani: "I had a dream about you last week. You were young. Maybe eight years old. You used to follow me everywhere. You'd wait by the door when I came home.", subtext: "(He is grieving the version of you that needed him without complication. He is also telling you that he remembers who you were before things became difficult between you. This is the closest he will come to saying: I miss you.)", conflict: "Moving past the memory quickly", salvation: true,
+    soft: ["I remember waiting by that door, Baba. You were my whole world then.", "I followed you because I wanted to be you. I still feel some of that.", "That's you saying you miss me, isn't it. I miss that too."],
+    aggressive: ["We're not those people anymore, Baba.", "Kids grow up. That's how it works.", "Why bring up when I was eight?"],
+    silent: ["I don't really remember that.", "That's nice, Baba.", "Okay."] },
+
+  { hani: "I know I wasn't always — I worked. That was what I knew. I thought that was enough.", subtext: "(He is apologizing. He will not say the word. But this is the apology. It is the only one he has.)", conflict: "Accepting it too quickly or not at all", salvation: true,
+    soft: ["You worked so we'd never go without. I understand that now in a way I couldn't before.", "It was your way of loving us, Baba. I see that. Thank you.", "You did what you knew. And it was more than enough in the ways that counted."],
+    aggressive: ["It wasn't always enough, Baba. Just being honest.", "Working isn't the same as being there.", "Now you realize? After all this time?"],
+    silent: ["It's okay, Baba.", "I know.", "Don't worry about it."] },
+
+  { hani: "I don't need you to agree with my choices. I need you to make yours.", subtext: "(He has just released you from something. He doesn't know it. He spent thirty years preparing this sentence and delivered it like it was nothing.)", conflict: "Debating his choices instead of hearing the release", salvation: true,
+    soft: ["That… is the kindest thing you've ever given me, Baba. Thank you.", "You just set me free a little. I don't think you even realise it.", "Then I'll make mine — and I'll make them knowing you trust me to."],
+    aggressive: ["Your choices weren't always right either, Baba.", "Easy to say now that mine are already made.", "So now I get to choose? After all the lectures?"],
+    silent: ["Okay.", "I will.", "Noted."] },
+
+  { hani: "You're more like me than you want to admit. That's not a bad thing. That's just — what it is.", subtext: "(He is saying: I see myself in you and I am not ashamed of what I see. This is love in the only dialect he speaks.)", conflict: "Rejecting the comparison", salvation: true,
+    soft: ["I used to fight that. Now I think it's the best part of me, Baba.", "You're right. The older I get, the more I see you in me. I don't mind it.", "Being like you isn't something I run from anymore."],
+    aggressive: ["I'm trying very hard not to be, actually.", "I'm nothing like you, Baba.", "Don't put your stubbornness on me."],
+    silent: ["Maybe.", "If you say so.", "Hm."] },
+
+  { hani: "I don't ask for things, Zain. You know that about me. But if you could — call your mother more. She doesn't say it but she counts the days.", subtext: "(He is asking for himself. He is routing the request through your mother because asking for himself is not something he knows how to do.)", conflict: "Focusing only on the practical request", salvation: true,
+    soft: ["I'll call her, Baba. And I know you count the days too, even if you won't say it.", "Of course. And you — you're allowed to ask for things for yourself, you know.", "It's not only Mama who's counting, is it. I'll call. I promise."],
+    aggressive: ["Fine, I'll call Mama. Anything else?", "Why is it always routed through Mama?", "She can call me too, you know."],
+    silent: ["I'll call her.", "Okay.", "Sure."] },
+
+  { hani: "I told your uncle you're doing well. I hope that's true. I want it to be true.", subtext: "(He has been saying this to everyone. He wants to believe it. The 'I hope' and 'I want' are the crack in the wall he has built. He is letting you see through it.)", conflict: "Correcting what he told uncle", salvation: false,
+    soft: ["I want it to be true too, Baba. I'm getting there. With you behind me, I will.", "You defended me to him. I won't make a liar of you. I promise.", "It's becoming true. Slowly. Thank you for believing it before I did."],
+    aggressive: ["Well, don't lie to uncle on my behalf.", "So you don't actually believe it.", "You 'hope' it's true. Thanks for the confidence."],
+    silent: ["It's true enough.", "Okay.", "I'm doing fine."] },
+
+  { hani: "When you were small you used to ask me questions about everything. Why is the sky that color. Why do people fight. I didn't always have answers. But I liked that you asked.", subtext: "(He is telling you that he was happiest when you needed him to have answers, even when he didn't. He is telling you that presence was enough once. He wants to know if it still can be.)", conflict: "Making it about the questions not the presence", salvation: true,
+    soft: ["I asked because being near you felt safe, Baba. It still would.", "You didn't need the answers. I just wanted you there. That was enough.", "I think you're saying you miss being needed. You still are, Baba."],
+    aggressive: ["Kids ask questions. It's not that deep.", "I stopped asking because you stopped answering.", "Why does this always turn into nostalgia?"],
+    silent: ["I don't really remember.", "That's nice.", "Okay."] },
+
+  { hani: "I'm proud of you. I don't know if I say it enough. I'm saying it now.", subtext: "(He has never said this before. He practiced it once, driving home from your cousin's wedding three years ago. He never found the moment. He is creating the moment now because he has decided he will not wait for the right one anymore.)", conflict: "Deflecting or minimizing it", salvation: true,
+    soft: ["I've waited my whole life to hear you say that, Baba. Thank you.", "You've never said it before. It means everything that you did just now.", "That… God. I needed that more than you know. I'm proud to be yours."],
+    aggressive: ["Proud of what, exactly? You list my failures every visit.", "A bit late for that, isn't it.", "You don't have to say it just because you feel guilty."],
+    silent: ["Okay.", "Thanks.", "You don't have to say that."] },
+
+  { hani: "I know things haven't always been easy between us. I know that. I'm not — I don't have the words for everything. But I want you to know I tried. In my own way. I tried.", subtext: "(He means it. He is describing his whole life in two sentences. He is not asking for forgiveness. He is asking to be understood — and that is harder.)", conflict: "Evaluating whether he tried enough", salvation: true,
+    soft: ["I know you tried, Baba. I'm only now learning to see how.", "You don't need the perfect words. 'I tried' — I feel it. Thank you.", "You tried in the only language you had. I understand that now."],
+    aggressive: ["Trying isn't the same as it not hurting.", "You tried your way. Mine needed something different.", "Did you, though? Or did you just work and hope?"],
+    silent: ["Okay, Baba.", "I know.", "Sure."] },
+
+  { hani: "Come for Eid. Just — come. Don't make it complicated. Just come home.", subtext: "(He is not talking about Eid. He is talking about every time you found a reason not to come. He is letting all of it go and asking for one thing. This is the most he has ever asked.)", conflict: "Making conditions or excuses", salvation: true,
+    soft: ["I'll come, Baba. No conditions. I'll be home for Eid.", "Yes. I'll come. I've made it complicated for too long. Not this time.", "Home for Eid. I promise. I want to be there."],
+    aggressive: ["I'll come if work lets me. No promises.", "It's not that simple, Baba.", "We'll see. Depends on a lot of things."],
+    silent: ["I'll try.", "Maybe.", "We'll see."] },
+
+  { hani: "Okay. Good. Then it's settled. I'll tell your mother.", subtext: "(He is relieved in a way he will never show. He will walk back to the kitchen and say 'he's coming' and your mother will ask 'did you talk to him' and he will say 'a little' and that will be all. But tonight he will sleep a bit better.)", conflict: "Reopening any part of the conversation", salvation: true,
+    soft: ["It's settled, Baba. Tell Mama I can't wait.", "Good. And Baba — thank you. For all of it tonight.", "Tell her. I'll be there. I love you both."],
+    aggressive: ["Wait, I never actually agreed to —", "Don't decide for me before I've —", "Settled? We still haven't talked about —"],
+    silent: ["Okay.", "Sure.", "Fine."] }
 ];
 
 // ─── Scenario 5: Hira & Sara (Sisters — love and jealousy intertwined) ─────
