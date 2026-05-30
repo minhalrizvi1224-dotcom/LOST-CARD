@@ -2320,23 +2320,17 @@ function _getUnifiedPool() {
 // Gemini free TPM limit = 1,000,000/min → handles it with no issues.
 // 3 Gemini keys = 3M TPM/min → ~250 HB requests/min → more than enough.
 function _getHBPool() {
-  // ── GEMINI FIRST for Hair Band ─────────────────────────────────────────
-  // HB system prompt is ~10k-15k tokens.
-  // Groq free TPM = 6,000/min → ONE HB request exceeds it → instant 429.
-  // Gemini free TPM = 1,000,000/min → handles many HB requests easily.
-  // Groq kept as last-resort fallback only (using llama-3.1-8b-instant 20k TPM).
+  // ── GEMINI ONLY for Hair Band ──────────────────────────────────────────
+  // HB system prompt = ~12k tokens.
+  // Groq ANY model: 6k-20k TPM → HB request ALWAYS exceeds limit → 413/429.
+  // Groq is REMOVED from HB pool entirely — it never works for HB.
+  // Gemini free: 1M TPM/min → easily handles HB, 15 RPM per key.
+  // 10 Gemini keys = 150 RPM → 2.5 HB requests/sec → more than enough.
   const geminiList = (typeof poolGeminiKeys !== 'undefined' && poolGeminiKeys.length)
     ? [...poolGeminiKeys] : [];
   const localGemini = localStorage.getItem('lc_gemini_key');
   if (localGemini && !geminiList.includes(localGemini)) geminiList.push(localGemini);
-
-  const groqList = (typeof poolGroqKeys !== 'undefined' && poolGroqKeys.length)
-    ? poolGroqKeys : (typeof poolGroqKey !== 'undefined' && poolGroqKey ? [poolGroqKey] : []);
-
-  return [
-    ...geminiList.map(k => ({ key: k, provider: 'gemini'  })),   // primary: Gemini
-    ...groqList.map(k   => ({ key: k, provider: 'groq-hb' }))    // fallback: Groq
-  ];
+  return geminiList.map(k => ({ key: k, provider: 'gemini' }));
 }
 
 // Kept for backward compat — returns just the key string of the current entry
@@ -4427,7 +4421,7 @@ async function callAI(provider, key, history, systemPrompt, userMsg, maxTokens =
   // Key-level errors: skip this key and try the next one
   // 429 = rate limited, 402 = out of credits, 401/403 = invalid/forbidden key
   // 400 = bad request (key may be misconfigured), 404 = model/endpoint not found for this key
-  const _isKeyErr = (s) => s === 429 || s === 402 || s === 401 || s === 403 || s === 400 || s === 404;
+  const _isKeyErr = (s) => s === 429 || s === 413 || s === 402 || s === 401 || s === 403 || s === 400 || s === 404;
 
   const _fetchEntry = (entry) => {
     if (entry.provider === 'gemini') {
