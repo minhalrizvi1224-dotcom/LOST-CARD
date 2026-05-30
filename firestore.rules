@@ -68,5 +68,11 @@ service cloud.firestore {
       allow create: if request.auth != null;
       allow read:   if isAdmin() || (request.auth != null && resource.data.uid == request.auth.uid);
     }
+
+    // ── Hair Band query logs (admin AI Queries tab reads these) ──────────
+    match /hairBandLogs/{id} {
+      allow create: if request.auth != null;
+      allow read, write, delete: if isAdmin();
+    }
   }
 }
