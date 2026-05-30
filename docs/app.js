@@ -3249,6 +3249,11 @@ function classifyGottmanTone(text, baseType) {
 // ── Health Score (0-100) + letter grade ──────────────────────────────
 function calculateHealthScore(s) {
   if (!s) return null;
+  // Fawning ending: cards survived only because the conflict was never engaged.
+  // Don't reward it — it's a maladaptive pattern, not regulation.
+  if (s.terminalCondition === 9) {
+    return { score: 38, grade: 'D', verdict: 'The cards survived, but only because nothing real was ever allowed to happen. Conflict was smoothed over, not resolved. Peace bought by self-erasure is not health.' };
+  }
   let score = 0;
   const cardsKept = 3 - (s.cardsLost || 0);
   score += cardsKept * 20;                              // 0-60 pts: card retention
@@ -3292,6 +3297,11 @@ function getRelationalArchetype(s) {
     if (m.type === 'SILENT') silentTotal++;
     if (m.type === 'SOFT' && mnli >= 0.50) floodedSoft++;
   }
+
+  if (s.terminalCondition === 9)
+    return { name: 'THE FAWN', color: '#A371F7', icon: '🎭',
+      desc: 'You met every grievance with softness — three times in a row, until the other person had nowhere to put their hurt. This is not warmth. It is appeasement: defusing conflict by dissolving your own position, so completely that the other person starts to doubt they were ever wronged. The relationship stayed "calm" because nothing true was allowed to surface.',
+      pattern: 'Conflict avoidance through self-erasure. Peace purchased at the cost of honesty.' };
 
   if (s.cardsLost === 0)
     return { name: 'THE SALVATION TYPE', color: '#98C379', icon: '🃏',
@@ -4988,7 +4998,8 @@ function addPsychSection() {
   const nli      = parseFloat(s.finalNLI) || 0;
 
   let profile = 'BALANCED', profileColor = 'var(--blue)';
-  if (s.cardsLost === 0)                       { profile = 'SECURE - REGULATED';    profileColor = 'var(--green)'; }
+  if (s.terminalCondition === 9)               { profile = 'FAWNING - APPEASEMENT';  profileColor = '#A371F7'; }
+  else if (s.cardsLost === 0)                  { profile = 'SECURE - REGULATED';    profileColor = 'var(--green)'; }
   else if (s.amygdalaOverrides > 2)            { profile = 'REACTIVE - AGGRESSIVE'; profileColor = 'var(--red)'; }
   else if (presLost && !excLost && !devLost)   { profile = 'AVOIDANT - WITHDRAWN';  profileColor = 'var(--yellow)'; }
   else if (excLost && s.stackMaxDepth >= 5)    { profile = 'ESCALATORY';            profileColor = 'var(--orange)'; }
@@ -5524,7 +5535,7 @@ function generateDSAReport(s) {
        <div class="rpt-dsa-info"><div class="rpt-dsa-name">${name}</div><div class="rpt-dsa-desc">${desc}</div></div>
        <div class="rpt-dsa-val" style="color:${valColor||'var(--blue)'}">${val}</div>
      </div>`;
-  const outcomeColor = s.terminalCondition === 1 ? 'var(--green)' : s.cardsLost === 3 ? 'var(--red)' : s.cardsLost > 0 ? 'var(--yellow)' : 'var(--blue)';
+  const outcomeColor = s.terminalCondition === 9 ? '#A371F7' : s.terminalCondition === 1 ? 'var(--green)' : s.cardsLost === 3 ? 'var(--red)' : s.cardsLost > 0 ? 'var(--yellow)' : 'var(--blue)';
   const stateColor = s.finalState === 'HARMONY' ? 'var(--green)' : s.finalState === 'FRACTURE' ? 'var(--yellow)' : s.finalState === 'COLLAPSE' ? 'var(--orange)' : 'var(--red)';
   const nli = parseFloat(s.finalNLI) || 0;
 
@@ -5595,7 +5606,8 @@ function generatePsychReport(s) {
   const presLost = !s.presence?.startsWith('RETAINED');
   let profile = 'BALANCED';
   let profileColor = 'var(--blue)';
-  if      (s.cardsLost === 0)                 { profile = 'SECURE - REGULATED';       profileColor = 'var(--green)'; }
+  if      (s.terminalCondition === 9)         { profile = 'FAWNING - APPEASEMENT';    profileColor = '#A371F7'; }
+  else if (s.cardsLost === 0)                 { profile = 'SECURE - REGULATED';       profileColor = 'var(--green)'; }
   else if ((s.amygdalaOverrides||0) > 2)      { profile = 'REACTIVE - AGGRESSIVE';    profileColor = 'var(--red)'; }
   else if (presLost && !excLost && !devLost)  { profile = 'AVOIDANT - WITHDRAWN';     profileColor = 'var(--yellow)'; }
   else if (excLost && s.stackMaxDepth >= 5)   { profile = 'ESCALATORY';               profileColor = 'var(--orange)'; }
