@@ -157,7 +157,8 @@ const UNLOCK_THRESHOLD   = 5;   // complete 5/7 defaults → all custom chats un
 const DEFAULT_PLAY_LIMIT = 10;  // free tier: 10 plays per default chat
 
 function getDefaultsCompleted() {
-  return (currentUser?.defaultChatsCompleted || []).filter(id => DEFAULT_CHAT_IDS.includes(id));
+  // Use deep-completed (21+ moves) for unlock — old defaultChatsCompleted ignored
+  return (currentUser?.defaultChatsDeepCompleted || []).filter(id => DEFAULT_CHAT_IDS.includes(id));
 }
 function isCustomUnlocked() {
   if (!currentUser) return false;
@@ -172,30 +173,27 @@ function canPlayDefault(id) {
   return getDefaultPlayCount(id) < DEFAULT_PLAY_LIMIT;
 }
 
-// Called after every default chat session ends — updates Firestore + local state
+// Called after a default chat session with 21+ moves — updates Firestore + local state
 async function _recordDefaultCompletion(chatId) {
   if (!currentUser || !DEFAULT_CHAT_IDS.includes(chatId)) return;
   const wasUnlocked = isCustomUnlocked();
 
-  // Local update (instant, no flicker)
-  if (!currentUser.chatPlayCounts)        currentUser.chatPlayCounts = {};
-  if (!currentUser.defaultChatsCompleted) currentUser.defaultChatsCompleted = [];
+  if (!currentUser.chatPlayCounts)             currentUser.chatPlayCounts = {};
+  if (!currentUser.defaultChatsDeepCompleted)  currentUser.defaultChatsDeepCompleted = [];
   currentUser.chatPlayCounts[chatId] = (currentUser.chatPlayCounts[chatId] || 0) + 1;
-  const alreadyDone = currentUser.defaultChatsCompleted.includes(chatId);
-  if (!alreadyDone) currentUser.defaultChatsCompleted.push(chatId);
+  const alreadyDeep = currentUser.defaultChatsDeepCompleted.includes(chatId);
+  if (!alreadyDeep) currentUser.defaultChatsDeepCompleted.push(chatId);
 
-  // Firestore update
   if (typeof firebaseDB !== 'undefined' && firebaseDB && currentUser.uid) {
     const patch = { [`chatPlayCounts.${chatId}`]: firebase.firestore.FieldValue.increment(1) };
-    if (!alreadyDone) patch.defaultChatsCompleted = firebase.firestore.FieldValue.arrayUnion(chatId);
+    if (!alreadyDeep) patch.defaultChatsDeepCompleted = firebase.firestore.FieldValue.arrayUnion(chatId);
     firebaseDB.collection('users').doc(currentUser.uid).update(patch).catch(() => {});
   }
 
-  // Unlock toast
   if (!wasUnlocked && isCustomUnlocked()) {
-    setTimeout(() => showToast('🔓 Custom Chats Unlocked! You\'ve completed 5 default scenarios.', 'success'), 1200);
+    setTimeout(() => showToast('🔓 Custom Chats Unlocked! Complete 5 defaults with 21+ moves.', 'success'), 1200);
   }
-  renderChatList(); // refresh lock state + play counts
+  renderChatList();
 }
 
 // ══════════════════════════════════════════════════════════════════════

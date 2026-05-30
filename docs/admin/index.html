@@ -1077,19 +1077,10 @@ async function updateComplaintStatus(id, status, uid, email, displayName) {
       }).catch(() => {});
     }
     adToast('Resolved ✓ — user notified');
-  } else {
-    const badge = document.getElementById('sbadge-' + id);
-    if (badge) {
-      badge.textContent = statusLabel[status] || status;
-      badge.style.color = statusColor[status] || 'var(--muted)';
-    }
   }
 
-  // Refresh badge count
-  adDB.collection('complaints').where('status','==','new').get().then(snap => {
-    const cb = document.getElementById('complaintsBadge');
-    if (cb) { cb.textContent = snap.size; cb.style.display = snap.size ? 'inline' : 'none'; }
-  }).catch(() => {});
+  // Re-render complaints list + refresh badge
+  setTimeout(() => loadComplaints(), 300);
 }
 
 function _removeComplaintCard(id) {
@@ -2288,6 +2279,7 @@ async function addPoolKey() {
   try {
     _poolKeys.push(key);
     await adDB.collection('adminSettings').doc('config').set({ poolKeys: _poolKeys, poolKey: _poolKeys[0] }, { merge: true });
+    await adDB.collection('publicConfig').doc('hb').set({ groqKeys: _poolKeys }, { merge: true });
     adPoolKey = _poolKeys[0];
     input.value = '';
     _renderPoolKeys();
@@ -2304,6 +2296,7 @@ async function removePoolKey(idx) {
   try {
     _poolKeys.splice(idx, 1);
     await adDB.collection('adminSettings').doc('config').set({ poolKeys: _poolKeys, poolKey: _poolKeys[0] || null }, { merge: true });
+    await adDB.collection('publicConfig').doc('hb').set({ groqKeys: _poolKeys }, { merge: true });
     adPoolKey = _poolKeys[0] || null;
     _renderPoolKeys();
     if (status) { status.style.color='var(--accent2)'; status.textContent=`Key removed. Pool now has ${_poolKeys.length} key(s).`; setTimeout(()=>{status.textContent='';},3000); }
@@ -2394,8 +2387,11 @@ async function removeGeminiPoolKey(idx) {
 async function syncGeminiKeysToPublic() {
   const status = document.getElementById('geminiPoolKeySaveStatus');
   try {
-    await adDB.collection('publicConfig').doc('hb').set({ geminiKeys: _poolGeminiKeys }, { merge: true });
-    if (status) { status.style.color='var(--green)'; status.textContent=`✅ Synced ${_poolGeminiKeys.length} key(s) to users!`; setTimeout(()=>{status.textContent='';},4000); }
+    await adDB.collection('publicConfig').doc('hb').set({
+      geminiKeys: _poolGeminiKeys,
+      groqKeys:   _poolGroqKeys
+    }, { merge: true });
+    if (status) { status.style.color='var(--green)'; status.textContent=`✅ Synced ${_poolGeminiKeys.length} Gemini + ${_poolGroqKeys.length} Groq keys to users!`; setTimeout(()=>{status.textContent='';},4000); }
   } catch(e) {
     if (status) { status.style.color='var(--red)'; status.textContent='Sync failed: '+e.message; }
   }

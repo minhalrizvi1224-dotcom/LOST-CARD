@@ -95,8 +95,9 @@ function initAuth() {
       upgradeRequested:      docData.upgradeRequested       || false,
       upgradeRequestedPlan:  docData.upgradeRequestedPlan   || null,
       geminiKey:             docData.geminiKey              || null,
-      defaultChatsCompleted: docData.defaultChatsCompleted  || [],  // which defaults finished
-      chatPlayCounts:        docData.chatPlayCounts         || {}   // plays per default chat
+      defaultChatsCompleted:     docData.defaultChatsCompleted     || [],
+      defaultChatsDeepCompleted: docData.defaultChatsDeepCompleted || [],  // 21+ moves only
+      chatPlayCounts:            docData.chatPlayCounts            || {}
     };
 
     // ── Restore profile data from Firestore into localStorage ────────────
@@ -159,21 +160,17 @@ function initAuth() {
         }
       }, () => {});
     } else {
-      // Regular users: load Gemini keys for Hair Band from publicConfig/hb
-      // Keys are rate-limited — this is safe for authenticated users
-      firebaseDB.collection('publicConfig').doc('hb').get().then(cfg => {
-        if (cfg.exists && Array.isArray(cfg.data().geminiKeys) && cfg.data().geminiKeys.length) {
-          poolGeminiKeys = cfg.data().geminiKeys;
-          window.dispatchEvent(new CustomEvent('lc-pool-updated'));
-        }
-      }).catch(() => {});
-
-      // Real-time listener — keys update immediately when admin changes them
+      // Regular users: load Gemini + Groq keys from publicConfig/hb
       firebaseDB.collection('publicConfig').doc('hb').onSnapshot(cfg => {
-        if (cfg.exists && Array.isArray(cfg.data().geminiKeys)) {
-          poolGeminiKeys = cfg.data().geminiKeys;
-          window.dispatchEvent(new CustomEvent('lc-pool-updated'));
+        if (!cfg.exists) return;
+        const d = cfg.data();
+        if (Array.isArray(d.geminiKeys) && d.geminiKeys.length)
+          poolGeminiKeys = d.geminiKeys;
+        if (Array.isArray(d.groqKeys) && d.groqKeys.length) {
+          poolGroqKeys = d.groqKeys;
+          poolGroqKey  = poolGroqKeys[0] || null;
         }
+        window.dispatchEvent(new CustomEvent('lc-pool-updated'));
       }, () => {});
     }
 
