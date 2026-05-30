@@ -25,6 +25,9 @@ let hbCountLocal  = 0;   // synced from Firestore on login
 const HB_FREE_LIMIT = 50; // free messages per account (lifetime)
 
 document.addEventListener('authReady', (e) => {
+  // Hide loading overlay once auth is confirmed
+  const ov = document.getElementById('authLoadingOverlay');
+  if (ov) { ov.style.opacity = '0'; ov.style.transition = 'opacity .25s'; setTimeout(() => ov.remove(), 260); }
   if (e && e.detail) {
     hbCountLocal = e.detail.hbCount || 0;
   }
