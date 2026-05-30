@@ -202,7 +202,7 @@ async function _recordDefaultCompletion(chatId) {
   }
 
   if (!wasUnlocked && isCustomUnlocked()) {
-    setTimeout(() => showToast('🔓 Custom Chats Unlocked! Complete 5 defaults with 21+ moves.', 'success'), 1200);
+    setTimeout(() => showToast('🔓 Custom Chats Unlocked! You mastered 5 default scenarios.', 'success'), 1200);
   }
   renderChatList();
 }
@@ -2280,7 +2280,7 @@ function renderChatList() {
       // 🔒 LOCKED — free user, not enough defaults
       return `
         <div class="chat-item ci-locked" data-id="${c.id}"
-             onclick="showToast('Complete ${UNLOCK_THRESHOLD} default chats to unlock (${doneCount}/${UNLOCK_THRESHOLD} done).','error')"
+             onclick="showToast('Win ${UNLOCK_THRESHOLD} default chats — keep all 3 cards through 23 moves (${doneCount}/${UNLOCK_THRESHOLD} done).','error')"
              title="Locked — complete ${Math.max(0, UNLOCK_THRESHOLD - doneCount)} more default chats">
           <div class="ci-avatar ci-emoji" style="background:${c.grad};opacity:0.3;filter:grayscale(0.8)">${c.emoji}</div>
           <div class="ci-info" style="opacity:0.38">
@@ -6153,9 +6153,15 @@ function saveSession(summary, chatId) {
   // Always increment play count (even stalemate/early exit)
   if (DEFAULT_CHAT_IDS.includes(chatId)) {
     _incrementPlayCount(chatId);
-    // Deep completion (unlocks custom chats) only with 21+ moves
-    if ((summary.moves || 0) >= 21) {
+    // Deep completion (unlocks custom chats) requires a REAL win:
+    // play all 21+ moves AND keep all 3 cards. Losing even one card = no credit.
+    const moves     = summary.moves     || 0;
+    const cardsLost = summary.cardsLost || 0;
+    if (moves >= 21 && cardsLost === 0) {
       _recordDefaultCompletion(chatId);
+    } else if (moves >= 21 && cardsLost > 0) {
+      // Reached the end but lost cards — tell them why it didn't count
+      setTimeout(() => showToast(`Survived 23 moves but lost ${cardsLost} card(s). Keep all 3 to unlock this one.`, 'error'), 1400);
     }
   }
 
