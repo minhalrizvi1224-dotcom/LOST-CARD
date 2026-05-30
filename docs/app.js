@@ -4928,9 +4928,16 @@ function addFutureSection(result) {
   };
   const end = endings[tc] || { icon: '◆', label: 'SESSION ENDED', color: 'var(--muted)', note: '' };
 
+  const movesPlayed = s.moves || 0;
+  const veteranBadge = movesPlayed >= 21
+    ? `<div style="display:inline-flex;align-items:center;gap:6px;background:rgba(229,192,107,.1);border:1px solid rgba(229,192,107,.4);border-radius:20px;padding:5px 14px;font-size:11px;font-weight:800;color:#E5C07B;margin-bottom:12px;letter-spacing:.5px">
+        🎖 VETERAN — ${movesPlayed} moves played
+       </div>` : '';
+
   const div = document.createElement('div');
   div.className = 'future-section';
   div.innerHTML = `
+    ${veteranBadge}
     <div class="fs-terminal">
       <span class="fs-icon">${end.icon}</span>
       <span class="fs-label" style="color:${end.color}">${end.label}</span>
@@ -6128,7 +6135,8 @@ function saveSession(summary, chatId) {
     summary
   };
   // Track default chat completion + play count
-  if (DEFAULT_CHAT_IDS.includes(chatId)) {
+  // Requires at least 5 moves played — stalemate/goodbye with 0-4 moves doesn't count
+  if (DEFAULT_CHAT_IDS.includes(chatId) && (summary.moves || 0) >= 5) {
     _recordDefaultCompletion(chatId);
   }
 
