@@ -173,21 +173,32 @@ function canPlayDefault(id) {
   return getDefaultPlayCount(id) < DEFAULT_PLAY_LIMIT;
 }
 
-// Called after a default chat session with 21+ moves — updates Firestore + local state
+// Increment play count — called after every default session (even stalemate)
+async function _incrementPlayCount(chatId) {
+  if (!currentUser || !DEFAULT_CHAT_IDS.includes(chatId)) return;
+  if (!currentUser.chatPlayCounts) currentUser.chatPlayCounts = {};
+  currentUser.chatPlayCounts[chatId] = (currentUser.chatPlayCounts[chatId] || 0) + 1;
+  if (typeof firebaseDB !== 'undefined' && firebaseDB && currentUser.uid) {
+    firebaseDB.collection('users').doc(currentUser.uid)
+      .update({ [`chatPlayCounts.${chatId}`]: firebase.firestore.FieldValue.increment(1) })
+      .catch(() => {});
+  }
+  renderChatList();
+}
+
+// Called only when 21+ moves played — marks chat as deeply completed (unlocks customs)
 async function _recordDefaultCompletion(chatId) {
   if (!currentUser || !DEFAULT_CHAT_IDS.includes(chatId)) return;
   const wasUnlocked = isCustomUnlocked();
 
-  if (!currentUser.chatPlayCounts)             currentUser.chatPlayCounts = {};
-  if (!currentUser.defaultChatsDeepCompleted)  currentUser.defaultChatsDeepCompleted = [];
-  currentUser.chatPlayCounts[chatId] = (currentUser.chatPlayCounts[chatId] || 0) + 1;
+  if (!currentUser.defaultChatsDeepCompleted) currentUser.defaultChatsDeepCompleted = [];
   const alreadyDeep = currentUser.defaultChatsDeepCompleted.includes(chatId);
   if (!alreadyDeep) currentUser.defaultChatsDeepCompleted.push(chatId);
 
-  if (typeof firebaseDB !== 'undefined' && firebaseDB && currentUser.uid) {
-    const patch = { [`chatPlayCounts.${chatId}`]: firebase.firestore.FieldValue.increment(1) };
-    if (!alreadyDeep) patch.defaultChatsDeepCompleted = firebase.firestore.FieldValue.arrayUnion(chatId);
-    firebaseDB.collection('users').doc(currentUser.uid).update(patch).catch(() => {});
+  if (typeof firebaseDB !== 'undefined' && firebaseDB && currentUser.uid && !alreadyDeep) {
+    firebaseDB.collection('users').doc(currentUser.uid)
+      .update({ defaultChatsDeepCompleted: firebase.firestore.FieldValue.arrayUnion(chatId) })
+      .catch(() => {});
   }
 
   if (!wasUnlocked && isCustomUnlocked()) {
@@ -6132,10 +6143,13 @@ function saveSession(summary, chatId) {
     date: new Date().toLocaleString(),
     summary
   };
-  // Track default chat completion + play count
-  // Requires 21+ moves — just opening/stalemate/early exit doesn't count
-  if (DEFAULT_CHAT_IDS.includes(chatId) && (summary.moves || 0) >= 21) {
-    _recordDefaultCompletion(chatId);
+  // Always increment play count (even stalemate/early exit)
+  if (DEFAULT_CHAT_IDS.includes(chatId)) {
+    _incrementPlayCount(chatId);
+    // Deep completion (unlocks custom chats) only with 21+ moves
+    if ((summary.moves || 0) >= 21) {
+      _recordDefaultCompletion(chatId);
+    }
   }
 
   // Save to localStorage

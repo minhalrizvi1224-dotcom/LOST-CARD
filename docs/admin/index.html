@@ -2480,14 +2480,10 @@ async function savePaymentInfo() {
   const pAnn    = parseInt(document.getElementById('pkrPriceAnnual').value)  || 9800;
   const status  = document.getElementById('payInfoSaveStatus');
   try {
-    await adDB.collection('adminSettings').doc('config').set({
-      paymentNumber:   payNum,
-      whatsappNumber:  waNum,
-      jazzCashTitle:   jcTitle,
-      pkrPrice15d:     p15,
-      pkrPriceMonthly: pMon,
-      pkrPriceAnnual:  pAnn
-    }, { merge: true });
+    const payData = { paymentNumber: payNum, whatsappNumber: waNum, jazzCashTitle: jcTitle, pkrPrice15d: p15, pkrPriceMonthly: pMon, pkrPriceAnnual: pAnn };
+    await adDB.collection('adminSettings').doc('config').set(payData, { merge: true });
+    // Sync to publicConfig so regular users see payment details
+    await adDB.collection('publicConfig').doc('hb').set(payData, { merge: true });
     if (status) { status.style.color='var(--green)'; status.textContent='✅ Payment info saved!'; }
     setTimeout(()=>{ if(status) status.textContent=''; }, 3000);
   } catch(e) {

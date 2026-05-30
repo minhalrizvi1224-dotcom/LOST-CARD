@@ -160,7 +160,7 @@ function initAuth() {
         }
       }, () => {});
     } else {
-      // Regular users: load Gemini + Groq keys from publicConfig/hb
+      // Regular users: load keys + payment config from publicConfig/hb
       firebaseDB.collection('publicConfig').doc('hb').onSnapshot(cfg => {
         if (!cfg.exists) return;
         const d = cfg.data();
@@ -170,6 +170,12 @@ function initAuth() {
           poolGroqKeys = d.groqKeys;
           poolGroqKey  = poolGroqKeys[0] || null;
         }
+        if (d.paymentNumber) adminPayNum     = d.paymentNumber;
+        if (d.whatsappNumber) adminWANum     = d.whatsappNumber;
+        if (d.jazzCashTitle) jazzCashTitle   = d.jazzCashTitle;
+        if (d.pkrPrice15d)   pkrPrice15d     = d.pkrPrice15d;
+        if (d.pkrPriceMonthly) pkrPriceMonthly = d.pkrPriceMonthly;
+        if (d.pkrPriceAnnual)  pkrPriceAnnual  = d.pkrPriceAnnual;
         window.dispatchEvent(new CustomEvent('lc-pool-updated'));
       }, () => {});
     }
