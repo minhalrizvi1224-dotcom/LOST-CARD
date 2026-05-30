@@ -539,6 +539,77 @@ body {
 [data-theme="light"] .hu-e { background: #fff; }
 [data-theme="light"] .hu-p { background: #fff; }
 
+/* ── LC ROPE LOGO (center of hang-scene) ── */
+.hang-logo {
+  position: absolute;
+  left: 50%;
+  top: 95px;
+  transform: translateX(-50%);
+  opacity: 0;
+  z-index: 2;
+}
+
+/* Rope draw animation */
+@keyframes drawRope {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes lcFadeIn {
+  to { opacity: 1; }
+}
+
+.lc-draw { animation: drawRope 1.4s cubic-bezier(0.4,0,0.2,1) forwards; }
+.lc-circle { animation-delay: 0.6s; }
+.lc-bow    { animation-delay: 1.8s; animation-duration: 0.7s; }
+.lc-join   { animation-delay: 1.6s; animation-duration: 0.3s; }
+.lc-text   { opacity: 0; animation: lcFadeIn 0.5s 2.5s ease forwards; }
+
+/* Logo drop-in (triggered by JS same as cards) */
+.hang-logo.dropping { opacity: 1; }
+.hang-logo.swaying  {
+  opacity: 1;
+  animation: swayCenter 5s 0.5s ease-in-out infinite;
+}
+
+/* ── HERO SIDE AMBIENT TERMS ── */
+.hero-side {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  pointer-events: none;
+}
+.hero-side-left  { left: 32px; text-align: right; }
+.hero-side-right { right: 32px; text-align: left; }
+
+.hero-side span {
+  display: block;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  opacity: 0;
+  animation: sideTermFade 5s var(--d, 0s) ease-in-out infinite;
+}
+.hero-side-left  span { border-right: 1.5px solid rgba(139,148,158,0.2); padding-right: 10px; }
+.hero-side-right span { border-left:  1.5px solid rgba(139,148,158,0.2); padding-left:  10px; }
+
+@keyframes sideTermFade {
+  0%   { opacity: 0;    transform: translateY(4px); }
+  15%  { opacity: 0.55; transform: translateY(0);   }
+  75%  { opacity: 0.55; }
+  90%  { opacity: 0;    transform: translateY(-4px); }
+  100% { opacity: 0; }
+}
+
+/* Hide side terms on mobile (not enough space) */
+@media (max-width: 860px) {
+  .hero-side { display: none; }
+}
+
 /* ── WORLD GLOBE SCENE ── */
 .world-scene {
   display: flex;

@@ -253,20 +253,18 @@ function applyTheme(theme) {
 }
 
 // ── Initials avatar helper ────────────────────────────────────────────
+// Shows SINGLE first letter only (Instagram/WhatsApp style)
 function _initialsAvatar(name, size) {
-  const n = (name || 'U').trim();
-  const parts = n.split(/\s+/);
-  const initials = parts.length >= 2
-    ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
-    : n.slice(0, 2).toUpperCase();
+  const n  = (name || 'U').trim();
+  const letter = n[0].toUpperCase(); // always 1 letter
   const palettes = [
     ['#C678DD','#8250DF'], ['#56B6C2','#0969DA'], ['#98C379','#1A7F37'],
     ['#F0883E','#BC4C00'], ['#F85149','#CF222E'], ['#E3B341','#9A6700'],
     ['#58A6FF','#0969DA']
   ];
   const [c1, c2] = palettes[(n.charCodeAt(0) || 0) % palettes.length];
-  const fs = size > 40 ? Math.round(size * 0.38) : Math.round(size * 0.42);
-  return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:linear-gradient(135deg,${c1},${c2});display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-size:${fs}px;font-weight:800;color:#fff;flex-shrink:0">${initials}</div>`;
+  const fs = Math.round(size * 0.40);
+  return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:linear-gradient(135deg,${c1},${c2});display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-size:${fs}px;font-weight:800;color:#fff;flex-shrink:0;user-select:none">${letter}</div>`;
 }
 
 // ── User Badge ────────────────────────────────────────────────────────
@@ -344,17 +342,13 @@ function openProfileModal() {
     imgEl.style.display = 'block';
     if (initialsEl) initialsEl.style.display = 'none';
   } else {
+    imgEl.src = '';
     imgEl.style.display = 'none';
     if (initialsEl) {
       initialsEl.style.display = 'flex';
-      initialsEl.innerHTML = _initialsAvatar(p.displayName || 'U', 96)
-        .replace(/^<div /, '<div style="width:100%;height:100%;border-radius:50%;')
-        .replace(/width:\d+px;height:\d+px;border-radius:50%;/, '');
-      // simpler: just update the text
-      const nm = (p.displayName || 'U').trim();
-      const parts = nm.split(/\s+/);
-      const ini = parts.length >= 2 ? (parts[0][0]+parts[parts.length-1][0]).toUpperCase() : nm.slice(0,2).toUpperCase();
-      initialsEl.textContent = ini;
+      // Single first letter, color derived from name
+      const letter = (p.displayName || 'U').trim()[0].toUpperCase();
+      initialsEl.textContent = letter;
     }
   }
 
@@ -439,11 +433,7 @@ function clearProfilePic() {
   if (imgEl) { imgEl.src = ''; imgEl.style.display = 'none'; }
   if (initialsEl) {
     initialsEl.style.display = 'flex';
-    const nm = (currentUser && currentUser.displayName) || 'U';
-    const parts = nm.trim().split(/\s+/);
-    initialsEl.textContent = parts.length >= 2
-      ? (parts[0][0] + parts[parts.length-1][0]).toUpperCase()
-      : nm.slice(0,2).toUpperCase();
+    initialsEl.textContent = ((currentUser && currentUser.displayName) || 'U')[0].toUpperCase();
   }
 }
 

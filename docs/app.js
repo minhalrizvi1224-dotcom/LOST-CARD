@@ -851,29 +851,42 @@ document.addEventListener('DOMContentLoaded', () => {
 // → final state = the existing globe SVG (D, E, P cards on the equator)
 // ══════════════════════════════════════════════════════════════════════
 function runHeroCardAnimation() {
-  const hu0 = document.getElementById('hu0'); // D - left
-  const hu1 = document.getElementById('hu1'); // E - center
-  const hu2 = document.getElementById('hu2'); // P - right
+  const hu0  = document.getElementById('hu0');      // D - left
+  const hu1  = document.getElementById('hu1');      // E - center
+  const hu2  = document.getElementById('hu2');      // P - right
+  const logo = document.getElementById('hangLogo'); // LC rope logo
   if (!hu0 || !hu1 || !hu2) return;
 
-  const units   = [hu0, hu1, hu2];
+  const units    = [hu0, hu1, hu2];
   const isCenter = [false, true, false];
   const bounce   = 'cubic-bezier(0.34, 1.42, 0.64, 1)';
 
-  // ── Reset ────────────────────────────────────────────────────────────
+  // ── Reset all ────────────────────────────────────────────────────────
   units.forEach((el, i) => {
     el.classList.remove('swaying', 'dropping');
     el.style.animation  = 'none';
     el.style.opacity    = '0';
     el.style.transition = 'none';
-    // Center preserves its translateX(-50%)
     el.style.transform  = isCenter[i]
       ? 'translateX(-50%) translateY(-110px)'
       : 'translateY(-110px)';
   });
+  if (logo) {
+    logo.classList.remove('swaying', 'dropping');
+    logo.style.animation  = 'none';
+    logo.style.opacity    = '0';
+    logo.style.transition = 'none';
+    logo.style.transform  = 'translateX(-50%) translateY(-110px)';
+    // Reset SVG rope draw animations
+    logo.querySelectorAll('.lc-draw,.lc-text').forEach(el => {
+      el.style.animation = 'none';
+      void el.offsetWidth; // force reflow
+      el.style.animation = '';
+    });
+  }
 
   // ── Phase 1: staggered drop-in ───────────────────────────────────────
-  const dropDelays = [200, 420, 640]; // left first, then center, then right
+  const dropDelays = [200, 420, 640]; // D → E → P
   units.forEach((el, i) => {
     setTimeout(() => {
       el.style.transition = `transform 0.75s ${bounce}, opacity 0.3s ease`;
@@ -882,9 +895,18 @@ function runHeroCardAnimation() {
     }, dropDelays[i]);
   });
 
-  // ── Phase 2: after landing, start gentle sway (different phases) ─────
-  const swayDelays  = [1050, 1200, 1350];
-  const swayPhases  = ['0s', '-1.4s', '-2.8s']; // offset so they don't all move together
+  // Logo drops in between D and P (after them)
+  if (logo) {
+    setTimeout(() => {
+      logo.style.transition = `transform 0.75s ${bounce}, opacity 0.3s ease`;
+      logo.style.opacity    = '1';
+      logo.style.transform  = 'translateX(-50%) translateY(0)';
+    }, 860);
+  }
+
+  // ── Phase 2: sway (different phases so they move independently) ──────
+  const swayDelays = [1050, 1200, 1350];
+  const swayPhases = ['0s', '-1.4s', '-2.8s'];
   units.forEach((el, i) => {
     setTimeout(() => {
       el.style.transition = '';
@@ -894,6 +916,15 @@ function runHeroCardAnimation() {
       el.style.animationDelay = swayPhases[i];
     }, swayDelays[i]);
   });
+  if (logo) {
+    setTimeout(() => {
+      logo.style.transition = '';
+      logo.style.transform  = '';
+      logo.style.animation  = '';
+      logo.classList.add('swaying');
+      logo.style.animationDelay = '-0.7s';
+    }, 1500);
+  }
 }
 
 // ══════════════════════════════════════════════════════════════════════
