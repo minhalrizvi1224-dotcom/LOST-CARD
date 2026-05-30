@@ -74,9 +74,14 @@ exports.ai = functions
   const model = isGemini ? 'gemini-2.0-flash' : 'llama-3.3-70b-versatile';
 
   // 6. Try keys round-robin, skip 429 / 402 / 401
+  // Grab and advance the pointer BEFORE the first await so concurrent
+  // requests each get a unique starting slot (fixes race condition).
   const startIdx = isGemini ? _geminiIdx : _groqIdx;
-  let lastErr    = 'All API keys unavailable.';
-  let result     = null;
+  if (isGemini) _geminiIdx = (startIdx + 1) % keys.length;
+  else          _groqIdx   = (startIdx + 1) % keys.length;
+
+  let lastErr = 'All API keys unavailable.';
+  let result  = null;
 
   for (let i = 0; i < keys.length; i++) {
     const idx = (startIdx + i) % keys.length;
@@ -100,9 +105,6 @@ exports.ai = functions
     }
 
     if (resp.ok) {
-      // Advance round-robin pointer for next call
-      if (isGemini) _geminiIdx = (idx + 1) % keys.length;
-      else          _groqIdx   = (idx + 1) % keys.length;
 
       const json = await resp.json();
       result = json.choices?.[0]?.message?.content?.trim() || '';

@@ -429,13 +429,35 @@ function switchTab(tab) {
 }
 
 // ── Account lock helpers (server-side via Cloud Functions) ────────────
+// ── localStorage fallback (used when CF unavailable) ──────────────────
+const _MAX_ATT = 5, _LOCK_MS = 24 * 60 * 60 * 1000;
+function _lsKey(e)   { return 'lc_lock_' + e.toLowerCase().trim(); }
+function _lsCheck(email) {
+  try {
+    const d = JSON.parse(localStorage.getItem(_lsKey(email)) || 'null');
+    if (!d) return { locked: false, attempts: 0 };
+    if (d.lockUntil && d.lockUntil > Date.now())
+      return { locked: true, hrs: Math.ceil((d.lockUntil - Date.now()) / 3600000) };
+    return { locked: false, attempts: d.attempts || 0 };
+  } catch(e) { return { locked: false, attempts: 0 }; }
+}
+function _lsRecord(email) {
+  const cur  = _lsCheck(email);
+  const next = (cur.attempts || 0) + 1;
+  const lockUntil = next >= _MAX_ATT ? Date.now() + _LOCK_MS : null;
+  localStorage.setItem(_lsKey(email), JSON.stringify({ attempts: next, lockUntil }));
+  return { locked: next >= _MAX_ATT, attemptsLeft: Math.max(0, _MAX_ATT - next) };
+}
+function _lsClear(email) { localStorage.removeItem(_lsKey(email)); }
+
+// ── Account lock helpers (CF primary, localStorage fallback) ──────────
 async function _checkLock(email) {
   try {
     const fn = firebase.functions().httpsCallable('checkLock');
     const result = await fn({ email });
-    return result.data; // { locked, hrs?, attempts }
+    return result.data;
   } catch(e) {
-    return { locked: false, attempts: 0 }; // CF unavailable → fail open
+    return _lsCheck(email); // CF unavailable → fall back to localStorage
   }
 }
 
@@ -443,17 +465,20 @@ async function _recordFailedAttempt(email) {
   try {
     const fn = firebase.functions().httpsCallable('recordFailedAttempt');
     const result = await fn({ email });
-    return result.data; // { locked, attemptsLeft }
+    // Also record in localStorage so fallback stays in sync
+    _lsRecord(email);
+    return result.data;
   } catch(e) {
-    return { locked: false, attemptsLeft: 2 };
+    return _lsRecord(email); // CF unavailable → localStorage enforces
   }
 }
 
 async function _clearAttempts(email) {
+  _lsClear(email); // always clear localStorage
   try {
     const fn = firebase.functions().httpsCallable('clearLock');
     await fn({ email });
-  } catch(e) { /* non-critical */ }
+  } catch(e) { /* non-critical — localStorage already cleared */ }
 }
 
 // ── Handle form submit ─────────────────────────────────────────────────

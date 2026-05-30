@@ -2705,8 +2705,16 @@ async function generateCustomReply(chatId, setup, userText) {
       }
     }
 
-    // Count toward the shared 50-message free limit
-    if (!isUpgraded()) incrementHBCount();
+    // Count toward the shared 50-message free limit — server-enforced
+    if (!isUpgraded()) {
+      const allowed = await incrementHBCount();
+      if (!allowed) {
+        addMessage('them', setup.theirName,
+          '⚠️ You\'ve reached the 50 free AI message limit. Upgrade in Settings to keep chatting.');
+        setInputEnabled(true);
+        return;
+      }
+    }
   } catch(err) {
     typingEl.remove();
     // Opening message failure (userText === null): fail silently — just let the user type
@@ -3825,8 +3833,14 @@ async function sendAIMessage() {
     aiAssistantHistory.push({ role: 'assistant', content: reply });
     addMessage('them', 'Hair Band', reply);
     scrollMessages();
-    // Only count free-tier usage
-    if (!isPremium && !geminiKey) incrementHBCount();
+    // Only count free-tier usage — server-enforced
+    if (!isPremium && !geminiKey) {
+      const allowed = await incrementHBCount();
+      if (!allowed) {
+        showHBUpgradeWall();
+        return;
+      }
+    }
     logHairBandQuery(text, reply);
   } catch(err) {
     typingEl.remove();
@@ -4042,15 +4056,38 @@ async function selectHBPlan(planKey, priceLabel) {
   }
 }
 
-// ── Increment Firestore HB count ──────────────────────────────────────
-function incrementHBCount() {
-  hbCountLocal++;
+// ── Increment HB count — server-enforced via Firestore transaction ─────
+// Returns true = allowed, false = limit exceeded (upgrade wall needed).
+// Even if user sets hbCountLocal=0 in DevTools, Firestore real count enforces.
+async function incrementHBCount() {
+  hbCountLocal++; // optimistic UI update
   const subEl = document.getElementById('cchSub');
   if (subEl && currentChatId === 'ai_assistant') subEl.textContent = _hbSubLabel();
-  if (!firebaseDB || !currentUser || !currentUser.uid) return;
-  firebaseDB.collection('users').doc(currentUser.uid).update({
-    hbCount: firebase.firestore.FieldValue.increment(1)
-  }).catch(() => {});
+
+  if (!firebaseDB || !currentUser || !currentUser.uid) return true; // guest — allow
+
+  // Premium users: just increment, no limit check
+  if (isUpgraded()) {
+    firebaseDB.collection('users').doc(currentUser.uid)
+      .update({ hbCount: firebase.firestore.FieldValue.increment(1) }).catch(() => {});
+    return true;
+  }
+
+  // Free users: atomic read-check-increment transaction
+  try {
+    const ref = firebaseDB.collection('users').doc(currentUser.uid);
+    const allowed = await firebaseDB.runTransaction(async t => {
+      const snap = await t.get(ref);
+      const realCount = snap.exists ? (snap.data().hbCount || 0) : 0;
+      hbCountLocal = realCount + 1; // sync local to real value (fixes any manipulation)
+      if (realCount >= HB_FREE_LIMIT) return false; // already at limit — block
+      t.update(ref, { hbCount: firebase.firestore.FieldValue.increment(1) });
+      return true;
+    });
+    return allowed;
+  } catch(e) {
+    return true; // on error fail open (network issue shouldn't block user)
+  }
 }
 
 // ── Gemini API call (legacy — admin-allocated key) ────────────────────
