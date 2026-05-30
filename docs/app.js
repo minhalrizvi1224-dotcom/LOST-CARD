@@ -4934,6 +4934,7 @@ function addFutureSection(result) {
     6: { icon: '🂠', label: 'HAND EMPTY',           color: 'var(--red)',      note: 'All three cards lost. The game was played. The manual was lost long before the last move.' },
     7: { icon: '⏱',  label: '23 MOVES COMPLETE',    color: 'var(--blue)',     note: `${s.cardsLost ?? 0} card(s) lost across 23 moves. The session is over. The record stands.` },
     8: { icon: '💤', label: 'FLATLINE',              color: 'var(--muted)',    note: 'This conversation did not end in conflict. It ended in nothing. Silence without resolution is the most common ending in long-term relational decay — not a fight, not a goodbye. Just the absence of a reply that never came.' },
+    9: { icon: '🎭', label: 'FAWN OVERRIDE',         color: '#A371F7',         note: 'Three soft replies in a row. Not warmth — a tactic. Every grievance soothed before it could land, every accusation dissolved in apology. The other person never got to stay angry, never got to be right, never got to trust their own read of events. Psychology calls it fawning: keeping the peace by erasing yourself — and quietly making them doubt they were ever hurt at all. The conflict ended. So did the truth.' },
   };
   const end = endings[tc] || { icon: '◆', label: 'SESSION ENDED', color: 'var(--muted)', note: '' };
 

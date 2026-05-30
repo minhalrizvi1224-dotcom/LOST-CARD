@@ -1148,7 +1148,8 @@ class HaniChessEngine {
 // ─── Terminal Conditions ─────────────────────────────────────────────────────
 const TC_NONE=0, TC_SALVATION=1, TC_CHECKMATE=2, TC_AMYGDALA=3,
       TC_STACK_OVERFLOW=4, TC_TRUST_FLOOR=5, TC_ALL_CARDS_LOST=6, TC_MAX_MOVES=7,
-      TC_FLATLINE=8; // Conversation died from silence/disengagement — not conflict
+      TC_FLATLINE=8, // Conversation died from silence/disengagement — not conflict
+      TC_FAWNING=9;  // 3 consecutive SOFT — appeasement/fawning used to bury the real grievance
 
 function checkTerminal(cards, chess, ns, stack, trust, move) {
   if (cards.allLost())             return TC_ALL_CARDS_LOST;
@@ -1421,8 +1422,10 @@ class LostCardSim {
       }
     }
 
-    // Terminal check
-    const tc = checkTerminal(this.cards, this.chess, this.ns, this.stack, this.trust, this.move);
+    // Terminal check — 3 consecutive SOFT moves triggers the fawning ending first
+    let tc = (this.softConsec >= 3)
+      ? TC_FAWNING
+      : checkTerminal(this.cards, this.chess, this.ns, this.stack, this.trust, this.move);
     if (tc !== TC_NONE) {
       this.terminalCondition = tc;
       result.terminal = tc;
@@ -1442,6 +1445,7 @@ class LostCardSim {
       case TC_TRUST_FLOOR:   return 'TRUST FLOOR REACHED';
       case TC_ALL_CARDS_LOST:return 'HAND EMPTY - ALL CARDS LOST';
       case TC_MAX_MOVES:     return '23 MOVES COMPLETE';
+      case TC_FAWNING:       return 'FAWN OVERRIDE - APPEASEMENT AS CONTROL';
       default: return '';
     }
   }
@@ -1455,6 +1459,7 @@ class LostCardSim {
       case TC_TRUST_FLOOR:   return 'Trust dropped below 0.15. The shortest path to decoupling is one move.';
       case TC_ALL_CARDS_LOST:return 'The game was played. No cards remain.\nThe relationship did not end because of one mistake.\nIt ended because the manual was lost long before the last move.';
       case TC_MAX_MOVES:     return `You played all 23 moves. ${this.cards.lostCount()} card(s) lost.`;
+      case TC_FAWNING:       return 'Three soft replies in a row. Not warmth - a tactic.\nEvery grievance soothed before it could land, every accusation dissolved in apology. The other person never got to stay angry, never got to be right, never got to trust their own read of events.\nPsychology calls it fawning: keeping the peace by erasing yourself - and quietly making them doubt they were ever hurt at all.\nThe conflict ended. So did the truth.';
       default: return '';
     }
   }
