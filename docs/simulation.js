@@ -1133,29 +1133,120 @@ const SCENARIOS_SARA = [
 // Design: Professional civility masking real damage. The colleague did something
 // that crossed a line. Now they want to talk. Every response is a political move.
 const SCENARIOS_COLLEAGUE = [
-  { hani: "Thanks for agreeing to meet. I know things have been — I know.", subtext: "(He doesn't finish the sentence because finishing it means naming what he did. He hopes you'll fill in the blank with something softer than the truth.)", conflict: "Filling in the blank for him", salvation: false },
-  { hani: "I want to be upfront. I know the way the project handoff happened wasn't ideal. I should have communicated better.", subtext: "(He is calling what happened a 'communication issue.' What happened was not a communication issue. He knows this. He is measuring how much you know.)", conflict: "Accepting 'communication issue' as the frame", salvation: false },
-  { hani: "I've always respected your work. I want that to be clear. This wasn't about that.", subtext: "(He is trying to separate his respect for your work from what he did. These cannot be separated right now. He knows that too.)", conflict: "Thanking him for the respect", salvation: false },
-  { hani: "The timeline was impossible. I know you know that. I was under pressure from above and I made a call I'm not entirely proud of.", subtext: "(He is introducing 'pressure from above' as a mitigating factor. He made a choice. The pressure was real. The choice was still his.)", conflict: "Letting 'pressure from above' explain it", salvation: false },
-  { hani: "I took credit I shouldn't have. I'm saying that. I'm saying it directly.", subtext: "(He said the word. He is watching what you do with it. This is the first honest thing he has said. He is hoping it ends the conversation.)", conflict: "Moving on because he admitted it", salvation: true },
-  { hani: "I've been doing this a long time. I've made mistakes before. I'm not — I'm not someone who does this as a pattern.", subtext: "(He is asking you to trust that this is an exception. He does not have data for you. He has only his own account of himself, which is the least reliable source available.)", conflict: "Accepting his self-assessment as evidence", salvation: false },
-  { hani: "What would it take. Practically. For us to move forward. I'm asking seriously.", subtext: "(He is not asking what he owes you. He is asking what you need from him in order for this to be over. These are very different questions.)", conflict: "Answering as if they're the same question", salvation: true },
-  { hani: "I value this working relationship. I think we make a good team. I don't want what happened to erase that.", subtext: "(He is trying to remind you of the good parts before you've finished processing the bad part. This is a tactic. He may not know it's a tactic.)", conflict: "Agreeing that the team is good", salvation: false },
-  { hani: "I reported it partially. I want to be honest about that. I reported the outcome but not fully who contributed to it.", subtext: "(He is making a new admission. This one is more specific. He is either genuinely coming clean or he knows you know more than he thought.)", conflict: "Accepting 'partially' as enough honesty", salvation: true },
-  { hani: "If the situation were reversed — and I mean this genuinely — I hope you would have done better than I did. I hope I would have too.", subtext: "(He is trying to place himself on your side by imagining he would have made the same choice. This is not quite an apology. It is closer to a confession.)", conflict: "Telling him what you would have done", salvation: false },
-  { hani: "I should have come to you before the presentation. I knew that. I made a calculation and it was wrong.", subtext: "(He made a calculation. He is using that word deliberately. It is honest in a way that is also alarming — it confirms the decision was considered, not accidental.)", conflict: "Forgiving the calculation", salvation: false },
-  { hani: "I'd like to fix this. I don't know exactly how. But I'd like to.", subtext: "(He wants to fix the relationship so he can stop feeling bad. Whether fixing it is good for you is a different question he hasn't asked.)", conflict: "Helping him figure out how to fix it", salvation: true },
-  { hani: "Have you — have you told anyone else? About what happened?", subtext: "(He is afraid. This question is about him. He is measuring the damage radius.)", conflict: "Answering directly without acknowledging what he's really asking", salvation: true },
-  { hani: "I'm not trying to manage you. I want you to know that. I'm trying to be straight with you.", subtext: "(He is trying to manage you. He is also trying to be straight with you. People contain multitudes. This one contains more than most.)", conflict: "Taking 'I'm not managing you' at face value", salvation: false },
-  { hani: "Look — I know trust is rebuilt slowly. I'm not asking you to trust me today. I'm asking you to give me the opportunity to rebuild it.", subtext: "(He has correctly identified the problem and offered the right-sounding solution. The question is whether the desire to rebuild is genuine or whether he is managing his own reputation.)", conflict: "Granting the opportunity without conditions", salvation: false },
-  { hani: "You're good at this. What you do. Better than me in some areas. That's probably part of what happened.", subtext: "(He is making your competence partly responsible for his choice to take credit for your work. This is a sophisticated reframe. He may not realize how much it reveals.)", conflict: "Accepting this as an explanation", salvation: true },
-  { hani: "I don't want this to affect your career. I'm going to make sure — wherever this goes — that the right people know your contribution.", subtext: "(He is offering to correct the record. This is the most concrete thing he has said. It is also something he should have done without being asked.)", conflict: "Thanking him before it happens", salvation: true },
-  { hani: "I've been thinking about this since the day it happened. I want you to know that. It hasn't been nothing to me.", subtext: "(He has been thinking about the consequences for himself since the day it happened. Some of those thoughts were about you. The proportion is unclear.)", conflict: "Accepting that it meant something to him as equivalent to what it meant to you", salvation: false },
-  { hani: "What do you need from me right now. Not going forward. Right now, in this conversation.", subtext: "(He is narrowing the scope. He wants to solve the conversation, not the problem. He is offering you something small and contained.)", conflict: "Accepting the small frame", salvation: true },
-  { hani: "I owe you more than an apology. I know that. I'm trying to figure out what the more looks like.", subtext: "(He is in the right place, finally. He arrived here at move twenty. It took too long. But he arrived.)", conflict: "Telling him what the more looks like before he figures it out", salvation: true },
-  { hani: "I'm sorry. Properly sorry. Not for the awkwardness, not for the professional fallout. For what I actually did to you.", subtext: "(This is the real apology. He found the right words. It took the entire conversation. He means them now even if he didn't start the meeting meaning them.)", conflict: "Responding to anything other than the apology itself", salvation: true },
-  { hani: "I'd like to buy you lunch. Not to smooth things over. Just — because I think I owe you a proper conversation outside of this room.", subtext: "(He is offering continuity. He is not running. This is more than you expected when you sat down.)", conflict: "Refusing entirely", salvation: true },
-  { hani: "Good. Then we'll talk. Not as colleagues managing a situation. As people.", subtext: "(He got there. Later than he should have, through routes he shouldn't have taken. But he got there. Now you decide if that matters.)", conflict: "Making a final statement about the past", salvation: true }
+  { hani: "Thanks for agreeing to meet. I know things have been — I know.", subtext: "(He doesn't finish the sentence because finishing it means naming what he did. He hopes you'll fill in the blank with something softer than the truth.)", conflict: "Filling in the blank for him", salvation: false,
+    soft: ["Of course. I'd rather talk it through than let it fester.", "We should talk. I appreciate you reaching out.", "Things have been tense, yeah. I'm glad you wanted to clear the air."],
+    aggressive: ["Things have been what, exactly? Say it.", "Don't trail off. Name what happened.", "I'm not going to finish that sentence for you."],
+    silent: ["Okay.", "What did you want to discuss?", "Sure."] },
+
+  { hani: "I want to be upfront. I know the way the project handoff happened wasn't ideal. I should have communicated better.", subtext: "(He is calling what happened a 'communication issue.' What happened was not a communication issue. He knows this. He is measuring how much you know.)", conflict: "Accepting 'communication issue' as the frame", salvation: false,
+    soft: ["I appreciate you owning the communication part. Let's talk about all of it, though.", "Okay. Though it was a bit more than communication, honestly.", "Thank you for starting there. But we both know it went further than that."],
+    aggressive: ["This wasn't a communication issue. You took my work.", "Let's not call it 'a handoff that wasn't ideal.'", "Be precise. 'Communicated better' is doing a lot of lifting."],
+    silent: ["Okay.", "Go on.", "Noted."] },
+
+  { hani: "I've always respected your work. I want that to be clear. This wasn't about that.", subtext: "(He is trying to separate his respect for your work from what he did. These cannot be separated right now. He knows that too.)", conflict: "Thanking him for the respect", salvation: false,
+    soft: ["I appreciate that. Respect matters to me too.", "That's good to hear. I've valued working with you as well.", "Thank you. I'd like to believe the respect is real."],
+    aggressive: ["If you respected it, you wouldn't have put your name on it.", "Respect and what you did can't both be true.", "Don't separate the respect from the part where you erased me."],
+    silent: ["Okay.", "Sure.", "If you say so."] },
+
+  { hani: "The timeline was impossible. I know you know that. I was under pressure from above and I made a call I'm not entirely proud of.", subtext: "(He is introducing 'pressure from above' as a mitigating factor. He made a choice. The pressure was real. The choice was still his.)", conflict: "Letting 'pressure from above' explain it", salvation: false,
+    soft: ["I know the pressure was real. I felt it too. Let's figure out the rest.", "The timeline was brutal, true. I just wish you'd brought me in on the call.", "I get that you were squeezed. But the choice was still yours to make."],
+    aggressive: ["Pressure didn't make you take my name off it. You did.", "Plenty of people are under pressure and don't do what you did.", "The timeline isn't on trial here. Your decision is."],
+    silent: ["Okay.", "Mm.", "Right."] },
+
+  { hani: "I took credit I shouldn't have. I'm saying that. I'm saying it directly.", subtext: "(He said the word. He is watching what you do with it. This is the first honest thing he has said. He is hoping it ends the conversation.)", conflict: "Moving on because he admitted it", salvation: true,
+    soft: ["Thank you for saying it plainly. That actually means something to me.", "I needed to hear you name it. That's a real start.", "Okay. That took something to say directly. I respect it."],
+    aggressive: ["Saying it doesn't undo it. What are you going to do about it?", "Good. Now say it to the people who think it was your work.", "An admission in this room isn't the same as fixing the record."],
+    silent: ["Okay.", "Noted.", "Alright."] },
+
+  { hani: "I've been doing this a long time. I've made mistakes before. I'm not — I'm not someone who does this as a pattern.", subtext: "(He is asking you to trust that this is an exception. He does not have data for you. He has only his own account of himself, which is the least reliable source available.)", conflict: "Accepting his self-assessment as evidence", salvation: false,
+    soft: ["I'd like to believe this was a one-off. Help me believe it.", "I hear you. I'd rather not see you as someone who does this.", "Okay. I want to trust that this isn't who you are."],
+    aggressive: ["I only have your word for that — and your word just took my work.", "Everyone says it's not a pattern. Right up until it is.", "Your track record is exactly what's in question here."],
+    silent: ["Okay.", "Sure.", "We'll see."] },
+
+  { hani: "What would it take. Practically. For us to move forward. I'm asking seriously.", subtext: "(He is not asking what he owes you. He is asking what you need from him in order for this to be over. These are very different questions.)", conflict: "Answering as if they're the same question", salvation: true,
+    soft: ["Honestly? Correct the record publicly. Then we can talk about forward.", "Move forward — okay. It starts with the right people knowing what I did.", "What it'd take is you fixing what you took. Then trust can rebuild."],
+    aggressive: ["Don't ask how to make it 'over.' Ask what you actually owe me.", "Moving forward and making this right aren't the same question.", "First tell me what you think you owe me. Then we'll talk forward."],
+    silent: ["I'm not sure yet.", "Give me time.", "I'll think about it."] },
+
+  { hani: "I value this working relationship. I think we make a good team. I don't want what happened to erase that.", subtext: "(He is trying to remind you of the good parts before you've finished processing the bad part. This is a tactic. He may not know it's a tactic.)", conflict: "Agreeing that the team is good", salvation: false,
+    soft: ["We have worked well together. I don't want to lose that either.", "We were a good team. I'd like to get back to that — properly.", "I value it too. That's exactly why this hurt as much as it did."],
+    aggressive: ["You're reminding me we're a team to skip past what you did.", "Don't use 'good team' as a shortcut around accountability.", "We can't talk about the team until we deal with the betrayal."],
+    silent: ["Maybe.", "We'll see.", "Okay."] },
+
+  { hani: "I reported it partially. I want to be honest about that. I reported the outcome but not fully who contributed to it.", subtext: "(He is making a new admission. This one is more specific. He is either genuinely coming clean or he knows you know more than he thought.)", conflict: "Accepting 'partially' as enough honesty", salvation: true,
+    soft: ["Thank you for that detail. It helps me understand what actually happened.", "Okay — 'partially.' I appreciate you being specific instead of vague.", "That's more honest than I expected. Let's keep going from there."],
+    aggressive: ["'Partially' is still leaving my name out of it.", "Partial honesty isn't honesty. Who got the credit?", "So you reported the win and buried the person who earned it."],
+    silent: ["Okay.", "Go on.", "Noted."] },
+
+  { hani: "If the situation were reversed — and I mean this genuinely — I hope you would have done better than I did. I hope I would have too.", subtext: "(He is trying to place himself on your side by imagining he would have made the same choice. This is not quite an apology. It is closer to a confession.)", conflict: "Telling him what you would have done", salvation: false,
+    soft: ["I appreciate you imagining it from my side. That's something.", "I'd like to think I'd have come to you. But I get why it's hard.", "That's an honest thing to admit. Thank you."],
+    aggressive: ["Don't put us in the same boat. I wouldn't have done this.", "Hoping you'd do better isn't the same as having done better.", "That's a nice hypothetical. It doesn't change what's real."],
+    silent: ["Maybe.", "Hard to say.", "Okay."] },
+
+  { hani: "I should have come to you before the presentation. I knew that. I made a calculation and it was wrong.", subtext: "(He made a calculation. He is using that word deliberately. It is honest in a way that is also alarming — it confirms the decision was considered, not accidental.)", conflict: "Forgiving the calculation", salvation: false,
+    soft: ["I appreciate you admitting you knew. That honesty matters to me.", "You should have. But thank you for not pretending it was an accident.", "Okay. At least you're being straight that it was a choice."],
+    aggressive: ["A calculation. So you weighed it and chose to cut me out.", "That word — 'calculation' — means it wasn't a slip. It was a plan.", "You knew, and did it anyway. That's worse, not better."],
+    silent: ["Okay.", "Right.", "Noted."] },
+
+  { hani: "I'd like to fix this. I don't know exactly how. But I'd like to.", subtext: "(He wants to fix the relationship so he can stop feeling bad. Whether fixing it is good for you is a different question he hasn't asked.)", conflict: "Helping him figure out how to fix it", salvation: true,
+    soft: ["I believe you want to. Let's figure out what 'fixing it' actually means.", "Okay. Wanting to is the first step. The how matters just as much.", "I'm open to that — as long as fixing it means fixing what you took, not just how we feel."],
+    aggressive: ["You want to fix it so you stop feeling guilty. That's not the same.", "Figure out the how first. Then come talk to me.", "Don't make me do the work of repairing what you broke."],
+    silent: ["Okay.", "We'll see.", "Sure."] },
+
+  { hani: "Have you — have you told anyone else? About what happened?", subtext: "(He is afraid. This question is about him. He is measuring the damage radius.)", conflict: "Answering directly without acknowledging what he's really asking", salvation: true,
+    soft: ["That sounds like you're worried about the fallout. Let's be honest about that too.", "I can hear this question is about you. Tell me what you're actually afraid of.", "Whatever I've said or not — what are you really asking me right now?"],
+    aggressive: ["So this is about protecting yourself. Got it.", "That's the real reason you're here, isn't it.", "Worried about your reputation now? Should've thought of that earlier."],
+    silent: ["Why do you ask?", "Does it matter?", "I haven't decided what I'm doing."] },
+
+  { hani: "I'm not trying to manage you. I want you to know that. I'm trying to be straight with you.", subtext: "(He is trying to manage you. He is also trying to be straight with you. People contain multitudes. This one contains more than most.)", conflict: "Taking 'I'm not managing you' at face value", salvation: false,
+    soft: ["Okay. Then let's both just be straight. No tactics.", "I'll take that in good faith — if you keep being direct.", "Alright. Straight talk, then. I can do that."],
+    aggressive: ["Saying you're not managing me is itself a way of managing me.", "If you have to announce you're not handling me, you probably are.", "Then stop with the careful phrasing and just be honest."],
+    silent: ["Okay.", "Sure.", "If you say so."] },
+
+  { hani: "Look — I know trust is rebuilt slowly. I'm not asking you to trust me today. I'm asking you to give me the opportunity to rebuild it.", subtext: "(He has correctly identified the problem and offered the right-sounding solution. The question is whether the desire to rebuild is genuine or whether he is managing his own reputation.)", conflict: "Granting the opportunity without conditions", salvation: false,
+    soft: ["I can give you that chance. Slowly, like you said.", "Okay. The opportunity's there — let's see what you do with it.", "I'm willing to let you try. Trust comes from what you do next."],
+    aggressive: ["The opportunity comes with conditions. Fix the record first.", "You don't get an open-ended chance after what you did.", "Rebuild it by acting, not by asking for room to."],
+    silent: ["We'll see.", "Maybe.", "Time will tell."] },
+
+  { hani: "You're good at this. What you do. Better than me in some areas. That's probably part of what happened.", subtext: "(He is making your competence partly responsible for his choice to take credit for your work. This is a sophisticated reframe. He may not realize how much it reveals.)", conflict: "Accepting this as an explanation", salvation: true,
+    soft: ["I appreciate the compliment, but my being good isn't why this happened.", "Thank you, but let's not make my work the reason you took it.", "That's kind. It's also not an explanation for the choice you made."],
+    aggressive: ["So my competence made you steal from me? Listen to yourself.", "Don't turn my skill into your excuse.", "That's the most backwards justification I've heard yet."],
+    silent: ["Okay.", "Hm.", "Sure."] },
+
+  { hani: "I don't want this to affect your career. I'm going to make sure — wherever this goes — that the right people know your contribution.", subtext: "(He is offering to correct the record. This is the most concrete thing he has said. It is also something he should have done without being asked.)", conflict: "Thanking him before it happens", salvation: true,
+    soft: ["That's the first concrete thing you've offered. I'll hold you to it — and thank you.", "Okay. If you actually do that, it changes things. I'm listening.", "Correcting the record matters more than any apology. Let's make that real."],
+    aggressive: ["You should've done that without me having to sit here.", "Don't promise it. Do it. Then I'll believe you.", "Making sure people know my work is the minimum, not a favour."],
+    silent: ["Okay.", "We'll see if you do.", "Noted."] },
+
+  { hani: "I've been thinking about this since the day it happened. I want you to know that. It hasn't been nothing to me.", subtext: "(He has been thinking about the consequences for himself since the day it happened. Some of those thoughts were about you. The proportion is unclear.)", conflict: "Accepting that it meant something to him as equivalent to what it meant to you", salvation: false,
+    soft: ["I'm glad it weighed on you. It weighed on me differently, though.", "Okay. It mattered to you. It also cost me, in ways you didn't carry.", "I hear it's bothered you. I've been living the consequences of it."],
+    aggressive: ["You thought about your guilt. I lived the damage. Not the same.", "It 'hasn't been nothing' to you? It was my reputation.", "Your discomfort and my loss aren't equivalent. Let's not pretend."],
+    silent: ["Okay.", "Right.", "Sure."] },
+
+  { hani: "What do you need from me right now. Not going forward. Right now, in this conversation.", subtext: "(He is narrowing the scope. He wants to solve the conversation, not the problem. He is offering you something small and contained.)", conflict: "Accepting the small frame", salvation: true,
+    soft: ["Right now? Honesty. Going forward is where the real work is, though.", "In this room, I need the truth. But this can't end at the door.", "Right now, I need you to not shrink this to one conversation."],
+    aggressive: ["Don't narrow it to 'right now.' This doesn't end when you leave.", "What I need can't be contained in this room and you know it.", "Nice try. The 'right now' frame lets you off too easy."],
+    silent: ["I don't know yet.", "Give me a minute.", "Let me think."] },
+
+  { hani: "I owe you more than an apology. I know that. I'm trying to figure out what the more looks like.", subtext: "(He is in the right place, finally. He arrived here at move twenty. It took too long. But he arrived.)", conflict: "Telling him what the more looks like before he figures it out", salvation: true,
+    soft: ["I'm glad you see it's more than sorry. Take the time to figure it out — genuinely.", "That's the right realization. Sit with it. I'd rather you mean it than rush it.", "Okay. The fact you know it's 'more' tells me you're finally getting it."],
+    aggressive: ["Took you twenty minutes to get to 'more than an apology.'", "Figure it out fast. I've waited long enough.", "You owe me the credit, publicly. There — I said it for you."],
+    silent: ["Okay.", "We'll see.", "Alright."] },
+
+  { hani: "I'm sorry. Properly sorry. Not for the awkwardness, not for the professional fallout. For what I actually did to you.", subtext: "(This is the real apology. He found the right words. It took the entire conversation. He means them now even if he didn't start the meeting meaning them.)", conflict: "Responding to anything other than the apology itself", salvation: true,
+    soft: ["Thank you. That's the apology I needed — for what you did, not the mess.", "I hear it. A real apology. It doesn't fix it, but it matters.", "Okay. That landed. Thank you for finally saying the true thing."],
+    aggressive: ["Words are easy. The record's still wrong out there.", "Sorry is a start, not an ending.", "Now prove the apology with something other than words."],
+    silent: ["Okay.", "Thank you.", "Noted."] },
+
+  { hani: "I'd like to buy you lunch. Not to smooth things over. Just — because I think I owe you a proper conversation outside of this room.", subtext: "(He is offering continuity. He is not running. This is more than you expected when you sat down.)", conflict: "Refusing entirely", salvation: true,
+    soft: ["I'd be open to that. A real conversation, no agenda. Okay.", "Lunch — fine. As long as it's honest, like this finally was.", "Sure. Let's keep talking like people, not memos."],
+    aggressive: ["Lunch won't undo what's on the record.", "Don't buy me anything. Just fix what you broke.", "I'm not closing this over a sandwich."],
+    silent: ["Maybe.", "We'll see.", "I'll think about it."] },
+
+  { hani: "Good. Then we'll talk. Not as colleagues managing a situation. As people.", subtext: "(He got there. Later than he should have, through routes he shouldn't have taken. But he got there. Now you decide if that matters.)", conflict: "Making a final statement about the past", salvation: true,
+    soft: ["As people. I'd like that. Thank you for getting there.", "Okay. As people, then. That's the only way this works.", "Good. Let's talk like that from now on."],
+    aggressive: ["As people who still have unfinished business, yeah.", "We'll talk — but I haven't forgotten any of it.", "Fine. But 'as people' doesn't mean a clean slate."],
+    silent: ["Okay.", "Sure.", "We'll talk."] }
 ];
 
 // ─── Scenario 7: Bilal & Old Friend (Childhood — Reconnecting After Years) ──
