@@ -1462,10 +1462,11 @@ function _renderCurrentPage() {
     const susp    = !!u.suspended;
     const lastSeenMs = u.lastSeen ? (u.lastSeen.seconds * 1000) : 0;
     const isOnline   = u.isOnline === true && (nowMs - lastSeenMs < 5 * 60 * 1000);
-    const statusBadge = susp ? '<span class="badge badge-red">SUSPENDED</span>'
-      : warns > 0 ? `<span class="badge badge-orange">⚠ ${warns}/3</span>`
-      : isOnline    ? '<span class="badge badge-green">● Online</span>'
+    const onlineBadge = susp  ? '<span class="badge badge-red">SUSPENDED</span>'
+      : isOnline ? '<span class="badge badge-green">● Online</span>'
       : '<span class="badge badge-gray">Inactive</span>';
+    const warnBadge  = warns > 0 ? ` <span class="badge badge-orange" title="${warns} warning(s)">⚠ ${warns}/3</span>` : '';
+    const statusBadge = onlineBadge + warnBadge;
     const hbCnt = u.hbCount || 0;
     const wantsUpgrade = u.upgradeRequested && u.hbPlan !== 'upgraded';
     const hbLimit = 50;
