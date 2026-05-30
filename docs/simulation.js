@@ -771,29 +771,120 @@ const SCENARIOS_REZA = [
 // and conditional love that make every response feel wrong.
 // Passive NLI damage is 2× higher for this scenario.
 const SCENARIOS_MAMA = [
-  { hani: "You didn't call last week. I had to hear from your khala that you were sick. Your khala, Noor.", subtext: "(She's been rehearsing this since Tuesday. She won't say that. She'll act like it just came out.)", conflict: "Justifying the absence", salvation: false },
-  { hani: "I'm not angry. I'm just — do you know what it feels like to find out your own daughter is sick through someone else?", subtext: "(She is angry. The 'I'm not angry' is load-bearing. She needs you to argue with it so she can feel right.)", conflict: "Agreeing too quickly or defending", salvation: false },
-  { hani: "I gave up a lot for you. I'm not saying that to make you feel bad. I'm just saying — a phone call. That's all I ask.", subtext: "(She is saying it to make you feel bad. The 'I'm not saying that' is the tell.)", conflict: "Acknowledging the sacrifice directly", salvation: false },
-  { hani: "Your father used to say you'd grow up and forget us. I defended you. Every time.", subtext: "(She is telling you that your father was right. She is using the defense as the accusation.)", conflict: "Defending yourself or validating her", salvation: false },
-  { hani: "I don't want anything from you. I never have. I just — I thought we were close. Maybe I was wrong.", subtext: "(She wants everything. The 'I don't want anything' is the highest-stakes thing she's said so far. There is no right answer here.)", conflict: "Agreeing or disagreeing with the premise", salvation: false },
-  { hani: "Do you know I still make your favourite food? Every Friday. Even when you're not here. Force of habit, I suppose.", subtext: "(This is not about food. This is a seven-year record of showing up that she is presenting as evidence in a case she has already decided.)", conflict: "Making it about the food", salvation: true },
-  { hani: "I'm not asking you to visit every week. I know you're busy. I just — sometimes I wonder if I made you too independent.", subtext: "(She is wondering if raising you was a mistake. She will not say that directly. She just did.)", conflict: "Reassuring her about independence", salvation: false },
-  { hani: "Your sister calls every day. I'm not comparing. I'm just — every day, Noor.", subtext: "(She is comparing. 'I'm not comparing' followed by the comparison is the whole mechanism.)", conflict: "Defending against the comparison", salvation: false },
-  { hani: "I had dreams too, you know. Before everything. I'm not saying I regret my choices. I just — I wonder sometimes.", subtext: "(She is saying she regrets her choices. She is also saying you are one of the consequences. She is also saying she loves you. All three are true. None of them cancel out.)", conflict: "Asking about her dreams or defending your existence", salvation: false },
-  { hani: "You look tired. Are you eating? You never eat properly when I'm not there to watch you.", subtext: "(The conversation just shifted. She has decided the confrontation is too much. She is retreating into care because care is the only language she was taught. This is not a truce. This is a tactical withdrawal.)", conflict: "Accepting the care or pushing through to the real conversation", salvation: true },
-  { hani: "I just want you to be happy. That's all I've ever wanted. If this life makes you happy, then fine.", subtext: "(The 'then fine' is doing all the work. It means: I disapprove. It means: I will not say I disapprove. It means: you will feel my disapproval anyway.)", conflict: "Thanking her or challenging the 'fine'", salvation: false },
-  { hani: "Sometimes I think — you know what, never mind. It doesn't matter.", subtext: "(It does matter. She needs you to ask. She will make you pay for not asking and she will also make you pay for asking. This is the double bind.)", conflict: "Not asking or asking in the wrong way", salvation: false },
-  { hani: "I'm getting old, Noor. I don't say that for sympathy. I just — time goes fast. I notice it more now.", subtext: "(She is telling you she is going to die. She is also telling you she is afraid. She does not have the language for fear, so she is using time.)", conflict: "Dismissing mortality or overcorrecting into panic", salvation: true },
-  { hani: "You know what I prayed for every day when you were little? That you'd find someone good. That you'd be okay when I'm gone. That's still what I pray for.", subtext: "(She is giving you permission to exist without her. She does not know this is what she's doing. It might be the most generous thing she has ever said.)", conflict: "Ignoring the prayer or making it transactional", salvation: true },
-  { hani: "I don't need you to understand everything I did. I just — I tried. I want you to know I tried.", subtext: "(This is an apology. It is the closest she can get. She has never said sorry directly in her life. The architecture of her love does not have that room.)", conflict: "Demanding a clearer apology or dismissing this one", salvation: true },
-  { hani: "I know I'm not easy. Your father always said that. You probably think it too.", subtext: "(She is asking you to tell her she's wrong. She also knows she's not wrong. She will not believe you if you say she's easy. She will believe you if you say something true instead.)", conflict: "Saying she's easy or agreeing harshly", salvation: false },
-  { hani: "I used to think I'd feel it — the moment you didn't need me anymore. I think it already happened and I missed it.", subtext: "(She is grieving a loss that is not a death. She is grieving the end of a particular kind of being needed. This is real grief. It is also being used as a tool. Both things are true.)", conflict: "Reassuring her you still need her or agreeing you don't", salvation: false },
-  { hani: "I'm not going to be here forever, Noor. I know you know that. I just want — I want things to be okay between us before.", subtext: "(She said 'before.' She did not finish the sentence. You both know what comes after 'before.')", conflict: "Avoiding the unfinished sentence or finishing it wrong", salvation: true },
-  { hani: "Do you remember when you were seven and you cried because you thought I was going to leave? I stayed up all night. I never told you that.", subtext: "(She is giving you a memory as a gift. She is also reminding you that she has always stayed. She is also asking you to stay.)", conflict: "Intellectualizing the memory or deflecting", salvation: true },
-  { hani: "I think we're more alike than you want to admit. That's probably why we clash.", subtext: "(This is the truest thing she has said. She is terrified of it. She said it anyway.)", conflict: "Denying the similarity", salvation: true },
-  { hani: "I'm sorry if I ever made you feel like you weren't enough. You were always — you were always more than enough.", subtext: "(She said it. She actually said it. Her voice broke on 'always.' She will not say it again. This is the only time.)", conflict: "Crying and making her comfort you, or not acknowledging it", salvation: true },
-  { hani: "Call me when you get home. Not because I'll worry. I'll worry anyway. Just — so I know.", subtext: "(She is letting you go. She is asking for one small thing in return. The ask is the smallest it has ever been.)", conflict: "Making a promise you won't keep", salvation: true },
-  { hani: "I love you. I know I don't always — I know. But I do.", subtext: "(She finished the sentence. She has never finished this sentence before. She will not say anything after this. She doesn't need to.)", conflict: "Anything that closes the door", salvation: true }
+  { hani: "You didn't call last week. I had to hear from your khala that you were sick. Your khala, Noor.", subtext: "(She's been rehearsing this since Tuesday. She won't say that. She'll act like it just came out.)", conflict: "Justifying the absence", salvation: false,
+    soft: ["You're right, Mama. You shouldn't have heard it from khala. That was wrong of me.", "I'm sorry. I should've called you first. I really should have.", "I didn't want to worry you — but I see how that landed. I'm sorry."],
+    aggressive: ["It was a fever, Mama, not a hospital stay.", "So this is going to be about khala now?", "I was sick. Sorry I didn't send a press release."],
+    silent: ["It wasn't a big deal.", "Okay, Mama.", "I'm fine now anyway."] },
+
+  { hani: "I'm not angry. I'm just — do you know what it feels like to find out your own daughter is sick through someone else?", subtext: "(She is angry. The 'I'm not angry' is load-bearing. She needs you to argue with it so she can feel right.)", conflict: "Agreeing too quickly or defending", salvation: false,
+    soft: ["I can hear that it hurt you. I'm sorry I made you feel that way.", "It must have felt awful. I didn't think about how it would reach you.", "I get it, Mama. Finding out like that — I'd hate it too."],
+    aggressive: ["You sound pretty angry for someone who's not angry.", "I'm a grown woman, Mama. I can be sick without a bulletin.", "Here we go. Nothing I do is ever right."],
+    silent: ["Okay.", "I said I'm sorry.", "It is what it is."] },
+
+  { hani: "I gave up a lot for you. I'm not saying that to make you feel bad. I'm just saying — a phone call. That's all I ask.", subtext: "(She is saying it to make you feel bad. The 'I'm not saying that' is the tell.)", conflict: "Acknowledging the sacrifice directly", salvation: false,
+    soft: ["I know you gave up so much, Mama. I don't take it for granted.", "You're right. A phone call isn't much to ask. I'll do better.", "I know. And I love you for everything you carried for us."],
+    aggressive: ["And there it is. The sacrifice speech.", "I never asked you to give anything up, Mama.", "So every call comes with an invoice now?"],
+    silent: ["Okay, Mama.", "I'll call more.", "Noted."] },
+
+  { hani: "Your father used to say you'd grow up and forget us. I defended you. Every time.", subtext: "(She is telling you that your father was right. She is using the defense as the accusation.)", conflict: "Defending yourself or validating her", salvation: false,
+    soft: ["I haven't forgotten you, Mama. Not for a single day.", "Thank you for defending me. I never want you to feel forgotten.", "Baba was wrong. And I'm sorry I ever let it feel true."],
+    aggressive: ["So you're saying he was right after all.", "Defending me, or keeping score?", "Maybe leave Baba out of this one."],
+    silent: ["I haven't forgotten anything.", "Okay.", "That's not fair, Mama."] },
+
+  { hani: "I don't want anything from you. I never have. I just — I thought we were close. Maybe I was wrong.", subtext: "(She wants everything. The 'I don't want anything' is the highest-stakes thing she's said so far. There is no right answer here.)", conflict: "Agreeing or disagreeing with the premise", salvation: false,
+    soft: ["We are close, Mama. Distance isn't the same as not caring.", "You weren't wrong. I've just been bad at showing up. That's on me.", "Don't say that. You mean everything — I've just been far away."],
+    aggressive: ["You want plenty, Mama. You just call it 'closeness.'", "So we're not close now because I got sick quietly?", "You always do this — turn it into us being broken."],
+    silent: ["We are close.", "Okay, Mama.", "If you say so."] },
+
+  { hani: "Do you know I still make your favourite food? Every Friday. Even when you're not here. Force of habit, I suppose.", subtext: "(This is not about food. This is a seven-year record of showing up that she is presenting as evidence in a case she has already decided.)", conflict: "Making it about the food", salvation: true,
+    soft: ["That's not about food, Mama. That's you missing me. I miss you too.", "Every Friday. God, Mama. I didn't know you still did that.", "That's the most you've ever said 'I love you' without saying it."],
+    aggressive: ["Then maybe stop, if it's such a burden.", "Is the food another thing I owe you for?", "You don't have to cook for a ghost, Mama."],
+    silent: ["That's sweet.", "You don't have to do that.", "Okay."] },
+
+  { hani: "I'm not asking you to visit every week. I know you're busy. I just — sometimes I wonder if I made you too independent.", subtext: "(She is wondering if raising you was a mistake. She will not say that directly. She just did.)", conflict: "Reassuring her about independence", salvation: false,
+    soft: ["You raised me to stand on my own. That's not a failure, Mama — it's a gift.", "Being independent doesn't mean I don't need you. I do.", "You didn't make me too anything. I just forgot to lean on you. My fault."],
+    aggressive: ["So now my independence is a mistake too?", "You can't raise me strong and then resent me for it.", "Make up your mind — proud of me or hurt by me?"],
+    silent: ["I'm not that independent.", "Okay, Mama.", "I'll visit more."] },
+
+  { hani: "Your sister calls every day. I'm not comparing. I'm just — every day, Noor.", subtext: "(She is comparing. 'I'm not comparing' followed by the comparison is the whole mechanism.)", conflict: "Defending against the comparison", salvation: false,
+    soft: ["I hear you. I'll call more — not because she does, because you deserve it.", "She and I just talk differently. But you're right, I can do better.", "I'm sorry, Mama. You shouldn't have to count anyone's calls."],
+    aggressive: ["That's literally comparing, Mama.", "Then go talk to her every day. Problem solved.", "We're not the same person. Stop ranking us."],
+    silent: ["Good for her.", "Okay.", "I'll call more."] },
+
+  { hani: "I had dreams too, you know. Before everything. I'm not saying I regret my choices. I just — I wonder sometimes.", subtext: "(She is saying she regrets her choices. She is also saying you are one of the consequences. She is also saying she loves you. All three are true. None of them cancel out.)", conflict: "Asking about her dreams or defending your existence", salvation: false,
+    soft: ["Tell me about them, Mama. The dreams. I want to know who you were.", "You gave up so much of yourself for us. I'm only seeing it now.", "I'd love to hear what you wanted, before all of this happened."],
+    aggressive: ["So I'm the thing between you and your dreams?", "You can't say you don't regret it and then 'wonder.'", "Should I apologise for being born now?"],
+    silent: ["Everyone has dreams, Mama.", "Okay.", "That's sad, I guess."] },
+
+  { hani: "You look tired. Are you eating? You never eat properly when I'm not there to watch you.", subtext: "(The conversation just shifted. She has decided the confrontation is too much. She is retreating into care because care is the only language she was taught. This is not a truce. This is a tactical withdrawal.)", conflict: "Accepting the care or pushing through to the real conversation", salvation: true,
+    soft: ["I have been tired. It's nice that you still notice, Mama.", "I eat. Just not like your cooking. Nothing comes close.", "You still take care of me even from here. I don't say thank you enough."],
+    aggressive: ["Don't change the subject when we were finally talking.", "I'm a grown woman, Mama. I can feed myself.", "Two minutes ago I was neglectful, now I'm starving?"],
+    silent: ["I'm eating fine.", "I'm okay, Mama.", "I'm fine."] },
+
+  { hani: "I just want you to be happy. That's all I've ever wanted. If this life makes you happy, then fine.", subtext: "(The 'then fine' is doing all the work. It means: I disapprove. It means: I will not say I disapprove. It means: you will feel my disapproval anyway.)", conflict: "Thanking her or challenging the 'fine'", salvation: false,
+    soft: ["It does make me happy, Mama. And it'd make me happier with you in it.", "I hear the 'fine.' Tell me what you actually feel. I can take it.", "Your blessing matters to me. Not a reluctant one — a real one."],
+    aggressive: ["Say what you mean, Mama. The 'fine' isn't fooling anyone.", "You don't get to disapprove and call it support.", "'Fine.' There it is."],
+    silent: ["Thanks, Mama.", "Okay.", "Good to know."] },
+
+  { hani: "Sometimes I think — you know what, never mind. It doesn't matter.", subtext: "(It does matter. She needs you to ask. She will make you pay for not asking and she will also make you pay for asking. This is the double bind.)", conflict: "Not asking or asking in the wrong way", salvation: false,
+    soft: ["It does matter, Mama. Tell me. I'm not going anywhere.", "Don't do that. Whatever it is, I want to hear it.", "Say it, Mama. I'd rather know than wonder."],
+    aggressive: ["Just say it instead of the whole 'never mind' routine.", "You can't bait me and then act like it's nothing.", "If it doesn't matter, why bring it up?"],
+    silent: ["Okay.", "Alright then.", "If you say so."] },
+
+  { hani: "I'm getting old, Noor. I don't say that for sympathy. I just — time goes fast. I notice it more now.", subtext: "(She is telling you she is going to die. She is also telling you she is afraid. She does not have the language for fear, so she is using time.)", conflict: "Dismissing mortality or overcorrecting into panic", salvation: true,
+    soft: ["I notice it too, Mama. That's why I don't want to waste the time we have.", "You're not old to me. But I hear you — let's not let it slip past us.", "That scares me, honestly. I want more days with you, not fewer."],
+    aggressive: ["Don't get morbid on me, Mama.", "You're not old, stop fishing.", "Is this the guilt angle now? Time?"],
+    silent: ["You're fine, Mama.", "Everyone gets older.", "Okay."] },
+
+  { hani: "You know what I prayed for every day when you were little? That you'd find someone good. That you'd be okay when I'm gone. That's still what I pray for.", subtext: "(She is giving you permission to exist without her. She does not know this is what she's doing. It might be the most generous thing she has ever said.)", conflict: "Ignoring the prayer or making it transactional", salvation: true,
+    soft: ["That's the kindest thing, Mama. You prayed for me to be okay without you.", "I'll be okay. Because of how you raised me. That's your prayer, answered.", "I didn't know you carried that. Thank you, Mama. Truly."],
+    aggressive: ["So even your prayers come with conditions.", "Stop talking like you're already gone.", "I don't need to be married off to be okay, Mama."],
+    silent: ["That's nice, Mama.", "Okay.", "I'm okay."] },
+
+  { hani: "I don't need you to understand everything I did. I just — I tried. I want you to know I tried.", subtext: "(This is an apology. It is the closest she can get. She has never said sorry directly in her life. The architecture of her love does not have that room.)", conflict: "Demanding a clearer apology or dismissing this one", salvation: true,
+    soft: ["I know you tried, Mama. I see it now in a way I couldn't before.", "You did try. And I turned out okay because of it. Thank you.", "That means more than a perfect apology ever could. I hear you."],
+    aggressive: ["Trying isn't the same as it not hurting, Mama.", "That's the closest you'll ever get to sorry, isn't it.", "You tried. But you never once admitted you were wrong."],
+    silent: ["Okay, Mama.", "I know.", "Sure."] },
+
+  { hani: "I know I'm not easy. Your father always said that. You probably think it too.", subtext: "(She is asking you to tell her she's wrong. She also knows she's not wrong. She will not believe you if you say she's easy. She will believe you if you say something true instead.)", conflict: "Saying she's easy or agreeing harshly", salvation: false,
+    soft: ["You're not easy, Mama. But you're mine. I wouldn't trade you.", "You're complicated. So am I. That doesn't mean I love you less.", "Easy isn't the point. You loved us the only way you knew. I see that now."],
+    aggressive: ["You said it, not me.", "No, you're really not easy. At all.", "Why ask if you already know the answer?"],
+    silent: ["You're fine, Mama.", "Don't say that.", "Okay."] },
+
+  { hani: "I used to think I'd feel it — the moment you didn't need me anymore. I think it already happened and I missed it.", subtext: "(She is grieving a loss that is not a death. She is grieving the end of a particular kind of being needed. This is real grief. It is also being used as a tool. Both things are true.)", conflict: "Reassuring her you still need her or agreeing you don't", salvation: false,
+    soft: ["I still need you, Mama. Just differently now. That never stops.", "It didn't happen. I need you in ways I'm only starting to understand.", "You didn't miss it — it never came. I still reach for you."],
+    aggressive: ["Needing you was never the issue, Mama.", "You raised me not to need you. Now that's a wound?", "I can't win — too dependent or not enough."],
+    silent: ["I still need you.", "That's not true, Mama.", "Okay."] },
+
+  { hani: "I'm not going to be here forever, Noor. I know you know that. I just want — I want things to be okay between us before.", subtext: "(She said 'before.' She did not finish the sentence. You both know what comes after 'before.')", conflict: "Avoiding the unfinished sentence or finishing it wrong", salvation: true,
+    soft: ["I want that too, Mama. Okay between us. Let's make it okay, starting now.", "Before. I know. I don't want to run out of time being distant.", "Things can be okay. I'm here. Let's not wait for 'before.'"],
+    aggressive: ["Don't use 'before' like a weapon, Mama.", "You always reach for the dying card when you're losing.", "That's not fair and you know it."],
+    silent: ["Don't talk like that.", "Okay, Mama.", "You're fine."] },
+
+  { hani: "Do you remember when you were seven and you cried because you thought I was going to leave? I stayed up all night. I never told you that.", subtext: "(She is giving you a memory as a gift. She is also reminding you that she has always stayed. She is also asking you to stay.)", conflict: "Intellectualizing the memory or deflecting", salvation: true,
+    soft: ["You stayed up all night for me. God, Mama. I never knew that.", "I remember being so scared. And you never left. Not once.", "That's the version of you I forget when we fight. Thank you for staying."],
+    aggressive: ["And you're telling me now to make a point.", "Funny how the memories always come with a lesson.", "Why save that one for an argument?"],
+    silent: ["I don't really remember it.", "That's sweet, Mama.", "Okay."] },
+
+  { hani: "I think we're more alike than you want to admit. That's probably why we clash.", subtext: "(This is the truest thing she has said. She is terrified of it. She said it anyway.)", conflict: "Denying the similarity", salvation: true,
+    soft: ["We really are, Mama. I see you in me more every year.", "You're right. I clash with you because I AM you. It scares me too.", "Maybe that's why I love you and lose patience in the same breath."],
+    aggressive: ["I am nothing like you.", "Don't put your temper on me.", "We clash because you push, Mama. Not because we're alike."],
+    silent: ["Maybe.", "If you say so.", "Hm."] },
+
+  { hani: "I'm sorry if I ever made you feel like you weren't enough. You were always — you were always more than enough.", subtext: "(She said it. She actually said it. Her voice broke on 'always.' She will not say it again. This is the only time.)", conflict: "Crying and making her comfort you, or not acknowledging it", salvation: true,
+    soft: ["Mama… I needed to hear that my whole life. Thank you.", "I always felt like I was failing you. Hearing this — it undoes something.", "You were more than enough too, Mama. We just never said it out loud."],
+    aggressive: ["Took you thirty years to say it.", "You did make me feel that way. A lot.", "Sorry 'if'? There's no 'if', Mama."],
+    silent: ["It's okay.", "Thanks, Mama.", "Okay."] },
+
+  { hani: "Call me when you get home. Not because I'll worry. I'll worry anyway. Just — so I know.", subtext: "(She is letting you go. She is asking for one small thing in return. The ask is the smallest it has ever been.)", conflict: "Making a promise you won't keep", salvation: true,
+    soft: ["I'll call. Every time, Mama. Not just tonight.", "The second I'm home. I promise. And I'll mean it.", "I'll call. And I'll actually pick up next time too."],
+    aggressive: ["Fine, I'll call. Anything else on the list?", "You'll worry regardless, so what's the point.", "Sure, Mama. Whatever you need."],
+    silent: ["Okay.", "I'll try.", "Sure."] },
+
+  { hani: "I love you. I know I don't always — I know. But I do.", subtext: "(She finished the sentence. She has never finished this sentence before. She will not say anything after this. She doesn't need to.)", conflict: "Anything that closes the door", salvation: true,
+    soft: ["I love you too, Mama. I always have. Even when we couldn't say it.", "I know you do. I've always known. I love you.", "I love you, Mama. Let's say it more. While we still can."],
+    aggressive: ["You have a strange way of showing it.", "Then why does it always feel like a fight?", "Love was never the question, Mama."],
+    silent: ["Love you too.", "I know, Mama.", "Okay."] }
 ];
 
 // ─── Scenario 4: Zain & Baba (Father/Son — Pakistani dynamic) ───────────────
