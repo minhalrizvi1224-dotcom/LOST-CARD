@@ -2320,19 +2320,22 @@ function _getUnifiedPool() {
 // Gemini free TPM limit = 1,000,000/min → handles it with no issues.
 // 3 Gemini keys = 3M TPM/min → ~250 HB requests/min → more than enough.
 function _getHBPool() {
+  // ── GEMINI FIRST for Hair Band ─────────────────────────────────────────
+  // HB system prompt is ~10k-15k tokens.
+  // Groq free TPM = 6,000/min → ONE HB request exceeds it → instant 429.
+  // Gemini free TPM = 1,000,000/min → handles many HB requests easily.
+  // Groq kept as last-resort fallback only (using llama-3.1-8b-instant 20k TPM).
   const geminiList = (typeof poolGeminiKeys !== 'undefined' && poolGeminiKeys.length)
-    ? poolGeminiKeys : [];
+    ? [...poolGeminiKeys] : [];
   const localGemini = localStorage.getItem('lc_gemini_key');
   if (localGemini && !geminiList.includes(localGemini)) geminiList.push(localGemini);
 
   const groqList = (typeof poolGroqKeys !== 'undefined' && poolGroqKeys.length)
     ? poolGroqKeys : (typeof poolGroqKey !== 'undefined' && poolGroqKey ? [poolGroqKey] : []);
 
-  // Groq first (llama-3.1-8b-instant, 20k TPM — handles large HB prompt).
-  // Gemini as backup once quotas reset.
   return [
-    ...groqList.map(k => ({ key: k, provider: 'groq-hb' })),
-    ...geminiList.map(k => ({ key: k, provider: 'gemini' }))
+    ...geminiList.map(k => ({ key: k, provider: 'gemini'  })),   // primary: Gemini
+    ...groqList.map(k   => ({ key: k, provider: 'groq-hb' }))    // fallback: Groq
   ];
 }
 
@@ -3844,22 +3847,33 @@ function startAIAssistant() {
       <style>@keyframes hbFloat{0%{transform:translateY(0)}100%{transform:translateY(-10px)}}</style>`;
     scrollMessages();
 
-    // Admin test function — shows raw error
+    // Admin test function — tests actual HB pool in order
     window._hbAdminTest = async () => {
       const el = document.getElementById('hbTestResult');
-      if (el) el.textContent = 'Testing…';
+      if (!el) return;
       const pool = _getHBPool();
-      if (!pool.length) { if (el) el.textContent = 'No keys in pool.'; return; }
-      const entry = pool[0];
-      try {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${entry.key}`;
-        const r = await fetch(url, {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: 'Hi' }] }], generationConfig: { maxOutputTokens: 10 } })
-        });
-        const d = await r.json();
-        if (el) el.textContent = `Status ${r.status}: ${JSON.stringify(d).substring(0, 300)}`;
-      } catch(e) { if (el) el.textContent = 'Error: ' + e.message; }
+      if (!pool.length) { el.textContent = '⚠ No keys in pool. Add Gemini keys in admin panel.'; return; }
+      el.textContent = `Testing ${pool.length} keys (${pool.filter(e=>e.provider==='gemini').length} Gemini, ${pool.filter(e=>e.provider==='groq-hb').length} Groq)…`;
+      let passed = 0, failed = 0;
+      for (const entry of pool) {
+        try {
+          let r;
+          if (entry.provider === 'gemini') {
+            r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${entry.key}`, {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: 'Hi' }] }], generationConfig: { maxOutputTokens: 5 } })
+            });
+          } else {
+            r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+              method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${entry.key}` },
+              body: JSON.stringify({ model: 'llama-3.1-8b-instant', messages: [{ role: 'user', content: 'Hi' }], max_tokens: 5 })
+            });
+          }
+          if (r.ok) passed++; else failed++;
+          el.textContent = `Tested ${passed+failed}/${pool.length} — ✓ ${passed} ok, ✗ ${failed} failed`;
+        } catch(e) { failed++; }
+      }
+      el.textContent = `Done — ✓ ${passed} working, ✗ ${failed} failed (${pool.length} total)`;
     };
     return;
   }
