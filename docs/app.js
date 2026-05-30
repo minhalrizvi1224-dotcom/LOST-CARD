@@ -142,6 +142,56 @@ function _pruneOldSetupKeys() {
 setTimeout(() => { _pruneLocalSessions(); _pruneOldSetupKeys(); }, 5000);
 
 // ══════════════════════════════════════════════════════════════════════
+// PROGRESSION SYSTEM — Default completion unlock + replay limits
+// ══════════════════════════════════════════════════════════════════════
+const DEFAULT_CHAT_IDS   = ['hani','reza','mama','baba','sara','colleague','oldfriend'];
+const CUSTOM_ALWAYS_FREE = ['bestfriend']; // never locked
+const UNLOCK_THRESHOLD   = 5;   // complete 5/7 defaults → all custom chats unlock
+const DEFAULT_PLAY_LIMIT = 10;  // free tier: 10 plays per default chat
+
+function getDefaultsCompleted() {
+  return (currentUser?.defaultChatsCompleted || []).filter(id => DEFAULT_CHAT_IDS.includes(id));
+}
+function isCustomUnlocked() {
+  if (!currentUser) return false;
+  if (isUpgraded()) return true;
+  return getDefaultsCompleted().length >= UNLOCK_THRESHOLD;
+}
+function getDefaultPlayCount(id) {
+  return (currentUser?.chatPlayCounts || {})[id] || 0;
+}
+function canPlayDefault(id) {
+  if (isUpgraded()) return true;
+  return getDefaultPlayCount(id) < DEFAULT_PLAY_LIMIT;
+}
+
+// Called after every default chat session ends — updates Firestore + local state
+async function _recordDefaultCompletion(chatId) {
+  if (!currentUser || !DEFAULT_CHAT_IDS.includes(chatId)) return;
+  const wasUnlocked = isCustomUnlocked();
+
+  // Local update (instant, no flicker)
+  if (!currentUser.chatPlayCounts)        currentUser.chatPlayCounts = {};
+  if (!currentUser.defaultChatsCompleted) currentUser.defaultChatsCompleted = [];
+  currentUser.chatPlayCounts[chatId] = (currentUser.chatPlayCounts[chatId] || 0) + 1;
+  const alreadyDone = currentUser.defaultChatsCompleted.includes(chatId);
+  if (!alreadyDone) currentUser.defaultChatsCompleted.push(chatId);
+
+  // Firestore update
+  if (typeof firebaseDB !== 'undefined' && firebaseDB && currentUser.uid) {
+    const patch = { [`chatPlayCounts.${chatId}`]: firebase.firestore.FieldValue.increment(1) };
+    if (!alreadyDone) patch.defaultChatsCompleted = firebase.firestore.FieldValue.arrayUnion(chatId);
+    firebaseDB.collection('users').doc(currentUser.uid).update(patch).catch(() => {});
+  }
+
+  // Unlock toast
+  if (!wasUnlocked && isCustomUnlocked()) {
+    setTimeout(() => showToast('🔓 Custom Chats Unlocked! You\'ve completed 5 default scenarios.', 'success'), 1200);
+  }
+  renderChatList(); // refresh lock state + play counts
+}
+
+// ══════════════════════════════════════════════════════════════════════
 // METADATA
 // ══════════════════════════════════════════════════════════════════════
 const CHAT_META = {
@@ -2090,14 +2140,60 @@ function renderChatList() {
       onclick="event.stopPropagation();togglePin('${id}')"
       title="${pinned ? 'Unpin' : 'Pin to top'}">📌</button>`;
 
-  const makeItem = (c) => {
-    const pinned = _isPinned(c);
-    const action = c.type === 'custom' ? `openChat('${c.id}')` : c.action;
-    const tagHtml = c.tag
-      ? `<span class="ci-rel-tag"${c.tagStyle ? ` style="${c.tagStyle}"` : ''}>${c.tag}</span>` : '';
-    const previewId = c.type === 'custom' ? ` id="prev_${c.id}"` : '';
+  const unlocked   = isCustomUnlocked();
+  const doneCount  = getDefaultsCompleted().length;
+  const usedMsgs   = typeof hbCountLocal !== 'undefined' ? hbCountLocal : 0;
+  const msgsLeft   = Math.max(0, HB_FREE_LIMIT - usedMsgs);
+  const isPro      = isUpgraded();
+
+  // ── Default item (shows play count badge) ─────────────────────────────
+  const makeDefaultItem = (c) => {
+    const pinned    = _isPinned(c);
+    const plays     = getDefaultPlayCount(c.id);
+    const playsLeft = DEFAULT_PLAY_LIMIT - plays;
+    const limitHit  = !isPro && plays >= DEFAULT_PLAY_LIMIT;
+    const playsHtml = !isPro
+      ? `<span style="font-size:9px;font-weight:700;color:${limitHit ? 'var(--red)' : 'var(--muted)'};letter-spacing:.3px">${limitHit ? '🔒 LIMIT' : plays + '/' + DEFAULT_PLAY_LIMIT}</span>`
+      : '';
+    const tagHtml   = c.tag ? `<span class="ci-rel-tag"${c.tagStyle ? ` style="${c.tagStyle}"` : ''}>${c.tag}</span>` : '';
     return `
-      <div class="chat-item${currentChatId === c.id ? ' active' : ''}" data-id="${c.id}" onclick="${action}">
+      <div class="chat-item${limitHit ? ' ci-dimmed' : ''}${currentChatId === c.id ? ' active' : ''}" data-id="${c.id}" onclick="${c.action}">
+        <div class="ci-avatar ci-emoji" style="background:${c.grad};${limitHit ? 'opacity:0.55' : ''}">${c.emoji}</div>
+        <div class="ci-info">
+          <div class="ci-name">${c.name}</div>
+          <div class="ci-preview">${c.sub}</div>
+        </div>
+        <div class="ci-meta" style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+          ${tagHtml}${playsHtml}${makePin(c.id, pinned)}
+        </div>
+      </div>`;
+  };
+
+  // ── Custom item — locked or open ───────────────────────────────────────
+  const makeCustomItem = (c) => {
+    const pinned  = _isPinned(c);
+    const isFree  = CUSTOM_ALWAYS_FREE.includes(c.id);
+    const isOpen  = isFree || unlocked;
+    const previewId = ` id="prev_${c.id}"`;
+
+    if (!isOpen) {
+      // LOCKED
+      return `
+        <div class="chat-item ci-locked" data-id="${c.id}"
+             onclick="showToast('Complete ${UNLOCK_THRESHOLD} default scenarios to unlock custom chats (${doneCount}/${UNLOCK_THRESHOLD} done).','error')"
+             title="Locked — complete ${UNLOCK_THRESHOLD - doneCount} more default chats">
+          <div class="ci-avatar ci-emoji" style="background:${c.grad};opacity:0.35;filter:grayscale(0.7)">${c.emoji}</div>
+          <div class="ci-info" style="opacity:0.4">
+            <div class="ci-name">${c.name}</div>
+            <div class="ci-preview">🔒 Unlock after ${UNLOCK_THRESHOLD} defaults</div>
+          </div>
+          <div class="ci-meta"><span style="font-size:16px;opacity:0.5">🔒</span></div>
+        </div>`;
+    }
+
+    const tagHtml = c.tag ? `<span class="ci-rel-tag"${c.tagStyle ? ` style="${c.tagStyle}"` : ''}>${c.tag}</span>` : '';
+    return `
+      <div class="chat-item${currentChatId === c.id ? ' active' : ''}" data-id="${c.id}" onclick="openChat('${c.id}')">
         <div class="ci-avatar ci-emoji" style="background:${c.grad}">${c.emoji}</div>
         <div class="ci-info">
           <div class="ci-name">${c.name}</div>
@@ -2109,15 +2205,30 @@ function renderChatList() {
       </div>`;
   };
 
+  // ── Build HTML ──────────────────────────────────────────────────────────
+  const makeItem = (c) => c.type === 'default' ? makeDefaultItem(c) : makeCustomItem(c);
+
   let html = '';
   if (pinned.length) {
     html += `<div class="cl-section-label">PINNED</div>${pinned.map(makeItem).join('')}`;
   }
   if (defaults.length) {
-    html += `<div class="cl-section-label">DEFAULT</div>${defaults.map(makeItem).join('')}`;
+    html += `<div class="cl-section-label">DEFAULT</div>${defaults.map(makeDefaultItem).join('')}`;
   }
   if (customs.length) {
-    html += `<div class="cl-section-label">CUSTOM – CHOOSE YOUR RELATION</div>${customs.map(makeItem).join('')}`;
+    // Progress bar / message counter row
+    const progressHtml = !unlocked
+      ? `<div style="padding:6px 12px 2px;display:flex;align-items:center;gap:8px">
+           <div style="flex:1;height:3px;background:var(--border);border-radius:2px;overflow:hidden">
+             <div style="height:100%;width:${Math.round(doneCount/UNLOCK_THRESHOLD*100)}%;background:linear-gradient(90deg,var(--accent),var(--devotion));transition:width .4s"></div>
+           </div>
+           <span style="font-size:9px;color:var(--muted);font-weight:700;white-space:nowrap">${doneCount}/${UNLOCK_THRESHOLD}</span>
+         </div>` : '';
+    const msgCounterHtml = !isPro
+      ? `<div style="padding:4px 12px 6px;font-size:9px;color:${msgsLeft <= 5 ? 'var(--red)' : 'var(--muted)'};font-weight:700;letter-spacing:.5px">
+           ${msgsLeft > 0 ? `💬 ${msgsLeft} free messages left` : '⚠️ Upgrade for more messages'}
+         </div>` : '';
+    html += `<div class="cl-section-label">CUSTOM – CHOOSE YOUR RELATION</div>${progressHtml}${customs.map(makeCustomItem).join('')}${msgCounterHtml}`;
   }
   container.innerHTML = html;
 }
@@ -2269,6 +2380,12 @@ function showScenarioPicker() {
 }
 
 function startDefaultMode(scenarioId = 'hani') {
+  // ── Replay limit check (free users: max 10 plays per chat) ───────────
+  if (!canPlayDefault(scenarioId)) {
+    const count = getDefaultPlayCount(scenarioId);
+    showToast(`Replay limit reached (${count}/${DEFAULT_PLAY_LIMIT}). Upgrade to Pro for unlimited plays.`, 'error');
+    return;
+  }
   showSection('chatApp');
   const csb = document.getElementById('changeSetupBtn');
   if (csb) csb.style.display = 'none';
@@ -4036,6 +4153,8 @@ async function incrementHBCount() {
   hbCountLocal++; // optimistic UI update
   const subEl = document.getElementById('cchSub');
   if (subEl && currentChatId === 'ai_assistant') subEl.textContent = _hbSubLabel();
+  // Refresh sidebar counter in real-time
+  renderChatList();
 
   if (!firebaseDB || !currentUser || !currentUser.uid) return true; // guest — allow
 
@@ -5878,6 +5997,11 @@ function saveSession(summary, chatId) {
     date: new Date().toLocaleString(),
     summary
   };
+  // Track default chat completion + play count
+  if (DEFAULT_CHAT_IDS.includes(chatId)) {
+    _recordDefaultCompletion(chatId);
+  }
+
   // Save to localStorage
   const sessions = JSON.parse(localStorage.getItem('lc_sessions') || '[]');
   sessions.unshift(record);

@@ -88,13 +88,15 @@ function initAuth() {
       displayName:      user.displayName || user.email.split('@')[0],
       avatarEmoji:      localStorage.getItem('lc_emoji_' + user.uid) || '🎭',
       isAdmin:          docData.isAdmin === true,
-      hbCount:          docData.hbCount          || 0,
-      hbPlan:           planActive ? 'upgraded' : 'free',
-      planExpiry:       docData.planExpiry        || null,
-      upgradePlan:      docData.upgradePlan       || null,
-      upgradeRequested: docData.upgradeRequested  || false,
-      upgradeRequestedPlan: docData.upgradeRequestedPlan || null,
-      geminiKey:        docData.geminiKey         || null  // legacy compat
+      hbCount:               docData.hbCount               || 0,
+      hbPlan:                planActive ? 'upgraded' : 'free',
+      planExpiry:            docData.planExpiry             || null,
+      upgradePlan:           docData.upgradePlan            || null,
+      upgradeRequested:      docData.upgradeRequested       || false,
+      upgradeRequestedPlan:  docData.upgradeRequestedPlan   || null,
+      geminiKey:             docData.geminiKey              || null,
+      defaultChatsCompleted: docData.defaultChatsCompleted  || [],  // which defaults finished
+      chatPlayCounts:        docData.chatPlayCounts         || {}   // plays per default chat
     };
 
     // ── Restore profile data from Firestore into localStorage ────────────
