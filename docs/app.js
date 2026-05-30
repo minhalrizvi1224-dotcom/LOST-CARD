@@ -2095,12 +2095,25 @@ async function confirmUpgradeRequest() {
   if (!ssFile) { showToast('Please upload your payment screenshot.', 'error'); return; }
 
   const btn = document.querySelector('.up-confirm-btn');
-  if (btn) { btn.disabled = true; btn.textContent = 'Uploading screenshot…'; }
+  if (btn) { btn.disabled = true; btn.textContent = 'Processing screenshot…'; }
   try {
-    // Upload screenshot to Firebase Storage
-    const storageRef = firebase.storage().ref(`paymentScreenshots/${currentUser.uid}_${Date.now()}`);
-    await storageRef.put(ssFile);
-    const screenshotURL = await storageRef.getDownloadURL();
+    // Compress screenshot via canvas → base64 (no Firebase Storage needed)
+    const screenshotB64 = await new Promise((resolve, reject) => {
+      const img = new Image();
+      const url = URL.createObjectURL(ssFile);
+      img.onload = () => {
+        const MAX = 600;
+        const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+        const canvas = document.createElement('canvas');
+        canvas.width  = Math.round(img.width  * scale);
+        canvas.height = Math.round(img.height * scale);
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        URL.revokeObjectURL(url);
+        resolve(canvas.toDataURL('image/jpeg', 0.7));
+      };
+      img.onerror = reject;
+      img.src = url;
+    });
 
     if (btn) btn.textContent = 'Sending request…';
     await firebaseDB.collection('users').doc(currentUser.uid).update({
@@ -2108,7 +2121,7 @@ async function confirmUpgradeRequest() {
       upgradeRequestedPlan:    _selectedPlan,
       upgradeRequestedAt:      firebase.firestore.FieldValue.serverTimestamp(),
       userPaymentAccount:      userAccount,
-      paymentScreenshotURL:    screenshotURL
+      paymentScreenshotB64:    screenshotB64
     });
     currentUser.upgradeRequested     = true;
     currentUser.upgradeRequestedPlan = _selectedPlan;

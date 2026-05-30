@@ -2033,8 +2033,8 @@ async function loadUpgrades() {
       const plan = PLAN_LABELS[u.upgradeRequestedPlan] || u.upgradeRequestedPlan || '—';
       const when = u.upgradeRequestedAt?.seconds ? fmtDateTime(u.upgradeRequestedAt.seconds) : '—';
       const idx  = allUsers.indexOf(u);
-      const ssCell = u.paymentScreenshotURL
-        ? `<a href="${u.paymentScreenshotURL}" target="_blank" style="color:var(--accent);font-size:11px;font-weight:700">📷 View</a>`
+      const ssCell = u.paymentScreenshotB64
+        ? `<a href="${u.paymentScreenshotB64}" target="_blank" style="color:var(--accent);font-size:11px;font-weight:700">📷 View</a>`
         : `<span style="color:var(--muted);font-size:11px">—</span>`;
       h += `<tr>
         <td><strong>${esc(u.displayName||'—')}</strong></td>

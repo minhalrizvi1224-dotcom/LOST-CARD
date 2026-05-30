@@ -249,6 +249,28 @@
     <!-- Message -->
     <div class="auth-msg" id="authMsg"></div>
 
+    <!-- Spam / unverified email notice -->
+    <div id="spamNotice" style="display:none;background:rgba(229,192,107,.07);border:1px solid rgba(229,192,107,.35);border-radius:12px;padding:18px 20px;margin-bottom:16px;text-align:center">
+      <div style="font-size:28px;margin-bottom:8px">📧</div>
+      <div style="font-weight:800;font-size:14px;margin-bottom:6px;color:#E5C07B">Verify your email to sign in</div>
+      <div style="font-size:12px;color:var(--text-muted);line-height:1.7;margin-bottom:12px">
+        We sent a verification link to<br>
+        <strong style="color:var(--text-main)" id="spamEmail"></strong>
+      </div>
+      <!-- Spam callout -->
+      <div style="background:rgba(248,81,73,.08);border:1px solid rgba(248,81,73,.25);border-radius:8px;padding:10px 14px;margin-bottom:14px;text-align:left">
+        <div style="font-size:11px;font-weight:800;color:#F85149;margin-bottom:4px">📁 Email not found in inbox?</div>
+        <div style="font-size:11px;color:var(--text-muted);line-height:1.6">
+          Gmail: Check <strong style="color:var(--text-main)">Spam</strong> folder<br>
+          Outlook/Hotmail: Check <strong style="color:var(--text-main)">Junk</strong> folder<br>
+          Yahoo: Check <strong style="color:var(--text-main)">Spam</strong> folder<br>
+          <span style="opacity:.8">The email comes from <em>noreply@lostcard-app.firebaseapp.com</em></span>
+        </div>
+      </div>
+      <button id="resendVerifyBtn" onclick="resendVerificationEmail()" style="width:100%;padding:9px;background:rgba(229,192,107,.1);border:1px solid rgba(229,192,107,.4);border-radius:8px;color:#E5C07B;font-size:12px;font-weight:700;cursor:pointer;margin-bottom:8px">🔁 Resend Verification Email</button>
+      <button onclick="hideSpamNotice()" style="width:100%;padding:7px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text-muted);font-size:11px;cursor:pointer">✕ Dismiss</button>
+    </div>
+
     <!-- Form -->
     <form class="auth-form" id="authForm" onsubmit="handleAuth(event)">
 
@@ -556,7 +578,7 @@ async function handleAuth(e) {
         if (!user.emailVerified && !_isOld) {
           await auth.signOut();
           _pendingVerifyUser = user;
-          showAuthMsg('📧 Please verify your email first. Check your inbox for the verification link.', 'error');
+          showSpamNotice(user.email);
           resetBtn(btn);
           return;
         }
@@ -744,6 +766,32 @@ function backToSignin() {
   document.getElementById('authTabs').style.display     = 'flex';
   document.getElementById('authQuote').style.display    = 'block';
   switchTab('signin');
+}
+
+// ── Spam notice ────────────────────────────────────────────────────────
+function showSpamNotice(email) {
+  hideAuthMsg();
+  const el = document.getElementById('spamNotice');
+  if (!el) return;
+  document.getElementById('spamEmail').textContent = email || 'your email';
+  el.style.display = 'block';
+  el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+function hideSpamNotice() {
+  const el = document.getElementById('spamNotice');
+  if (el) el.style.display = 'none';
+}
+async function resendVerificationEmail() {
+  const btn = document.getElementById('resendVerifyBtn');
+  if (!_pendingVerifyUser) { showAuthMsg('Please sign in again first.', 'error'); return; }
+  try {
+    if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+    await _pendingVerifyUser.sendEmailVerification();
+    if (btn) { btn.textContent = '✅ Sent! Check inbox & spam'; setTimeout(() => { btn.disabled = false; btn.textContent = '🔁 Resend Verification Email'; }, 5000); }
+  } catch(e) {
+    if (btn) { btn.disabled = false; btn.textContent = '🔁 Resend Verification Email'; }
+    showAuthMsg('Could not resend. Wait a moment and try again.', 'error');
+  }
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────
