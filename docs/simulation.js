@@ -1253,29 +1253,120 @@ const SCENARIOS_COLLEAGUE = [
 // Design: Two people who were once everything to each other, meeting after years.
 // The warmth is real. So is the distance. Neither knows how to reconcile them.
 const SCENARIOS_OLDFRIEND = [
-  { hani: "You look exactly the same. That's the first thing I thought. Exactly the same.", subtext: "(He doesn't look exactly the same. Neither do you. He is offering you an easy opening because he's nervous and warmth is the only tool he has right now.)", conflict: "Pointing out how much has changed", salvation: false },
-  { hani: "I wasn't sure you'd actually come. I think I sent that message three times before I deleted it and wrote a new one.", subtext: "(He sent it seven times. He wrote it over two days. He is telling you this because he wants you to know the reaching out cost him something, and he didn't want you to think it was casual.)", conflict: "Treating it as casual anyway", salvation: true },
-  { hani: "How long has it been? Four years? Five?", subtext: "(He knows exactly how long it's been. He is giving you the option to also know exactly how long it's been without making either of you say the number out loud.)", conflict: "Not knowing how long it's been", salvation: false },
-  { hani: "A lot happened. For both of us, I imagine. I don't even know where to start.", subtext: "(He knows where he wants to start. He doesn't know if you're ready to go there yet. He is giving you the chance to choose the entry point.)", conflict: "Starting with small talk", salvation: false },
-  { hani: "I thought about reaching out when your father passed. I didn't. I've thought about that a lot — that I didn't.", subtext: "(He has thought about it more than a lot. It is one of the things he is most ashamed of. He is telling you because he decided, coming here, that he would not pretend it didn't happen.)", conflict: "Telling him it's fine", salvation: true },
-  { hani: "We had a falling out. I know we did. I just — I can't remember exactly what it was about. Can you?", subtext: "(He remembers. He is giving you the chance to say it first, or to let it go. He is not sure which he wants. He may want both.)", conflict: "Telling the full story of what it was about", salvation: false },
-  { hani: "It's strange. I know everything about who you were at sixteen. I know almost nothing about who you are now.", subtext: "(He is naming the exact shape of the grief: the precision of old knowledge against the blankness of recent years. He has been thinking about this exact feeling for a long time.)", conflict: "Filling in everything at once", salvation: true },
-  { hani: "Do you still — are you still the same, in the ways that mattered? The things I remember about you — are those still there?", subtext: "(He is asking if the person he loved is still the person in front of him. He doesn't know how to bear it if the answer is no. He is asking anyway.)", conflict: "Giving a comprehensive answer", salvation: true },
-  { hani: "I have this memory of us. We stayed up all night at your house and we talked about everything we were going to do. Everything. We had a whole list.", subtext: "(He still has the list. Not literally. But he remembers it clearly enough that it might as well be written down. He brings it up because he wants to know if you remember it too, and if you do, what you feel about where those things went.)", conflict: "Focusing on what didn't happen from the list", salvation: true },
-  { hani: "I didn't handle things well. When we drifted. I could have tried harder. I know that now.", subtext: "(He is taking responsibility for the drift. This is generous. He is also slightly editing the story. Both things are true.)", conflict: "Sharing responsibility without letting him finish", salvation: false },
-  { hani: "I moved cities three times. My mother got sick. I got married and then — it's a long story. I don't use that as an excuse. I just want you to know things got complicated.", subtext: "(He is giving you context, not excuses. He knows the difference. He is checking if you know the difference.)", conflict: "Evaluating the context as an excuse", salvation: true },
-  { hani: "You were my best friend. I don't think I've had one since. Not like that. I don't know if that's sad or just — what it is.", subtext: "(It's both. He is thirty-something years old and he is telling you that you were the last person who knew him completely. He has been carrying this and he is finally setting it down in front of you.)", conflict: "Rushing to tell him you haven't either", salvation: true },
-  { hani: "I'm not asking for us to go back to how it was. I know that's not possible. I just — I missed you. I wanted to say that to your face.", subtext: "(He means this completely. He drove two hours to sit in this chair and say this sentence. He is not asking for anything in return. He just needed to say it.)", conflict: "Explaining why going back isn't possible", salvation: true },
-  { hani: "Tell me something about your life. Something real. Not the LinkedIn version.", subtext: "(He is ready to receive the real version. He has been offering real things for half this conversation. He is ready for the exchange.)", conflict: "Giving the edited version anyway", salvation: true },
-  { hani: "I think part of why I reached out is — I've been looking at my life lately and asking what actually mattered. And you keep coming up.", subtext: "(He has been doing this inventory for months. Possibly years. The answer surprised him. He is telling you because you deserve to know you made the list.)", conflict: "Minimizing that you came up", salvation: true },
-  { hani: "Are you happy? You don't have to answer if that's too much. But I'm asking genuinely.", subtext: "(He is asking genuinely. He has the kind of care that has survived years of silence and come out intact. This is rare. He is offering it to you now.)", conflict: "Deflecting with 'I'm fine'", salvation: true },
-  { hani: "I got married last year. I wanted to invite you. I didn't know if — I didn't know what we were to each other anymore. So I didn't.", subtext: "(He thought about inviting you for weeks. He almost called twice. He is telling you this because he wants you to know that even at the biggest moment of his year, you were present in his thinking.)", conflict: "Expressing hurt about not being invited", salvation: true },
-  { hani: "My wife knows who you are. I've talked about you. She asked why I lost touch with you and I didn't have a good answer.", subtext: "(He talked about you enough that his wife knows your name. He has no good answer for why you lost touch because the truth is it wasn't necessary — it just happened — and that's the most honest and most painful answer.)", conflict: "Trying to provide the good answer he doesn't have", salvation: false },
-  { hani: "I'd like to not lose touch again. I know that sounds — I know it's not guaranteed. I just want to say that I'd like it.", subtext: "(He is making a low-stakes, honest request. He is not asking for a promise. He is telling you his preference and leaving the door open.)", conflict: "Making a bigger promise than he asked for", salvation: true },
-  { hani: "You know what I remember most? You used to laugh in a way that made everyone else want to laugh too. I haven't thought about that in years and now I can't stop thinking about it.", subtext: "(He is giving you a gift: a specific memory of who you were, held carefully by someone who chose to keep it. This is what it means to be known.)", conflict: "Minimizing the memory", salvation: true },
-  { hani: "I'm really glad I sent that message. However many times I had to write it.", subtext: "(He is ending where he began. He is telling you the cost was worth it. He wants you to know that this — sitting here, talking — was the point.)", conflict: "Focusing on the awkwardness of getting here", salvation: true },
-  { hani: "Same time next month?", subtext: "(He is asking for continuity. He is asking plainly. There is no subtext here. He means exactly what he said.)", conflict: "Making it uncertain", salvation: true },
-  { hani: "Good. I'll be there.", subtext: "(He will be there. He was always going to be there. You both knew that when you sat down. Everything in between was just two people finding their way back to what they already knew.)", conflict: "Adding anything unnecessary", salvation: true }
+  { hani: "You look exactly the same. That's the first thing I thought. Exactly the same.", subtext: "(He doesn't look exactly the same. Neither do you. He is offering you an easy opening because he's nervous and warmth is the only tool he has right now.)", conflict: "Pointing out how much has changed", salvation: false,
+    soft: ["So do you, honestly. Like no time passed at all. It's good to see you.", "Ha — you're being kind. But God, it's good to see your face.", "You always could make a moment feel easy. I've missed that about you."],
+    aggressive: ["We both know that's not true. A lot's changed.", "Five years changes everyone. Let's not pretend.", "Do I? Doesn't feel like it from in here."],
+    silent: ["Thanks.", "You too, I guess.", "Hm. Sure."] },
+
+  { hani: "I wasn't sure you'd actually come. I think I sent that message three times before I deleted it and wrote a new one.", subtext: "(He sent it seven times. He wrote it over two days. He is telling you this because he wants you to know the reaching out cost him something, and he didn't want you to think it was casual.)", conflict: "Treating it as casual anyway", salvation: true,
+    soft: ["I'm really glad you sent it — however many tries it took. I wanted to come.", "It meant a lot that you reached out. I know that's not nothing for you.", "Three times, huh. I felt the care in it. That's why I'm here."],
+    aggressive: ["Well, here I am. No big deal.", "It's just coffee. You're overthinking it.", "You always did make things into a whole production."],
+    silent: ["Yeah, I came.", "It's fine.", "Here I am."] },
+
+  { hani: "How long has it been? Four years? Five?", subtext: "(He knows exactly how long it's been. He is giving you the option to also know exactly how long it's been without making either of you say the number out loud.)", conflict: "Not knowing how long it's been", salvation: false,
+    soft: ["Five. Since the spring. I've counted too, if I'm honest.", "Five years. I know exactly — which probably says something.", "Too long. Five years. Way too long for what we were."],
+    aggressive: ["Long enough that you stopped counting, apparently.", "Does the exact number matter now?", "You tell me. You're the one who drifted."],
+    silent: ["A while.", "I'm not sure.", "Few years."] },
+
+  { hani: "A lot happened. For both of us, I imagine. I don't even know where to start.", subtext: "(He knows where he wants to start. He doesn't know if you're ready to go there yet. He is giving you the chance to choose the entry point.)", conflict: "Starting with small talk", salvation: false,
+    soft: ["Start wherever's real. We don't have to do the polite version.", "Then let's not start small. Tell me the thing that actually matters.", "Start anywhere. I've got time, and I'd rather it be honest."],
+    aggressive: ["So how's work? The weather? Let's keep it light.", "Maybe some things are better left unstarted.", "A lot happened because you disappeared. There's your start."],
+    silent: ["Yeah. A lot.", "Where do you want to start?", "Mm."] },
+
+  { hani: "I thought about reaching out when your father passed. I didn't. I've thought about that a lot — that I didn't.", subtext: "(He has thought about it more than a lot. It is one of the things he is most ashamed of. He is telling you because he decided, coming here, that he would not pretend it didn't happen.)", conflict: "Telling him it's fine", salvation: true,
+    soft: ["It wasn't fine — but it means everything that you're naming it now.", "That was a hard time. I won't say it didn't hurt. But thank you for saying this.", "I felt your absence then. I'm glad you didn't just pretend it away today."],
+    aggressive: ["Yeah. You weren't there. That one stayed with me.", "You thought about it and still didn't call. That's the part.", "It's a bit late to think about it now, isn't it."],
+    silent: ["It's okay.", "It was a long time ago.", "Don't worry about it."] },
+
+  { hani: "We had a falling out. I know we did. I just — I can't remember exactly what it was about. Can you?", subtext: "(He remembers. He is giving you the chance to say it first, or to let it go. He is not sure which he wants. He may want both.)", conflict: "Telling the full story of what it was about", salvation: false,
+    soft: ["Honestly? I'm not sure it matters anymore. We're here now.", "Bits of it. But maybe the 'what' matters less than the years we lost.", "I remember the feeling more than the reason. Let's not dig it all up."],
+    aggressive: ["Oh, I remember exactly. Want me to list it out?", "Convenient that you've forgotten.", "You don't remember? I've carried every detail."],
+    silent: ["Not really.", "It's hazy.", "Does it matter?"] },
+
+  { hani: "It's strange. I know everything about who you were at sixteen. I know almost nothing about who you are now.", subtext: "(He is naming the exact shape of the grief: the precision of old knowledge against the blankness of recent years. He has been thinking about this exact feeling for a long time.)", conflict: "Filling in everything at once", salvation: true,
+    soft: ["Then let's fix that, slowly. I'd like you to know who I am now.", "That's a beautiful, sad way to put it. I feel the same about you.", "Sixteen-year-old me would be glad you're still around. Let me introduce the new one."],
+    aggressive: ["Whose fault is that, though?", "You could've known, if you'd stuck around.", "Well, that's what happens when people vanish."],
+    silent: ["Yeah, it's been a while.", "People change.", "I guess."] },
+
+  { hani: "Do you still — are you still the same, in the ways that mattered? The things I remember about you — are those still there?", subtext: "(He is asking if the person he loved is still the person in front of him. He doesn't know how to bear it if the answer is no. He is asking anyway.)", conflict: "Giving a comprehensive answer", salvation: true,
+    soft: ["In the ways that mattered to you? I think so. I hope so.", "The core's still here. Bruised a little, but here. You'd still know me.", "Ask me anything. But yeah — the parts you loved didn't go anywhere."],
+    aggressive: ["Why do you care now, after all this time?", "You don't get to check if I'm still 'your' version of me.", "Maybe. You weren't around to watch, so you tell me."],
+    silent: ["Mostly.", "I think so.", "Some of it."] },
+
+  { hani: "I have this memory of us. We stayed up all night at your house and we talked about everything we were going to do. Everything. We had a whole list.", subtext: "(He still has the list. Not literally. But he remembers it clearly enough that it might as well be written down. He brings it up because he wants to know if you remember it too, and if you do, what you feel about where those things went.)", conflict: "Focusing on what didn't happen from the list", salvation: true,
+    soft: ["I remember that list. We were so sure of everything. I love that we were.", "God, the list. Some of it happened, some didn't. But that night was real.", "I think about that night too. We meant every word of it."],
+    aggressive: ["And how much of that list did we actually do? Exactly.", "Lists are easy at sixteen. Life had other plans.", "That list feels like a different lifetime now."],
+    silent: ["I remember.", "That was a long time ago.", "Yeah."] },
+
+  { hani: "I didn't handle things well. When we drifted. I could have tried harder. I know that now.", subtext: "(He is taking responsibility for the drift. This is generous. He is also slightly editing the story. Both things are true.)", conflict: "Sharing responsibility without letting him finish", salvation: false,
+    soft: ["Thank you for owning that. It wasn't all you, though — I drifted too.", "I hear you. We both let it slide. But it means a lot that you said it.", "That's generous of you. Honestly, neither of us fought for it."],
+    aggressive: ["You really didn't. You just stopped answering.", "No, you didn't try at all. Let's be accurate.", "Glad you finally see it."],
+    silent: ["Okay.", "It happens.", "We both did."] },
+
+  { hani: "I moved cities three times. My mother got sick. I got married and then — it's a long story. I don't use that as an excuse. I just want you to know things got complicated.", subtext: "(He is giving you context, not excuses. He knows the difference. He is checking if you know the difference.)", conflict: "Evaluating the context as an excuse", salvation: true,
+    soft: ["That's not an excuse — that's a life. A heavy one. I'm sorry I missed it.", "I can hear that wasn't easy. Thank you for trusting me with it.", "Life got complicated for both of us. I don't hold the silence against you."],
+    aggressive: ["Sounds like a lot of excuses lined up in a row.", "Everyone's busy. People still call the ones who matter.", "Complicated for everyone. We stopped trying anyway."],
+    silent: ["That's a lot.", "Okay.", "Life happens."] },
+
+  { hani: "You were my best friend. I don't think I've had one since. Not like that. I don't know if that's sad or just — what it is.", subtext: "(It's both. He is thirty-something years old and he is telling you that you were the last person who knew him completely. He has been carrying this and he is finally setting it down in front of you.)", conflict: "Rushing to tell him you haven't either", salvation: true,
+    soft: ["That… lands hard. You were mine too. The kind you only get once.", "I don't think I've had it either. But I'm not sure that's sad. It's rare.", "Hearing you say that undoes something in me. You mattered that much."],
+    aggressive: ["Then why did you let it go so easily?", "You say that now. You didn't act like it for five years.", "Best friends don't disappear, though, do they."],
+    silent: ["Yeah.", "Same, I guess.", "That's kind of you to say."] },
+
+  { hani: "I'm not asking for us to go back to how it was. I know that's not possible. I just — I missed you. I wanted to say that to your face.", subtext: "(He means this completely. He drove two hours to sit in this chair and say this sentence. He is not asking for anything in return. He just needed to say it.)", conflict: "Explaining why going back isn't possible", salvation: true,
+    soft: ["I missed you too. More than I let myself notice. Thank you for coming to say it.", "We don't need to go back. I'd just like a forward — with you in it.", "That means everything, hearing it to your face. I missed you too."],
+    aggressive: ["We couldn't go back even if we wanted to. Too much happened.", "Missing me didn't stop you from leaving, though.", "It's a nice thing to say. Saying it doesn't undo the years."],
+    silent: ["I missed you too.", "Okay.", "That's good to hear."] },
+
+  { hani: "Tell me something about your life. Something real. Not the LinkedIn version.", subtext: "(He is ready to receive the real version. He has been offering real things for half this conversation. He is ready for the exchange.)", conflict: "Giving the edited version anyway", salvation: true,
+    soft: ["Real version? I've been lonelier than I admit. You showing up helps.", "Okay, real: I built a whole life and forgot to keep the people in it. Like you.", "The true thing? I've missed having someone who knew the old me. That's you."],
+    aggressive: ["Why should I give you the real version?", "The real version is none of your business yet.", "You lost the right to the real version when you left."],
+    silent: ["Work's fine. Life's fine.", "Not much to tell.", "It's going okay."] },
+
+  { hani: "I think part of why I reached out is — I've been looking at my life lately and asking what actually mattered. And you keep coming up.", subtext: "(He has been doing this inventory for months. Possibly years. The answer surprised him. He is telling you because you deserve to know you made the list.)", conflict: "Minimizing that you came up", salvation: true,
+    soft: ["I keep coming up because we were real. That's not a small thing to me.", "I don't know what to say except thank you. You come up for me too.", "I'm glad I made the list. You're on mine, for what it's worth."],
+    aggressive: ["I 'come up.' That's a strange way to miss someone.", "Took you a whole life review to remember me, huh.", "I'm flattered I made the inventory."],
+    silent: ["That's nice.", "Huh.", "Okay."] },
+
+  { hani: "Are you happy? You don't have to answer if that's too much. But I'm asking genuinely.", subtext: "(He is asking genuinely. He has the kind of care that has survived years of silence and come out intact. This is rare. He is offering it to you now.)", conflict: "Deflecting with 'I'm fine'", salvation: true,
+    soft: ["Honestly? Some days. Less than I pretend. Thank you for actually asking.", "Not as much as I should be. It's good to be asked by someone who means it.", "I'm getting there. Strange how much that question means coming from you."],
+    aggressive: ["Why do you care if I'm happy now?", "That's a big question from someone who left.", "Happy enough. Doesn't really concern you."],
+    silent: ["I'm fine.", "I'm okay.", "Doing alright."] },
+
+  { hani: "I got married last year. I wanted to invite you. I didn't know if — I didn't know what we were to each other anymore. So I didn't.", subtext: "(He thought about inviting you for weeks. He almost called twice. He is telling you this because he wants you to know that even at the biggest moment of his year, you were present in his thinking.)", conflict: "Expressing hurt about not being invited", salvation: true,
+    soft: ["Congratulations, truly. I understand why you didn't. I'd have wondered too.", "That's huge. I'm happy for you. And I get the not-knowing.", "I wish I'd been there — but I understand. We'd lost the thread by then."],
+    aggressive: ["You got married and I wasn't even a maybe?", "So I didn't cross your mind enough to even ask.", "That stings, honestly. Married, and I find out now."],
+    silent: ["Congrats.", "That's nice.", "Oh. Okay."] },
+
+  { hani: "My wife knows who you are. I've talked about you. She asked why I lost touch with you and I didn't have a good answer.", subtext: "(He talked about you enough that his wife knows your name. He has no good answer for why you lost touch because the truth is it wasn't necessary — it just happened — and that's the most honest and most painful answer.)", conflict: "Trying to provide the good answer he doesn't have", salvation: false,
+    soft: ["There isn't a good answer. It just slipped, for both of us. That's the sad truth.", "Maybe there's no good answer. It wasn't dramatic. It just… faded.", "I love that she knows my name. The 'why' doesn't need a clean story."],
+    aggressive: ["The answer is you stopped calling. That's it.", "I could give her the answer, if you want it.", "There's an answer. You just don't like it."],
+    silent: ["Huh.", "That's sweet of you.", "I don't know what to say."] },
+
+  { hani: "I'd like to not lose touch again. I know that sounds — I know it's not guaranteed. I just want to say that I'd like it.", subtext: "(He is making a low-stakes, honest request. He is not asking for a promise. He is telling you his preference and leaving the door open.)", conflict: "Making a bigger promise than he asked for", salvation: true,
+    soft: ["I'd like that too. No grand promises — just, let's actually try this time.", "Me too. We don't have to swear anything. Just keep showing up.", "I'd like it too. Let's just take it one coffee at a time."],
+    aggressive: ["I'm not promising anything I can't keep this time.", "We'll see if you mean it this round.", "Easy to say. Last time you said nothing and just left."],
+    silent: ["Sure.", "We'll see.", "Yeah, maybe."] },
+
+  { hani: "You know what I remember most? You used to laugh in a way that made everyone else want to laugh too. I haven't thought about that in years and now I can't stop thinking about it.", subtext: "(He is giving you a gift: a specific memory of who you were, held carefully by someone who chose to keep it. This is what it means to be known.)", conflict: "Minimizing the memory", salvation: true,
+    soft: ["I'd forgotten that about myself. You kept it for me. Thank you.", "God, that means a lot — that you held onto that. You made me laugh like that.", "I don't laugh like that much anymore. Maybe being around you brings it back."],
+    aggressive: ["That was a long time ago. Different person.", "Why bring up old stuff like that now?", "Nice memory. Doesn't change the years of silence."],
+    silent: ["Ha. Did I?", "That's nice.", "I don't really remember that."] },
+
+  { hani: "I'm really glad I sent that message. However many times I had to write it.", subtext: "(He is ending where he began. He is telling you the cost was worth it. He wants you to know that this — sitting here, talking — was the point.)", conflict: "Focusing on the awkwardness of getting here", salvation: true,
+    soft: ["I'm really glad you did too. This was the point — sitting here, like this.", "Whatever it took, it was worth it. I needed this more than I knew.", "Me too. Don't let it be another five years, okay?"],
+    aggressive: ["Took you long enough to hit send.", "Seven drafts for one coffee. Classic you.", "Glad one of us finally bothered."],
+    silent: ["Yeah.", "Me too, I guess.", "Glad you did."] },
+
+  { hani: "Same time next month?", subtext: "(He is asking for continuity. He is asking plainly. There is no subtext here. He means exactly what he said.)", conflict: "Making it uncertain", salvation: true,
+    soft: ["Same time next month. I'll be here. I mean it.", "Yes. Put it in the calendar. I'm not disappearing this time.", "Absolutely. Next month. And the one after that."],
+    aggressive: ["Let's not over-promise. We'll see how it goes.", "Maybe. If life doesn't get 'complicated' again.", "We'll figure it out. No guarantees."],
+    silent: ["Maybe.", "We'll see.", "I'll try."] },
+
+  { hani: "Good. I'll be there.", subtext: "(He will be there. He was always going to be there. You both knew that when you sat down. Everything in between was just two people finding their way back to what they already knew.)", conflict: "Adding anything unnecessary", salvation: true,
+    soft: ["So will I. It's really good to have you back.", "Me too. Thank you — for finding your way back to this.", "Good. I'll be there too. I'm glad we found our way here."],
+    aggressive: ["Don't make me regret believing you this time.", "We'll see if you actually show.", "Just — actually be there, okay?"],
+    silent: ["Okay.", "See you then.", "Good."] }
 ];
 
 // ─── Scenario registry ───────────────────────────────────────────────────────
