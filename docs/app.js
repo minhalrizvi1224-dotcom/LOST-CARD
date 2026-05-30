@@ -37,6 +37,10 @@ document.addEventListener('authReady', (e) => {
   if (e && e.detail && !e.detail.isAdmin) {
     _checkAdminMessagesBadge();
   }
+
+  // Re-render chat list now that currentUser is loaded — shows correct
+  // play counts (X/10) and lock state on default + custom chats
+  renderChatList();
 });
 
 // ── Firebase Cloud Function proxy (Step 11) ───────────────────────────
@@ -1871,24 +1875,56 @@ function _populateSettings() {
         : '—';
       planEl.innerHTML = `<span style="color:var(--c-green)">✨ Upgraded</span> &nbsp;·&nbsp; <span style="color:var(--muted);font-size:12px">Renews ${expiry}</span>`;
     } else {
-      const used = hbCountLocal || 0;
-      const pct  = Math.min(100, (used / HB_FREE_LIMIT) * 100);
+      const used      = hbCountLocal || 0;
+      const pct       = Math.min(100, (used / HB_FREE_LIMIT) * 100);
       const remaining = Math.max(0, HB_FREE_LIMIT - used);
-      const limitColor = used >= HB_FREE_LIMIT ? 'var(--c-red)' : used >= 40 ? 'var(--c-orange)' : 'var(--muted)';
-      const barColor   = pct >= 100 ? 'var(--c-red)' : pct >= 80 ? 'var(--c-orange)' : 'var(--accent)';
-      const statusHtml = used >= HB_FREE_LIMIT
-        ? '<span style="color:var(--c-red);font-weight:700">⚠ Limit reached</span> — upgrade to keep chatting with Hair Band'
-        : '<span style="color:var(--muted)">' + remaining + ' message' + (remaining === 1 ? '' : 's') + ' remaining</span>';
-      const btnText = used >= HB_FREE_LIMIT ? 'Upgrade Now — Limit Reached' : 'Upgrade for Unlimited Access';
-      planEl.innerHTML = '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px">'
-        + '<span style="font-weight:600">Free Plan</span>'
+      const limitHit  = used >= HB_FREE_LIMIT;
+      const limitColor = limitHit ? 'var(--red)' : used >= 40 ? 'var(--orange)' : 'var(--muted)';
+      const barColor   = pct >= 100 ? 'var(--red)' : pct >= 80 ? 'var(--orange)' : 'var(--accent)';
+
+      // Progression info
+      const done        = getDefaultsCompleted().length;
+      const customOpen  = isCustomUnlocked();
+      const progColor   = customOpen ? 'var(--green)' : 'var(--accent)';
+      const progLabel   = customOpen
+        ? '🔓 Custom chats unlocked'
+        : `🔒 ${done}/${UNLOCK_THRESHOLD} default chats to unlock customs`;
+
+      const statusHtml = limitHit
+        ? '<span style="color:var(--red);font-weight:700">⚠ Limit reached</span> — upgrade to keep chatting'
+        : '<span style="color:var(--muted)">' + remaining + ' AI message' + (remaining === 1 ? '' : 's') + ' remaining</span>';
+      const btnText = limitHit ? 'Upgrade Now — Limit Reached' : 'Upgrade for Unlimited Access';
+
+      planEl.innerHTML =
+        // FREE badge
+        '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">'
+        + '<span style="display:inline-flex;align-items:center;gap:5px;background:rgba(139,148,158,.12);border:1px solid rgba(139,148,158,.25);color:var(--muted);font-size:11px;font-weight:800;padding:4px 12px;border-radius:20px;letter-spacing:1px">🔓 FREE ACCOUNT</span>'
+        + '<span style="font-size:11px;color:var(--muted)">· Limited features</span>'
+        + '</div>'
+        // Message usage
+        + '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px">'
+        + '<span style="font-weight:600;color:var(--text)">AI Messages</span>'
         + '<span style="color:' + limitColor + ';font-weight:700">' + used + ' / ' + HB_FREE_LIMIT + ' used</span>'
         + '</div>'
-        + '<div style="height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-bottom:6px">'
-        + '<div style="height:100%;width:' + pct + '%;background:' + barColor + ';border-radius:3px;transition:width 0.4s"></div>'
+        + '<div style="height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-bottom:5px">'
+        + '<div style="height:100%;width:' + pct + '%;background:' + barColor + ';border-radius:3px;transition:width .4s"></div>'
         + '</div>'
-        + '<div style="font-size:11px;color:var(--muted);margin-bottom:10px">' + statusHtml + '</div>'
-        + '<button onclick="closeSettingsModal();showUpgradeModal()" style="width:100%;padding:9px;background:linear-gradient(90deg,var(--accent),#7c3aed);border:none;color:#fff;font-size:12px;font-weight:700;border-radius:8px;cursor:pointer;letter-spacing:0.3px">'
+        + '<div style="font-size:11px;margin-bottom:12px">' + statusHtml + '</div>'
+        // Custom chats progression
+        + '<div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:11px">'
+        + '<div style="display:flex;justify-content:space-between;margin-bottom:6px">'
+        + '<span style="font-weight:700;color:var(--text)">Default Chat Progress</span>'
+        + '<span style="color:' + progColor + ';font-weight:700">' + done + ' / 7</span>'
+        + '</div>'
+        + '<div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:7px">'
+        + '<div style="height:100%;width:' + Math.round(done/7*100) + '%;background:' + progColor + ';border-radius:2px;transition:width .4s"></div>'
+        + '</div>'
+        + '<span style="color:' + progColor + ';font-weight:600">' + progLabel + '</span>'
+        + '</div>'
+        // Replay limit info
+        + '<div style="font-size:11px;color:var(--muted);margin-bottom:12px">Default chats: max <strong style="color:var(--text)">' + DEFAULT_PLAY_LIMIT + ' plays</strong> each · Custom chats: shared <strong style="color:var(--text)">' + HB_FREE_LIMIT + ' AI messages</strong></div>'
+        // Upgrade button
+        + '<button onclick="closeSettingsModal();showUpgradeModal()" style="width:100%;padding:9px;background:linear-gradient(90deg,var(--accent),#7c3aed);border:none;color:#fff;font-size:12px;font-weight:700;border-radius:8px;cursor:pointer;letter-spacing:.3px">'
         + '✨ ' + btnText
         + '</button>';
     }
