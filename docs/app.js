@@ -2320,17 +2320,26 @@ function _getUnifiedPool() {
 // Gemini free TPM limit = 1,000,000/min → handles it with no issues.
 // 3 Gemini keys = 3M TPM/min → ~250 HB requests/min → more than enough.
 function _getHBPool() {
-  // ── GEMINI ONLY for Hair Band ──────────────────────────────────────────
+  // ── GEMINI + CEREBRAS for Hair Band (NO GROQ) ─────────────────────────
   // HB system prompt = ~12k tokens.
-  // Groq ANY model: 6k-20k TPM → HB request ALWAYS exceeds limit → 413/429.
-  // Groq is REMOVED from HB pool entirely — it never works for HB.
-  // Gemini free: 1M TPM/min → easily handles HB, 15 RPM per key.
-  // 10 Gemini keys = 150 RPM → 2.5 HB requests/sec → more than enough.
+  // Groq: REMOVED — all Groq models fail with 413/429 on HB's prompt size.
+  // Gemini:   15 RPM / key,  1M TPM/min  → primary
+  // Cerebras: 30 RPM / key, 60k TPM/min  → fallback when Gemini rate-limits
+  //
+  // With 10 Gemini + N Cerebras keys, HB has redundancy across two APIs
+  // so when Gemini 429s (minute quota) Cerebras takes over immediately.
   const geminiList = (typeof poolGeminiKeys !== 'undefined' && poolGeminiKeys.length)
     ? [...poolGeminiKeys] : [];
   const localGemini = localStorage.getItem('lc_gemini_key');
   if (localGemini && !geminiList.includes(localGemini)) geminiList.push(localGemini);
-  return geminiList.map(k => ({ key: k, provider: 'gemini' }));
+
+  const cerebrasList = (typeof poolCerebrasKeys !== 'undefined' && poolCerebrasKeys.length)
+    ? [...poolCerebrasKeys] : [];
+
+  return [
+    ...geminiList.map(k  => ({ key: k, provider: 'gemini'   })),  // primary
+    ...cerebrasList.map(k => ({ key: k, provider: 'cerebras' }))   // fallback
+  ];
 }
 
 // Kept for backward compat — returns just the key string of the current entry
