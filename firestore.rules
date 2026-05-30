@@ -12,10 +12,21 @@ service cloud.firestore {
     }
 
     // ── Users ──────────────────────────────────────────────────────────
+    // Privileged fields only the admin (Admin SDK / admin panel) may change.
+    // A user updating their OWN doc cannot touch these — blocks self-promotion
+    // to admin, self-granting premium, clearing suspensions/warnings, etc.
+    function safeUserUpdate() {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+        'isAdmin','suspended','hbPlan','planExpiry','upgradePlan',
+        'upgradedAt','upgradeApprovedBy','warningCount','warnings'
+      ]);
+    }
     match /users/{uid} {
       allow read:   if isOwner(uid) || isAdmin();
-      allow create: if isOwner(uid);
-      allow update: if isOwner(uid) || isAdmin();
+      allow create: if isOwner(uid)
+                    && request.resource.data.get('isAdmin', false) == false
+                    && request.resource.data.get('hbPlan', '') != 'upgraded';
+      allow update: if isAdmin() || (isOwner(uid) && safeUserUpdate());
 
       // Admin messages — admin writes, owner reads + marks read
       match /adminMessages/{msgId} {
