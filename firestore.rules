@@ -21,12 +21,18 @@ service cloud.firestore {
         'upgradedAt','upgradeApprovedBy','warningCount','warnings'
       ]);
     }
+    // hbCount (free-message counter) may only go UP for a self-update — stops
+    // a user resetting it to 0 in the console to get unlimited free messages.
+    function hbCountNotReset() {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(['hbCount'])
+        || request.resource.data.hbCount >= resource.data.hbCount;
+    }
     match /users/{uid} {
       allow read:   if isOwner(uid) || isAdmin();
       allow create: if isOwner(uid)
                     && request.resource.data.get('isAdmin', false) == false
                     && request.resource.data.get('hbPlan', '') != 'upgraded';
-      allow update: if isAdmin() || (isOwner(uid) && safeUserUpdate());
+      allow update: if isAdmin() || (isOwner(uid) && safeUserUpdate() && hbCountNotReset());
 
       // Admin messages — admin writes, owner reads + marks read
       match /adminMessages/{msgId} {
@@ -39,7 +45,8 @@ service cloud.firestore {
 
     // ── Sessions ───────────────────────────────────────────────────────
     match /sessions/{id} {
-      allow create: if request.auth != null;
+      // Must stamp your own uid — can't write sessions under someone else's id
+      allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
       allow read:   if isAdmin() || (request.auth != null && resource.data.uid == request.auth.uid);
       allow delete: if isAdmin();
     }
