@@ -89,6 +89,8 @@
     radial-gradient(ellipse 60% 30% at 90% 110%, rgba(130,80,223,0.03) 0%, transparent 60%);
 }
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;800&display=swap');
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html { scroll-behavior: smooth; }
@@ -96,7 +98,7 @@ html { scroll-behavior: smooth; }
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 14px;
   line-height: 1.5;
   min-height: 100vh;
@@ -400,8 +402,9 @@ body {
 }
 
 .hero-title {
+  font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
   font-size: clamp(48px, 8vw, 84px);
-  font-weight: 900;
+  font-weight: 800;
   letter-spacing: 10px;
   background: linear-gradient(135deg, #79BBFF 0%, var(--blue) 30%, var(--devotion) 70%, #E5A0F5 100%);
   background-size: 200% 200%;
@@ -421,6 +424,120 @@ body {
   margin-bottom: 36px;
   animation: fadeInUp 0.6s 0.2s ease-out both;
 }
+
+/* ── HANGING CARDS SCENE ── */
+.hang-scene {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  height: 230px;
+  margin: 0 auto 8px;
+}
+
+/* Each hanging unit: rope + card, rotates from top centre */
+.hang-unit {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform-origin: top center;
+  opacity: 0;
+}
+.hang-left   { left: 42px;  top: 44px; }
+.hang-center { left: 50%;   top: 0;    transform: translateX(-50%); }
+.hang-right  { right: 42px; top: 44px; }
+
+/* Rope — fades from invisible at top to visible at bottom */
+.hu-rope {
+  width: 1.5px;
+  height: 74px;
+  background: linear-gradient(to bottom,
+    transparent 0%,
+    rgba(139,148,158,0.25) 35%,
+    rgba(139,148,158,0.55) 100%);
+}
+.hu-rope-short { height: 44px; } /* center card — shorter rope, appears from text */
+
+/* Card body */
+.hu-card {
+  width: 52px;
+  height: 72px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Space Grotesk', 'Consolas', monospace;
+  font-size: 22px;
+  font-weight: 800;
+  position: relative;
+}
+.hu-card::after {                              /* subtle inner glow */
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  opacity: 0.06;
+}
+.hu-d {
+  background: #0D1117;
+  border: 1.8px solid #C678DD;
+  color: #C678DD;
+  box-shadow: 0 4px 22px rgba(198,120,221,0.18), 0 0 0 0 rgba(198,120,221,0.4);
+}
+.hu-d::after { background: #C678DD; }
+
+.hu-e {
+  background: #0D1117;
+  border: 1.8px solid #56B6C2;
+  color: #56B6C2;
+  box-shadow: 0 4px 22px rgba(86,182,194,0.18), 0 0 0 0 rgba(86,182,194,0.4);
+}
+.hu-e::after { background: #56B6C2; }
+
+.hu-p {
+  background: #0D1117;
+  border: 1.8px solid #98C379;
+  color: #98C379;
+  box-shadow: 0 4px 22px rgba(152,195,121,0.18), 0 0 0 0 rgba(152,195,121,0.4);
+}
+.hu-p::after { background: #98C379; }
+
+/* Drop-in animation */
+@keyframes hangDrop {
+  0%   { opacity: 0; transform: translateY(-90px); }
+  60%  { opacity: 1; transform: translateY(8px); }
+  80%  { transform: translateY(-4px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+/* Center card drop needs to account for its translateX */
+@keyframes hangDropCenter {
+  0%   { opacity: 0; transform: translateX(-50%) translateY(-90px); }
+  60%  { opacity: 1; transform: translateX(-50%) translateY(8px); }
+  80%  { transform: translateX(-50%) translateY(-4px); }
+  100% { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* Continuous sway — gentle, like in breeze */
+@keyframes sway {
+  0%   { transform: rotate(-2.2deg); }
+  50%  { transform: rotate( 2.2deg); }
+  100% { transform: rotate(-2.2deg); }
+}
+@keyframes swayCenter {
+  0%   { transform: translateX(-50%) rotate(-1.8deg); }
+  50%  { transform: translateX(-50%) rotate( 1.8deg); }
+  100% { transform: translateX(-50%) rotate(-1.8deg); }
+}
+
+/* States: .dropping → .swaying applied by JS */
+.hang-unit.dropping { opacity: 1; }
+.hang-unit.swaying  { opacity: 1; animation: sway 3.8s ease-in-out infinite; }
+.hang-center.swaying { animation: swayCenter 3.8s ease-in-out infinite; }
+
+/* Light-theme card adjustments */
+[data-theme="light"] .hu-d { background: #fff; }
+[data-theme="light"] .hu-e { background: #fff; }
+[data-theme="light"] .hu-p { background: #fff; }
 
 /* ── WORLD GLOBE SCENE ── */
 .world-scene {

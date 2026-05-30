@@ -851,92 +851,49 @@ document.addEventListener('DOMContentLoaded', () => {
 // → final state = the existing globe SVG (D, E, P cards on the equator)
 // ══════════════════════════════════════════════════════════════════════
 function runHeroCardAnimation() {
-  const c0     = document.getElementById('hfc0');   // D - Devotion
-  const c1     = document.getElementById('hfc1');   // E - Excitement
-  const c2     = document.getElementById('hfc2');   // P - Presence
-  const line   = document.getElementById('hfConnLine');
-  const globe  = document.getElementById('worldGlobeSvg');
-  const wrap   = document.getElementById('heroFlyWrap');
-  if (!c0 || !c1 || !c2 || !globe || !wrap) return;
+  const hu0 = document.getElementById('hu0'); // D - left
+  const hu1 = document.getElementById('hu1'); // E - center
+  const hu2 = document.getElementById('hu2'); // P - right
+  if (!hu0 || !hu1 || !hu2) return;
 
-  const cards  = [c0, c1, c2];
-  const spring = 'cubic-bezier(0.34, 1.56, 0.64, 1)';
-  const smooth = 'cubic-bezier(0.4, 0, 0.2, 1)';
+  const units   = [hu0, hu1, hu2];
+  const isCenter = [false, true, false];
+  const bounce   = 'cubic-bezier(0.34, 1.42, 0.64, 1)';
 
-  // ── Reset to start state ─────────────────────────────────────────────
-  globe.classList.remove('globe-revealing');
-  globe.style.opacity    = '0';
-  globe.style.transition = 'none';
-
-  wrap.style.display    = '';
-  wrap.style.opacity    = '1';
-  wrap.style.transition = 'none';
-
-  cards.forEach(el => {
-    el.classList.remove('hf-landed');
-    el.style.transition = 'none';
-    el.style.opacity    = '0';
+  // ── Reset ────────────────────────────────────────────────────────────
+  units.forEach((el, i) => {
+    el.classList.remove('swaying', 'dropping');
     el.style.animation  = 'none';
+    el.style.opacity    = '0';
+    el.style.transition = 'none';
+    // Center preserves its translateX(-50%)
+    el.style.transform  = isCenter[i]
+      ? 'translateX(-50%) translateY(-110px)'
+      : 'translateY(-110px)';
   });
-  if (line) {
-    line.style.transition = 'none';
-    line.style.opacity    = '0';
-    line.style.transform  = 'scaleX(0)';
-  }
 
-  // ── Phase 0: Cards start far off-screen, tiny ───────────────────────
-  const starts = [
-    'translate(-250px, -210px) rotate(-36deg) scale(0.18)',  // D - top-left
-    'translate(  6px,  240px)  rotate( 20deg) scale(0.18)',  // E - bottom
-    'translate( 250px, -210px) rotate( 36deg) scale(0.18)'   // P - top-right
-  ];
-  cards.forEach((el, i) => { el.style.transform = starts[i]; });
-
-  // ── Phase 1: Staggered spring fly-in → each card lands on its spot ───
-  const flyDelays = [180, 360, 540];
-  cards.forEach((el, i) => {
+  // ── Phase 1: staggered drop-in ───────────────────────────────────────
+  const dropDelays = [200, 420, 640]; // left first, then center, then right
+  units.forEach((el, i) => {
     setTimeout(() => {
-      el.style.transition = `transform 0.68s ${spring}, opacity 0.32s ease`;
-      el.style.transform  = 'translate(0,0) rotate(0deg) scale(1)';
+      el.style.transition = `transform 0.75s ${bounce}, opacity 0.3s ease`;
       el.style.opacity    = '1';
-      // Landing flash - bright glow pulse when card snaps into place
-      setTimeout(() => {
-        el.classList.add('hf-landed');
-        setTimeout(() => el.classList.remove('hf-landed'), 600);
-      }, 680);
-    }, flyDelays[i]);
+      el.style.transform  = isCenter[i] ? 'translateX(-50%) translateY(0)' : 'translateY(0)';
+    }, dropDelays[i]);
   });
 
-  // ── Phase 2: Connection line draws from centre outward ───────────────
-  setTimeout(() => {
-    if (line) {
-      line.style.transition = `opacity 0.25s ease, transform 0.48s ${smooth}`;
-      line.style.opacity    = '1';
-      line.style.transform  = 'scaleX(1)';
-    }
-  }, 820);
-
-  // ── Phase 3: Globe reveals with scale + fade (cinematic) ─────────────
-  // Clear inline opacity first - CSS animation keyframes can't override inline styles
-  setTimeout(() => {
-    globe.style.opacity    = '';
-    globe.style.transition = '';
-    globe.classList.add('globe-revealing');
-  }, 1380);
-
-  // ── Phase 4: Overlay fades out - seamless handoff to SVG ─────────────
-  setTimeout(() => {
-    wrap.style.transition = 'opacity 0.6s ease';
-    wrap.style.opacity    = '0';
-  }, 2300);
-
-  // ── Phase 5: Cleanup - remove overlay, restore globe ─────────────────
-  setTimeout(() => {
-    wrap.style.display = 'none';
-    globe.classList.remove('globe-revealing');
-    globe.style.opacity    = '';
-    globe.style.transition = '';
-  }, 3000);
+  // ── Phase 2: after landing, start gentle sway (different phases) ─────
+  const swayDelays  = [1050, 1200, 1350];
+  const swayPhases  = ['0s', '-1.4s', '-2.8s']; // offset so they don't all move together
+  units.forEach((el, i) => {
+    setTimeout(() => {
+      el.style.transition = '';
+      el.style.transform  = '';
+      el.style.animation  = '';
+      el.classList.add('swaying');
+      el.style.animationDelay = swayPhases[i];
+    }, swayDelays[i]);
+  });
 }
 
 // ══════════════════════════════════════════════════════════════════════

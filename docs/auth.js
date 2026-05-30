@@ -252,11 +252,27 @@ function applyTheme(theme) {
   if (btn) btn.textContent = theme === 'dark' ? '☀' : '🌙';
 }
 
+// ── Initials avatar helper ────────────────────────────────────────────
+function _initialsAvatar(name, size) {
+  const n = (name || 'U').trim();
+  const parts = n.split(/\s+/);
+  const initials = parts.length >= 2
+    ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+    : n.slice(0, 2).toUpperCase();
+  const palettes = [
+    ['#C678DD','#8250DF'], ['#56B6C2','#0969DA'], ['#98C379','#1A7F37'],
+    ['#F0883E','#BC4C00'], ['#F85149','#CF222E'], ['#E3B341','#9A6700'],
+    ['#58A6FF','#0969DA']
+  ];
+  const [c1, c2] = palettes[(n.charCodeAt(0) || 0) % palettes.length];
+  const fs = size > 40 ? Math.round(size * 0.38) : Math.round(size * 0.42);
+  return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:linear-gradient(135deg,${c1},${c2});display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-size:${fs}px;font-weight:800;color:#fff;flex-shrink:0">${initials}</div>`;
+}
+
 // ── User Badge ────────────────────────────────────────────────────────
 function renderUserBadge() {
   const badge = document.getElementById('userBadge');
   if (!badge) return;
-  const emoji   = (currentUser && currentUser.avatarEmoji) || '🎭';
   const name    = (currentUser && currentUser.displayName) || 'User';
   const picData = currentUser && currentUser.uid ? localStorage.getItem('lc_pic_' + currentUser.uid) : null;
 
@@ -264,7 +280,7 @@ function renderUserBadge() {
   if (picData) {
     inner = `<img src="${picData}" alt="${name}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;display:block"/>`;
   } else {
-    inner = `<span style="font-size:18px;line-height:1">${emoji}</span>`;
+    inner = _initialsAvatar(name, 32);
   }
   badge.innerHTML = `<div class="user-badge-btn" onclick="toggleProfileDropdown()" title="${name}" style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;overflow:hidden">${inner}</div>`;
 }
@@ -310,9 +326,8 @@ function openProfileModal() {
   const p = currentUser || {};
 
   // Basic fields
-  document.getElementById('profileName').value     = p.displayName || '';
-  document.getElementById('profileEmail').value    = p.email || '';
-  document.getElementById('profileEmojiPrev').textContent = p.avatarEmoji || '🎭';
+  document.getElementById('profileName').value  = p.displayName || '';
+  document.getElementById('profileEmail').value = p.email || '';
 
   // Extended fields from localStorage
   const uid = p.uid || '';
@@ -320,17 +335,27 @@ function openProfileModal() {
   document.getElementById('profilePhone').value    = localStorage.getItem('lc_phone_' + uid) || '';
   document.getElementById('profileLocation').value = localStorage.getItem('lc_location_' + uid) || '';
 
-  // Profile pic
-  const picData = uid ? localStorage.getItem('lc_pic_' + uid) : null;
-  const imgEl   = document.getElementById('profilePicImg');
-  const emojiEl = document.getElementById('profileEmojiPrev');
+  // Profile pic or initials avatar
+  const picData    = uid ? localStorage.getItem('lc_pic_' + uid) : null;
+  const imgEl      = document.getElementById('profilePicImg');
+  const initialsEl = document.getElementById('profileInitialsAvatar');
   if (picData) {
     imgEl.src = picData;
     imgEl.style.display = 'block';
-    emojiEl.style.display = 'none';
+    if (initialsEl) initialsEl.style.display = 'none';
   } else {
     imgEl.style.display = 'none';
-    emojiEl.style.display = 'block';
+    if (initialsEl) {
+      initialsEl.style.display = 'flex';
+      initialsEl.innerHTML = _initialsAvatar(p.displayName || 'U', 96)
+        .replace(/^<div /, '<div style="width:100%;height:100%;border-radius:50%;')
+        .replace(/width:\d+px;height:\d+px;border-radius:50%;/, '');
+      // simpler: just update the text
+      const nm = (p.displayName || 'U').trim();
+      const parts = nm.split(/\s+/);
+      const ini = parts.length >= 2 ? (parts[0][0]+parts[parts.length-1][0]).toUpperCase() : nm.slice(0,2).toUpperCase();
+      initialsEl.textContent = ini;
+    }
   }
 
   document.getElementById('profileModal').style.display = 'flex';
@@ -338,7 +363,6 @@ function openProfileModal() {
 
 async function saveProfile() {
   const name     = document.getElementById('profileName').value.trim();
-  const emoji    = document.getElementById('profileEmojiPrev').textContent;
   const bio      = document.getElementById('profileBio').value.trim();
   const phone    = document.getElementById('profilePhone').value.trim();
   const location = document.getElementById('profileLocation').value.trim();
@@ -348,13 +372,11 @@ async function saveProfile() {
   btn.disabled = true; btn.textContent = 'Saving...';
 
   currentUser.displayName = name;
-  currentUser.avatarEmoji = emoji;
 
   const uid = currentUser.uid || '';
 
   // Save to localStorage
   if (uid) {
-    localStorage.setItem('lc_emoji_' + uid,    emoji);
     localStorage.setItem('lc_bio_' + uid,      bio);
     localStorage.setItem('lc_phone_' + uid,    phone);
     localStorage.setItem('lc_location_' + uid, location);
@@ -383,16 +405,6 @@ async function saveProfile() {
   btn.disabled = false; btn.textContent = 'Save Profile';
 }
 
-function pickProfileEmoji(emoji) {
-  document.getElementById('profileEmojiPrev').textContent = emoji;
-  document.querySelectorAll('.ep-emoji-profile').forEach(b => b.classList.remove('selected-emoji'));
-  // Hide profile pic, show emoji
-  const imgEl = document.getElementById('profilePicImg');
-  if (imgEl) { imgEl.style.display = 'none'; document.getElementById('profileEmojiPrev').style.display = 'block'; }
-  // Clear stored pic
-  if (currentUser && currentUser.uid) localStorage.removeItem('lc_pic_' + currentUser.uid);
-}
-
 // ── Profile Picture ───────────────────────────────────────────────────
 function handleProfilePicChange(input) {
   const file = input.files[0];
@@ -401,26 +413,19 @@ function handleProfilePicChange(input) {
   reader.onload = (e) => {
     const img = new Image();
     img.onload = () => {
-      // Resize to 120x120 via canvas
       const canvas = document.createElement('canvas');
       canvas.width = 120; canvas.height = 120;
       const ctx = canvas.getContext('2d');
-      // Crop center square
       const size = Math.min(img.width, img.height);
-      const sx   = (img.width  - size) / 2;
-      const sy   = (img.height - size) / 2;
+      const sx = (img.width - size) / 2, sy = (img.height - size) / 2;
       ctx.drawImage(img, sx, sy, size, size, 0, 0, 120, 120);
       const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-      // Store in localStorage
-      if (currentUser && currentUser.uid) {
-        localStorage.setItem('lc_pic_' + currentUser.uid, dataUrl);
-      }
-      // Show preview
-      const imgEl   = document.getElementById('profilePicImg');
-      const emojiEl = document.getElementById('profileEmojiPrev');
+      if (currentUser && currentUser.uid) localStorage.setItem('lc_pic_' + currentUser.uid, dataUrl);
+      const imgEl      = document.getElementById('profilePicImg');
+      const initialsEl = document.getElementById('profileInitialsAvatar');
       imgEl.src = dataUrl;
       imgEl.style.display = 'block';
-      emojiEl.style.display = 'none';
+      if (initialsEl) initialsEl.style.display = 'none';
     };
     img.src = e.target.result;
   };
@@ -429,10 +434,17 @@ function handleProfilePicChange(input) {
 
 function clearProfilePic() {
   if (currentUser && currentUser.uid) localStorage.removeItem('lc_pic_' + currentUser.uid);
-  const imgEl   = document.getElementById('profilePicImg');
-  const emojiEl = document.getElementById('profileEmojiPrev');
-  if (imgEl)   { imgEl.src = ''; imgEl.style.display = 'none'; }
-  if (emojiEl) emojiEl.style.display = 'block';
+  const imgEl      = document.getElementById('profilePicImg');
+  const initialsEl = document.getElementById('profileInitialsAvatar');
+  if (imgEl) { imgEl.src = ''; imgEl.style.display = 'none'; }
+  if (initialsEl) {
+    initialsEl.style.display = 'flex';
+    const nm = (currentUser && currentUser.displayName) || 'U';
+    const parts = nm.trim().split(/\s+/);
+    initialsEl.textContent = parts.length >= 2
+      ? (parts[0][0] + parts[parts.length-1][0]).toUpperCase()
+      : nm.slice(0,2).toUpperCase();
+  }
 }
 
 // ── Save session to Firestore ─────────────────────────────────────────
