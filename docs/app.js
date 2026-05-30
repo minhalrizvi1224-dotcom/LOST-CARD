@@ -3994,10 +3994,25 @@ async function sendAIMessage() {
     typingEl.remove();
     isAITyping = false;
     const errMsg = (err && err.message) || '';
-    const isRateErr = /rate.?limit|429|busy|quota|exhaust|too.many|capacity|HTTP 429/i.test(errMsg);
+    // Log full error for admin diagnosis
+    if (currentUser && currentUser.isAdmin) {
+      const pool = _getHBPool();
+      console.error('[HB Error]', errMsg, '| Pool size:', pool.length,
+        '| Gemini keys:', pool.filter(e=>e.provider==='gemini').length,
+        '| Groq keys:', pool.filter(e=>e.provider==='groq-hb').length);
+    }
+    const isRateErr = /rate.?limit|429|busy|quota|exhaust|too.many|capacity|HTTP 429|TPM|resource/i.test(errMsg);
     const isKeyErr  = /HTTP 4[0-9][0-9]|invalid.*key|api.key|permission|forbidden|not.*found/i.test(errMsg);
     if (isRateErr || isKeyErr) {
       _hbRateRetry(text);
+    } else if (!errMsg || errMsg === 'All API keys unavailable.') {
+      // Pool empty or all keys failed — show specific message
+      const pool = _getHBPool();
+      addMessage('them', 'Hair Band',
+        pool.length === 0
+          ? 'No API keys configured. Admin: add Gemini keys in the admin panel under Pool Keys.'
+          : `All ${pool.length} keys are currently rate-limited. Try again in a moment.`
+      );
     } else {
       addMessage('them', 'Hair Band', _friendlyAPIError(err, 'Hair Band'));
     }
