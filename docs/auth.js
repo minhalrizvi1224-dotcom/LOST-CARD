@@ -85,7 +85,7 @@ function initAuth() {
     currentUser = {
       uid:              user.uid,
       email:            user.email,
-      displayName:      user.displayName || user.email.split('@')[0],
+      displayName:      user.displayName || user.email?.split('@')[0] || 'User',
       avatarEmoji:      localStorage.getItem('lc_emoji_' + user.uid) || '🎭',
       isAdmin:          docData.isAdmin === true,
       hbCount:               docData.hbCount               || 0,
@@ -508,17 +508,18 @@ async function saveSessionToFirestore(sessionData, chatId, displayNameOverride) 
 async function _autoPurgeSessions(uid) {
   const snap = await firebaseDB.collection('sessions')
     .where('uid', '==', uid)
+    .orderBy('savedAt', 'asc')
     .get();
-  if (snap.size < 100) return; // under the limit — nothing to do
+  if (snap.size < 100) return;
 
-  // 100+ sessions: delete ALL of them in batches of 500
+  // Keep newest 50, delete the oldest ones
+  const toDelete = snap.docs.slice(0, snap.size - 50);
   const batch = firebaseDB.batch();
-  snap.forEach(doc => batch.delete(doc.ref));
+  toDelete.forEach(doc => batch.delete(doc.ref));
   await batch.commit();
 
-  // Reset the session counter on the user doc
   await firebaseDB.collection('users').doc(uid).update({
-    totalSessions: 0
+    totalSessions: 50
   }).catch(() => {});
 }
 

@@ -6,7 +6,7 @@
   <script>
     (function(){
       // ── MAINTENANCE MODE — set to false when update is done ──
-      var MAINTENANCE = true;
+      var MAINTENANCE = false;
       var p = new URLSearchParams(window.location.search);
       if(p.get('dev')==='2443141856934ee5') sessionStorage.setItem('lc_preview','1');
       if(MAINTENANCE && sessionStorage.getItem('lc_preview')!=='1'){

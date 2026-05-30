@@ -798,9 +798,7 @@
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
-<script src="../firebase-config.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script><script src="../firebase-config.js"></script>
 
 <script>
 'use strict';
@@ -1042,7 +1040,7 @@ async function loadComplaints() {
               <span style="font-size:11px;color:var(--muted)">${d.displayName || 'Anonymous'} · ${d.email || '—'} · ${d.platform || '—'}</span>
             </div>
             <div style="display:flex;align-items:center;gap:8px">
-              <span style="font-size:11px;font-weight:700;color:${statusColor[d.status]||'var(--muted)'}">${statusLabel[d.status]||d.status}</span>
+              <span data-status-badge style="font-size:11px;font-weight:700;color:${statusColor[d.status]||'var(--muted)'}">${statusLabel[d.status]||d.status}</span>
               <select onchange="updateComplaintStatus('${doc.id}', this.value, ${JSON.stringify(d.uid||null)}, ${JSON.stringify(d.email||null)}, ${JSON.stringify(d.displayName||null)})" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:3px 8px;border-radius:6px;font-size:11px">
                 <option value="new"      ${d.status==='new'      ?'selected':''}>🔴 New</option>
                 <option value="seen"     ${d.status==='seen'     ?'selected':''}>🟡 Seen</option>
@@ -1064,11 +1062,11 @@ async function loadComplaints() {
 async function updateComplaintStatus(id, status, uid, email, displayName) {
   await adDB.collection('complaints').doc(id).update({ status }).catch(err => console.error(err));
 
-  if (status === 'resolved') {
-    // Remove card from DOM immediately with animation
-    _removeComplaintCard(id);
+  const statusColor = { new:'var(--red)', seen:'var(--yellow)', resolved:'var(--green)' };
+  const statusLabel = { new:'🔴 New', seen:'🟡 Seen', resolved:'🟢 Resolved' };
 
-    // Send resolution notification to user
+  if (status === 'resolved') {
+    _removeComplaintCard(id);
     if (uid) {
       await adDB.collection('users').doc(uid).collection('adminMessages').add({
         type:        'complaint_resolved',
@@ -1079,6 +1077,16 @@ async function updateComplaintStatus(id, status, uid, email, displayName) {
       }).catch(() => {});
     }
     adToast('Resolved ✓ — user notified');
+  } else {
+    // Update the status badge on the card without re-rendering
+    const card = document.getElementById('complaint-' + id);
+    if (card) {
+      const badge = card.querySelector('[data-status-badge]');
+      if (badge) {
+        badge.textContent = statusLabel[status] || status;
+        badge.style.color = statusColor[status] || 'var(--muted)';
+      }
+    }
   }
 
   // Refresh badge count

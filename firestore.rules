@@ -44,9 +44,9 @@ service cloud.firestore {
       allow read, write: if isAdmin();
     }
 
-    // ── Lockouts — read by anyone (pre-login check), CF writes via Admin SDK
+    // ── Lockouts — CF reads/writes via Admin SDK (bypasses rules), no client access
     match /lockouts/{id} {
-      allow read:  if request.auth != null; // authenticated only — prevents enumeration
+      allow read:  if false;
       allow write: if false;
     }
 

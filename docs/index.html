@@ -6,7 +6,7 @@
   <script>
     (function(){
       // ── MAINTENANCE MODE — set to false when update is done ──
-      var MAINTENANCE = true;
+      var MAINTENANCE = false;
       var p = new URLSearchParams(window.location.search);
       if(p.get('dev')==='2443141856934ee5') sessionStorage.setItem('lc_preview','1');
       if(MAINTENANCE && sessionStorage.getItem('lc_preview')!=='1'){
@@ -44,7 +44,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-functions-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
   <script src="firebase-config.js"></script>
   <!-- Service Worker — cache static assets for faster loads -->
   <script>
@@ -167,7 +166,7 @@
       <div class="stat-card"><div class="stat-num">7</div><div class="stat-label">DSA Structures Active</div></div>
       <div class="stat-card"><div class="stat-num">23</div><div class="stat-label">Moves Per Session</div></div>
       <div class="stat-card"><div class="stat-num">3</div><div class="stat-label">Cards To Keep</div></div>
-      <div class="stat-card"><div class="stat-num">8</div><div class="stat-label">Conversations</div></div>
+      <div class="stat-card"><div class="stat-num">15</div><div class="stat-label">Conversations</div></div>
     </div>
     <div class="obj-grid">
       <div class="obj-card"><div class="obj-tag" style="color:var(--blue)">OBJECTIVE 01</div><div class="obj-title">Simulate Relational Decay</div><div class="obj-desc">Model how relationships degrade mathematically using weighted graphs, neurological state machines, and adversarial game theory.</div></div>

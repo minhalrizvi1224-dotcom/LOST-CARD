@@ -2166,7 +2166,7 @@ const _CHAT_LIST_DATA = [
   { id:'friend',     type:'custom',  name:'Friend',               sub:'Meaningful friendship · Tap to begin',         emoji:'💬', grad:'linear-gradient(135deg,#58A6FF,#79BBFF)', tag:'Friend' },
   { id:'partner',    type:'custom',  name:'Partner / Romantic',   sub:'Someone you love · Tap to begin',              emoji:'💕', grad:'linear-gradient(135deg,#E06C75,#F0883E)', tag:'Romantic' },
   { id:'family',     type:'custom',  name:'Family',               sub:"Blood that doesn't always understand · Tap to begin", emoji:'🏡', grad:'linear-gradient(135deg,#98C379,#56B6C2)', tag:'Family' },
-  { id:'colleague',  type:'custom',  name:'Colleague',            sub:'Professional proximity · Tap to begin',        emoji:'💼', grad:'linear-gradient(135deg,#E5C07B,#F0883E)', tag:'Colleague' },
+  { id:'colleague_c',type:'custom',  name:'Colleague',            sub:'Professional proximity · Tap to begin',        emoji:'💼', grad:'linear-gradient(135deg,#E5C07B,#F0883E)', tag:'Colleague' },
   { id:'childhood',  type:'custom',  name:'Childhood Friend',     sub:'Who you were before who you became · Tap to begin', emoji:'🌱', grad:'linear-gradient(135deg,#C678DD,#9333EA)', tag:'Childhood' },
   { id:'mentor',     type:'custom',  name:'Mentor / Teacher',     sub:'Authority, guidance, unequal power · Tap to begin', emoji:'🎓', grad:'linear-gradient(135deg,#2EA043,#3FB950)', tag:'Mentor' },
   { id:'rival',      type:'custom',  name:'Rival / Competitor',   sub:'Respect wrapped in competition · Tap to begin',emoji:'⚔️', grad:'linear-gradient(135deg,#F85149,#FF6B6B)', tag:'Rival' },
