@@ -2389,6 +2389,10 @@ function startDefaultMode(scenarioId = 'hani') {
   showSection('chatApp');
   const csb = document.getElementById('changeSetupBtn');
   if (csb) csb.style.display = 'none';
+  // Set currentChatId to the actual scenario ID so exitChat() / saveSession()
+  // know which default chat is live (stalemate save + completion tracking)
+  currentChatId = scenarioId;
+  isCustomMode  = false;
   showConv('default');
   sim = new LostCardSim(scenarioId);
   const meta = sim._meta;

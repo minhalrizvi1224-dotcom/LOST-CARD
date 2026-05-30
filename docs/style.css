@@ -575,22 +575,22 @@ body {
   gap: 18px;
   pointer-events: none;
 }
-.hero-side-left  { left: 64px;  text-align: right; }
-.hero-side-right { right: 64px; text-align: left; }
+.hero-side-left  { left: 80px;  text-align: right; }
+.hero-side-right { right: 80px; text-align: left; }
 
 .hero-side span {
   display: block;
   font-family: 'Space Grotesk', sans-serif;
-  font-size: 10px;
+  font-size: 11.5px;
   font-weight: 600;
-  letter-spacing: 1.8px;
+  letter-spacing: 1.6px;
   text-transform: uppercase;
   color: var(--muted);
   opacity: 0;
   animation: sideTermFade 5s var(--d, 0s) ease-in-out infinite;
 }
-.hero-side-left  span { border-right: 1.5px solid rgba(139,148,158,0.18); padding-right: 12px; }
-.hero-side-right span { border-left:  1.5px solid rgba(139,148,158,0.18); padding-left:  12px; }
+.hero-side-left  span { border-right: 1.5px solid rgba(139,148,158,0.22); padding-right: 14px; }
+.hero-side-right span { border-left:  1.5px solid rgba(139,148,158,0.22); padding-left:  14px; }
 
 @keyframes sideTermFade {
   0%   { opacity: 0;    transform: translateY(4px); }
@@ -693,7 +693,7 @@ body {
   gap: 12px;
   flex-wrap: wrap;
   justify-content: center;
-  margin-bottom: 0;
+  margin-bottom: 28px;   /* gap between buttons and cards */
   animation: fadeInUp 0.6s 0.45s ease-out both;
 }
 
