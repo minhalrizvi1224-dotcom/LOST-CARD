@@ -2403,11 +2403,11 @@ async function syncGeminiKeysToPublic() {
   const status = document.getElementById('geminiPoolKeySaveStatus');
   try {
     await adDB.collection('publicConfig').doc('hb').set({
-      geminiKeys:   _poolGeminiKeys,
-      groqKeys:     _poolGroqKeys,
-      cerebrasKeys: _poolCerebrasKeys
+      geminiKeys:   _poolGeminiKeys   || [],
+      groqKeys:     _poolKeys         || [],
+      cerebrasKeys: _poolCerebrasKeys || []
     }, { merge: true });
-    if (status) { status.style.color='var(--green)'; status.textContent=`✅ Synced ${_poolGeminiKeys.length} Gemini + ${_poolGroqKeys.length} Groq + ${_poolCerebrasKeys.length} Cerebras keys to users!`; setTimeout(()=>{status.textContent='';},4000); }
+    if (status) { status.style.color='var(--green)'; status.textContent=`✅ Synced ${_poolGeminiKeys.length} Gemini + ${_poolKeys.length} Groq + ${_poolCerebrasKeys.length} Cerebras keys to users!`; setTimeout(()=>{status.textContent='';},4000); }
   } catch(e) {
     if (status) { status.style.color='var(--red)'; status.textContent='Sync failed: '+e.message; }
   }
