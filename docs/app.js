@@ -6130,10 +6130,17 @@ function generateChessReport(s) {
 // ══════════════════════════════════════════════════════════════════════
 // HISTORY
 // ══════════════════════════════════════════════════════════════════════
+// Default-chat id → display name (CHAT_META only has the generic 'default' key)
+const DEFAULT_CHAT_NAMES = {
+  hani: 'Umm-e-Laila & Hani', reza: 'Ayla & Reza', mama: 'Noor & Mama',
+  baba: 'Zain & Baba', sara: 'Hira & Sara', colleague: 'Daniyal & Colleague',
+  oldfriend: 'Bilal & Old Friend'
+};
+
 function saveSession(summary, chatId) {
-  // For custom chats, use the setup's other person name if available
-  let displayName = CHAT_META[chatId]?.name || 'Unknown';
-  if (currentChatSetup && currentChatSetup.theirName && chatId !== 'default') {
+  // Resolve a proper display name: default chats by id, custom chats by setup name
+  let displayName = DEFAULT_CHAT_NAMES[chatId] || CHAT_META[chatId]?.name || 'Session';
+  if (currentChatSetup && currentChatSetup.theirName && !DEFAULT_CHAT_NAMES[chatId] && chatId !== 'default') {
     displayName = `${currentChatSetup.theirName} (${CHAT_META[chatId]?.name || chatId})`;
   }
   const record = {
