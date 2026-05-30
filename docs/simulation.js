@@ -531,29 +531,120 @@ const P3_SILE = [
 // ─── Scenarios (23 Hani dialogues, mirrors buildScenarios() in C++) ─────────
 
 const SCENARIOS = [
-  { hani: "Hey. You free this evening? I found that old photo. The one from the roof.", subtext: "(He's been looking at it for twenty minutes before texting. He won't say that.)", conflict: "Dismissing a memory", salvation: false },
-  { hani: "I was just cleaning up and it came up. We looked so - I don't know. Less complicated.", subtext: "(He almost said 'happy'. He stopped himself. He doesn't know why.)", conflict: "Invalidating nostalgia", salvation: false },
-  { hani: "I called you three times last week. You picked up once, said you'd call back in five minutes. That was three weeks ago.", subtext: "(He counted. He wasn't going to say that. He just did.)", conflict: "Being called out on absence", salvation: true },
-  { hani: "It's not about the calls. I don't need you to call me every day. I just - when I actually reach out, I want it to mean something.", subtext: "(He's been rehearsing this. Not the words - the courage to say them.)", conflict: "Minimizing his need", salvation: true },
-  { hani: "Do you remember what you said the last time we actually talked - properly talked? You said things were going to be different.", subtext: "(He believed it when she said it. That's the part that hurts.)", conflict: "Broken promise unaddressed", salvation: false },
-  { hani: "I'm not trying to make you feel bad. I just think I've been pretending everything is fine for a while now. And it's - tiring.", subtext: "(He's been waiting to say this. Not to punish her. Just to stop carrying it alone.)", conflict: "Deflecting his honesty", salvation: true },
-  { hani: "I think I've been lonely. Not in general. Specifically when I'm talking to you.", subtext: "(He said it. He didn't plan to say it today. He can't take it back.)", conflict: "Contradicting his experience", salvation: true },
-  { hani: "I used to tell you things I didn't tell anyone else. I stopped. I'm not sure exactly when.", subtext: "(He knows exactly when. He's protecting her from knowing.)", conflict: "Dismissing trust erosion", salvation: false },
-  { hani: "There was a night - I don't remember the exact date - where I was genuinely not okay. And I opened your chat and just closed it again.", subtext: "(That night was six months ago. He remembers the exact date.)", conflict: "Blaming him for his own silence", salvation: true },
-  { hani: "Because I'd done it before. Reached out. And you were - you were there, but not there. Physically responding, emotionally somewhere else.", subtext: "(He's never said this to anyone. He's terrified she's going to get defensive.)", conflict: "Defending unavailability", salvation: false },
-  { hani: "I'm not asking for 24/7. I'm asking for the one time I actually needed you. Just that one time.", subtext: "(He's shaking slightly. He's kept this in for a very long time.)", conflict: "Minimizing a specific wound", salvation: true },
-  { hani: "The thing is - I still wanted to talk to you. After everything. That's what I can't explain.", subtext: "(He's trying to say: I still chose you. He doesn't know if that's strength or stupidity.)", conflict: "Missing the weight of his loyalty", salvation: false },
-  { hani: "I just need to know if this is still something you're invested in. Because I can't keep guessing.", subtext: "(He's asked himself this question fifty times. He's finally asking her.)", conflict: "Demanding proof without giving it", salvation: true },
-  { hani: "Because I stopped assuming. That's what happens when things shift and no one acknowledges it.", subtext: "(He's watched too many people leave without ever saying they were leaving.)", conflict: "Excusing drift as inevitable", salvation: false },
-  { hani: "I just - I wish you'd told me you were drifting instead of making me feel like I was imagining it.", subtext: "(He felt crazy for a while. He's only recently understood he wasn't.)", conflict: "Gaslighting response", salvation: true },
-  { hani: "What would it take. Actually. For this to be what it used to be.", subtext: "(He doesn't think it's possible. He's asking anyway. For closure if nothing else.)", conflict: "Closing the door on repair", salvation: true },
-  { hani: "I'm not sure I believe that anymore. Not because of you - because of how many times I've believed it.", subtext: "(He's not angry. He's tired. That's worse.)", conflict: "Confirming hopelessness", salvation: false },
-  { hani: "Maybe some friendships just have a natural end. Maybe this is it.", subtext: "(He doesn't believe this. He's testing if she does.)", conflict: "Accepting dissolution", salvation: true },
-  { hani: "You know what I keep thinking about? That moment on the roof. Before all of this. We didn't need to say anything.", subtext: "(He's grieving something that is still technically alive.)", conflict: "Erasing the memory", salvation: false },
-  { hani: "I'm going to be honest. If we stop talking now - I don't think I'd reach out again. I've done the reaching.", subtext: "(He means it. He's not saying it to hurt her. He's saying it so she understands the weight.)", conflict: "Conceding the loss", salvation: true },
-  { hani: "I want to believe you. I genuinely do. I just don't know how much of that is hope and how much is habit.", subtext: "(He's distinguishing between them for the first time. It scares him.)", conflict: "Dismissing his doubt", salvation: false },
-  { hani: "Okay. I'll try. But I need you to understand - I'm not the same person I was when we started. Some of that is gone.", subtext: "(He's giving her one last opening. He doesn't know if she'll walk through it.)", conflict: "Acknowledging change without engaging", salvation: true },
-  { hani: "Then - okay. Let's try. But slowly. I can't do another fall.", subtext: "(He means: I can't survive losing this twice.)", conflict: "Final rejection", salvation: true }
+  { hani: "Hey. You free this evening? I found that old photo. The one from the roof.", subtext: "(He's been looking at it for twenty minutes before texting. He won't say that.)", conflict: "Dismissing a memory", salvation: false,
+    soft: ["The roof — god, I haven't thought about that night in so long. Send it to me?", "That photo. We were so different then. I'd actually love to see it.", "Yeah, I'm free. And honestly… I've missed talking to you."],
+    aggressive: ["That was ages ago. Why are you digging up old stuff now?", "I don't really get sentimental over photos. Was there something you needed?", "Kind of slammed tonight. What's this actually about?"],
+    silent: ["Oh. Cool. What about it?", "Haha that's random. Anyway.", "Maybe. We'll see how the night goes."] },
+
+  { hani: "I was just cleaning up and it came up. We looked so - I don't know. Less complicated.", subtext: "(He almost said 'happy'. He stopped himself. He doesn't know why.)", conflict: "Invalidating nostalgia", salvation: false,
+    soft: ["We were lighter then. I miss that version of us too.", "Less complicated, yeah. I think about that more than I admit.", "We really did. What happened to us, Hani?"],
+    aggressive: ["Everyone looks happier in old photos. Don't read into it.", "Things get complicated. That's just life, not a tragedy.", "This is a weird thing to be texting me about."],
+    silent: ["Yeah, I guess.", "Hm.", "People change. It's fine."] },
+
+  { hani: "I called you three times last week. You picked up once, said you'd call back in five minutes. That was three weeks ago.", subtext: "(He counted. He wasn't going to say that. He just did.)", conflict: "Being called out on absence", salvation: true,
+    soft: ["You're right. I said five minutes and disappeared. That wasn't fair to you.", "Three weeks. God. I didn't even realize. I'm sorry.", "I keep doing that to you, don't I. I want to stop."],
+    aggressive: ["I've been busy, Hani. Not everyone can drop everything to chat.", "Are you keeping a tally of my calls now? That's a lot.", "You could've called back too, you know. It goes both ways."],
+    silent: ["Things have been hectic, that's all.", "I'll call you sometime this week.", "It slipped my mind. No big deal."] },
+
+  { hani: "It's not about the calls. I don't need you to call me every day. I just - when I actually reach out, I want it to mean something.", subtext: "(He's been rehearsing this. Not the words - the courage to say them.)", conflict: "Minimizing his need", salvation: true,
+    soft: ["It does mean something. I've just been bad at showing it. You deserve better from me.", "I hear you. When you reach out, you should feel like you matter. You do.", "That's fair. I haven't been meeting you halfway."],
+    aggressive: ["That sounds like a lot of pressure for a phone call.", "So now every text has to 'mean something'? That's exhausting.", "You're overthinking this whole thing, honestly."],
+    silent: ["Okay.", "I mean… it does, I guess.", "Sure, noted."] },
+
+  { hani: "Do you remember what you said the last time we actually talked - properly talked? You said things were going to be different.", subtext: "(He believed it when she said it. That's the part that hurts.)", conflict: "Broken promise unaddressed", salvation: false,
+    soft: ["I remember. And I meant it then — I just didn't follow through. That's on me.", "I said it and then I let it slide. You had every right to expect more.", "I do remember. I'm sorry I made it sound like a promise and then vanished."],
+    aggressive: ["People say things in the moment. You can't hold me to every word.", "I'm not going to be cross-examined over something I said months ago.", "Things did change. Maybe just not the way you wanted."],
+    silent: ["Vaguely.", "Did I? I don't really remember.", "That was a long time ago."] },
+
+  { hani: "I'm not trying to make you feel bad. I just think I've been pretending everything is fine for a while now. And it's - tiring.", subtext: "(He's been waiting to say this. Not to punish her. Just to stop carrying it alone.)", conflict: "Deflecting his honesty", salvation: true,
+    soft: ["You shouldn't have to pretend with me. Tell me the real thing. I can take it.", "I didn't know you were carrying that alone. You don't have to anymore.", "Thank you for being honest instead of just disappearing on me too."],
+    aggressive: ["So you've been faking it this whole time? Great.", "If it's so tiring, why are you even bothering?", "Don't put your exhaustion on me. I never asked you to pretend."],
+    silent: ["Okay, that's fair I suppose.", "Hm. Alright.", "If you say so."] },
+
+  { hani: "I think I've been lonely. Not in general. Specifically when I'm talking to you.", subtext: "(He said it. He didn't plan to say it today. He can't take it back.)", conflict: "Contradicting his experience", salvation: true,
+    soft: ["That's a hard thing to say out loud. I'm glad you did. I don't want to be the person who makes you feel alone.", "Lonely while talking to me — that lands. I've been here without really being here.", "I never wanted that for you. Tell me what being close to me used to feel like."],
+    aggressive: ["How can you be lonely when I'm literally right here talking to you?", "That doesn't even make sense, Hani.", "That's a you problem, not a me problem."],
+    silent: ["That's… a lot.", "Okay.", "I don't really know what to say to that."] },
+
+  { hani: "I used to tell you things I didn't tell anyone else. I stopped. I'm not sure exactly when.", subtext: "(He knows exactly when. He's protecting her from knowing.)", conflict: "Dismissing trust erosion", salvation: false,
+    soft: ["You did. I felt trusted with those things. I want to earn that back.", "I noticed you went quieter and I didn't ask why. I should have.", "When did it stop? I want to understand what I missed."],
+    aggressive: ["Maybe you just grew out of oversharing. It happens.", "You stopped on your own. Don't pin that on me.", "So this is my fault now too? Convenient."],
+    silent: ["People stop sharing. Normal.", "Huh.", "I hadn't really noticed."] },
+
+  { hani: "There was a night - I don't remember the exact date - where I was genuinely not okay. And I opened your chat and just closed it again.", subtext: "(That night was six months ago. He remembers the exact date.)", conflict: "Blaming him for his own silence", salvation: true,
+    soft: ["You needed me that night and I'd made myself unreachable. I'm so sorry.", "You opened my chat and didn't feel safe enough to type. That breaks me a little.", "I wish you'd sent it. But I understand why you didn't. That's something I did."],
+    aggressive: ["Well if you didn't message me, how was I supposed to know?", "You closed the chat yourself. That's not on me.", "You can't blame me for a text you never sent."],
+    silent: ["Oh.", "That's rough, I guess.", "You should've just messaged."] },
+
+  { hani: "Because I'd done it before. Reached out. And you were - you were there, but not there. Physically responding, emotionally somewhere else.", subtext: "(He's never said this to anyone. He's terrified she's going to get defensive.)", conflict: "Defending unavailability", salvation: false,
+    soft: ["Present but absent. That's exactly what I was, and you felt it. I'm sorry.", "You learned not to lean on me because I wasn't really catching you. That's fair.", "I gave you half of me and called it being there. You deserved more."],
+    aggressive: ["I always replied. What more do you want from me?", "So now even when I show up it's wrong? Unbelievable.", "Maybe that's just how I am. Take it or leave it."],
+    silent: ["I was replying though.", "Okay.", "I don't see the difference, honestly."] },
+
+  { hani: "I'm not asking for 24/7. I'm asking for the one time I actually needed you. Just that one time.", subtext: "(He's shaking slightly. He's kept this in for a very long time.)", conflict: "Minimizing a specific wound", salvation: true,
+    soft: ["The one time that mattered, I wasn't there. I can't undo it, but I can be different now.", "You're not asking for much. You're asking for the bare minimum and I missed it.", "That one time — I think about it too. I want to be someone you can count on."],
+    aggressive: ["One time? You're really going to define our whole friendship by one night?", "Nobody's perfect, Hani. You missed things for me too.", "That's dramatic. It was one moment."],
+    silent: ["Okay.", "Fair enough I suppose.", "Noted."] },
+
+  { hani: "The thing is - I still wanted to talk to you. After everything. That's what I can't explain.", subtext: "(He's trying to say: I still chose you. He doesn't know if that's strength or stupidity.)", conflict: "Missing the weight of his loyalty", salvation: false,
+    soft: ["You kept choosing me even when I gave you reasons not to. That means everything.", "After everything, you still showed up. I don't take that lightly. Not anymore.", "That's not stupidity, Hani. That's loyalty. And I haven't matched it."],
+    aggressive: ["Then why are we even doing this whole guilt-trip conversation?", "If you still wanted to talk, this is a strange way of showing it.", "Make up your mind — are you mad at me or not?"],
+    silent: ["Right.", "Okay, same I guess.", "Cool."] },
+
+  { hani: "I just need to know if this is still something you're invested in. Because I can't keep guessing.", subtext: "(He's asked himself this question fifty times. He's finally asking her.)", conflict: "Demanding proof without giving it", salvation: true,
+    soft: ["I am invested. I know my actions haven't shown it — let me change that, starting now.", "You shouldn't have to guess where you stand with me. I'm in. I want to prove it.", "Yes. And I get that saying it isn't enough. Hold me to it."],
+    aggressive: ["I'm here, aren't I? What more proof do you need?", "You can't demand a guarantee like that. That's not how it works.", "Why is it on me to convince you?"],
+    silent: ["I mean, yeah.", "Of course.", "I guess so."] },
+
+  { hani: "Because I stopped assuming. That's what happens when things shift and no one acknowledges it.", subtext: "(He's watched too many people leave without ever saying they were leaving.)", conflict: "Excusing drift as inevitable", salvation: false,
+    soft: ["You stopped assuming because I never reassured you. I let the silence speak for me.", "Things shifted and I said nothing. That silence cost you your certainty. I'm sorry.", "You deserved someone to name it instead of letting you wonder. I'll name it now."],
+    aggressive: ["Things shift. That's just how relationships go. Stop romanticizing it.", "You assumed the worst, that's the real problem here.", "Not everything needs a big announcement."],
+    silent: ["I suppose.", "Mm.", "That's just life."] },
+
+  { hani: "I just - I wish you'd told me you were drifting instead of making me feel like I was imagining it.", subtext: "(He felt crazy for a while. He's only recently understood he wasn't.)", conflict: "Gaslighting response", salvation: true,
+    soft: ["You weren't imagining it. You were right the whole time, and I let you doubt yourself. I'm sorry.", "I made you question your own gut to avoid an honest conversation. That was wrong of me.", "You saw it clearly. I should have just told you the truth instead of hiding."],
+    aggressive: ["You were imagining half of it, to be honest.", "I never said anything was wrong, so don't act like I lied.", "You're rewriting history to make me the villain."],
+    silent: ["Maybe.", "If that's how you saw it.", "Okay."] },
+
+  { hani: "What would it take. Actually. For this to be what it used to be.", subtext: "(He doesn't think it's possible. He's asking anyway. For closure if nothing else.)", conflict: "Closing the door on repair", salvation: true,
+    soft: ["Honesty. Consistency. Me actually showing up. I'm willing to do the work if you'll let me.", "Time, and me proving it instead of promising it. I want to try, properly this time.", "It would take me being the friend you needed years ago. I want to become that."],
+    aggressive: ["Maybe it just can't go back. Some things don't.", "I don't know, Hani. Maybe nothing. Maybe it's run its course.", "Why is it my job to fix all of it?"],
+    silent: ["I don't know.", "Hard to say.", "We'll see."] },
+
+  { hani: "I'm not sure I believe that anymore. Not because of you - because of how many times I've believed it.", subtext: "(He's not angry. He's tired. That's worse.)", conflict: "Confirming hopelessness", salvation: false,
+    soft: ["You've believed me before and I let you down. I won't ask for faith — I'll show you instead.", "Your tiredness makes sense. I'd rather earn it back slowly than ask you to trust me on words.", "I don't blame you for not believing me. Let me change your mind with actions, not promises."],
+    aggressive: ["Then why bother talking to me at all if you've already decided?", "So nothing I say matters now? Got it.", "That's a self-fulfilling thing, you know. You've already given up."],
+    silent: ["Okay.", "Fair.", "Understood."] },
+
+  { hani: "Maybe some friendships just have a natural end. Maybe this is it.", subtext: "(He doesn't believe this. He's testing if she does.)", conflict: "Accepting dissolution", salvation: true,
+    soft: ["I don't think this is it. I'm not ready to let what we have just dissolve.", "Some do end. But I don't want ours to end from neglect — that's not natural, that's just me failing.", "Don't say that. I'd rather fight for this than watch it fade."],
+    aggressive: ["Maybe you're right. Maybe we should just stop forcing it.", "If that's what you want, fine.", "Yeah. Maybe this has run its course."],
+    silent: ["Maybe.", "Could be.", "If you think so."] },
+
+  { hani: "You know what I keep thinking about? That moment on the roof. Before all of this. We didn't need to say anything.", subtext: "(He's grieving something that is still technically alive.)", conflict: "Erasing the memory", salvation: false,
+    soft: ["The roof. We could sit in silence and it was enough. I want that ease back with you.", "I think about it too. We were so comfortable we didn't need words. I miss that.", "That night meant something to me too. It still does."],
+    aggressive: ["That was years ago. We're not those people anymore.", "Why do you keep going back to that roof? It's over.", "Living in the past isn't going to fix anything."],
+    silent: ["Yeah.", "I barely remember it, honestly.", "That was a long time ago."] },
+
+  { hani: "I'm going to be honest. If we stop talking now - I don't think I'd reach out again. I've done the reaching.", subtext: "(He means it. He's not saying it to hurt her. He's saying it so she understands the weight.)", conflict: "Conceding the loss", salvation: true,
+    soft: ["You've done all the reaching for too long. It's my turn. I'm not letting this go quietly.", "I hear the weight in that. You shouldn't have to be the only one trying. Let me reach now.", "Then I won't make you reach again. I'll be the one showing up this time."],
+    aggressive: ["So this is an ultimatum now?", "Fine. Then don't. See if I chase you.", "That's a threat dressed up as honesty."],
+    silent: ["Okay.", "I hear you.", "Alright then."] },
+
+  { hani: "I want to believe you. I genuinely do. I just don't know how much of that is hope and how much is habit.", subtext: "(He's distinguishing between them for the first time. It scares him.)", conflict: "Dismissing his doubt", salvation: false,
+    soft: ["Then let it be hope. Give me the chance to make it more than habit.", "That doubt is fair. I'll be patient while I prove it's worth believing in.", "Hope and habit — I'll take either if it means you give me a chance to show up differently."],
+    aggressive: ["You're overanalyzing this to death.", "Either you believe me or you don't. Pick one.", "This is exhausting. I can't argue you into trusting me."],
+    silent: ["Okay.", "Sure.", "If you say so."] },
+
+  { hani: "Okay. I'll try. But I need you to understand - I'm not the same person I was when we started. Some of that is gone.", subtext: "(He's giving her one last opening. He doesn't know if she'll walk through it.)", conflict: "Acknowledging change without engaging", salvation: true,
+    soft: ["I don't need the old you. I want to know who you are now. Let me meet him.", "Some of that's gone because of how I treated it. I'll be gentle with whoever you are now.", "Thank you for trying. I'll show up for the person you actually are, not a memory."],
+    aggressive: ["Everyone changes. Don't make it sound so dramatic.", "So you're a different person now? Convenient timing.", "Fine, whatever. People grow up."],
+    silent: ["Okay.", "Understood.", "Noted."] },
+
+  { hani: "Then - okay. Let's try. But slowly. I can't do another fall.", subtext: "(He means: I can't survive losing this twice.)", conflict: "Final rejection", salvation: true,
+    soft: ["Slowly. I promise. I'd rather rebuild this carefully than risk breaking you again.", "No more falls. I'll move at whatever pace lets you feel safe with me.", "Then slowly it is. Thank you for letting me back in at all. I won't waste it."],
+    aggressive: ["Slow is fine, just don't keep me on probation forever.", "Okay but I'm not going to walk on eggshells either.", "Let's not make this more fragile than it needs to be."],
+    silent: ["Okay.", "Sure.", "Fine."] }
 ];
 
 // ─── Scenario 2: Ayla & Reza (ex-couple trying friendship) ──────────────────
@@ -1128,15 +1219,32 @@ class LostCardSim {
   }
 
   getChoices() {
-    const phase = this.move < 6 ? 0 : this.move < 16 ? 1 : 2;
-    const pools = [[P1_SOFT,P1_AGGR,P1_SILE],[P2_SOFT,P2_AGGR,P2_SILE],[P3_SOFT,P3_AGGR,P3_SILE]];
-    const [sp, ap, np] = pools[phase];
     const ri = (arr) => Math.floor(Math.random() * arr.length);
-    let choices = [
-      { text: sp[ri(sp)], type: SOFT },
-      { text: ap[ri(ap)], type: AGGRESSIVE },
-      { text: np[ri(np)], type: SILENT }
-    ];
+    const sc = this._scenes[Math.min(this.move, 22)];
+    let choices;
+
+    // ── Per-line options (preferred) ──────────────────────────────────
+    // If this scene defines its own soft/aggressive/silent arrays, the options
+    // are written to respond to THIS specific line, with several variations
+    // each so replays feel fresh. Falls back to generic phase pools otherwise.
+    if (sc && Array.isArray(sc.soft) && sc.soft.length
+          && Array.isArray(sc.aggressive) && sc.aggressive.length
+          && Array.isArray(sc.silent) && sc.silent.length) {
+      choices = [
+        { text: sc.soft[ri(sc.soft)],             type: SOFT },
+        { text: sc.aggressive[ri(sc.aggressive)], type: AGGRESSIVE },
+        { text: sc.silent[ri(sc.silent)],         type: SILENT }
+      ];
+    } else {
+      const phase = this.move < 6 ? 0 : this.move < 16 ? 1 : 2;
+      const pools = [[P1_SOFT,P1_AGGR,P1_SILE],[P2_SOFT,P2_AGGR,P2_SILE],[P3_SOFT,P3_AGGR,P3_SILE]];
+      const [sp, ap, np] = pools[phase];
+      choices = [
+        { text: sp[ri(sp)], type: SOFT },
+        { text: ap[ri(ap)], type: AGGRESSIVE },
+        { text: np[ri(np)], type: SILENT }
+      ];
+    }
     // Shuffle (mirrors std::shuffle in C++)
     for (let i = choices.length-1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i+1));
@@ -1145,7 +1253,20 @@ class LostCardSim {
     return choices;
   }
 
-  getCurrentScenario() { return this._scenes[Math.min(this.move, 22)]; }
+  // Returns the current scene with hani/subtext resolved to a single string.
+  // A scene may define `hani`/`subtext` as an ARRAY of variations — one is
+  // picked at random per move (cached) so replays show different wording.
+  getCurrentScenario() {
+    const idx = Math.min(this.move, 22);
+    const sc  = this._scenes[idx];
+    if (!sc) return sc;
+    if (!this._lineCache) this._lineCache = {};
+    if (this._lineCache[idx]) return this._lineCache[idx];
+    const pick = (v) => Array.isArray(v) ? v[Math.floor(Math.random()*v.length)] : v;
+    const resolved = Object.assign({}, sc, { hani: pick(sc.hani), subtext: pick(sc.subtext) });
+    this._lineCache[idx] = resolved;
+    return resolved;
+  }
 
   processMove(choiceType) {
     if (this.terminalCondition !== TC_NONE) return null;
