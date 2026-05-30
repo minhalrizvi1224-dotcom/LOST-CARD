@@ -1040,7 +1040,7 @@ async function loadComplaints() {
               <span style="font-size:11px;color:var(--muted)">${d.displayName || 'Anonymous'} · ${d.email || '—'} · ${d.platform || '—'}</span>
             </div>
             <div style="display:flex;align-items:center;gap:8px">
-              <span data-status-badge style="font-size:11px;font-weight:700;color:${statusColor[d.status]||'var(--muted)'}">${statusLabel[d.status]||d.status}</span>
+              <span id="sbadge-${doc.id}" style="font-size:11px;font-weight:700;color:${statusColor[d.status]||'var(--muted)'}">${statusLabel[d.status]||d.status}</span>
               <select onchange="updateComplaintStatus('${doc.id}', this.value, ${JSON.stringify(d.uid||null)}, ${JSON.stringify(d.email||null)}, ${JSON.stringify(d.displayName||null)})" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:3px 8px;border-radius:6px;font-size:11px">
                 <option value="new"      ${d.status==='new'      ?'selected':''}>🔴 New</option>
                 <option value="seen"     ${d.status==='seen'     ?'selected':''}>🟡 Seen</option>
@@ -1078,14 +1078,10 @@ async function updateComplaintStatus(id, status, uid, email, displayName) {
     }
     adToast('Resolved ✓ — user notified');
   } else {
-    // Update the status badge on the card without re-rendering
-    const card = document.getElementById('complaint-' + id);
-    if (card) {
-      const badge = card.querySelector('[data-status-badge]');
-      if (badge) {
-        badge.textContent = statusLabel[status] || status;
-        badge.style.color = statusColor[status] || 'var(--muted)';
-      }
+    const badge = document.getElementById('sbadge-' + id);
+    if (badge) {
+      badge.textContent = statusLabel[status] || status;
+      badge.style.color = statusColor[status] || 'var(--muted)';
     }
   }
 
