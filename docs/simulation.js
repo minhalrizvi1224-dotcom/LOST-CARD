@@ -1013,29 +1013,120 @@ const SCENARIOS_BABA = [
 // Everything is layered — compliment hidden in wound, wound hidden in joke.
 // The user can never quite find the safe response.
 const SCENARIOS_SARA = [
-  { hani: "You look good. Are you doing something different?", subtext: "(She means it. She also means: I noticed before you noticed that I noticed. Sara has been watching Hira's life the way you watch something you want and tell yourself you don't.)", conflict: "Accepting the compliment simply", salvation: false },
-  { hani: "Mama told me about your promotion. She was so excited. I've never heard her that excited.", subtext: "(She is telling you that Mama told her before you did. She is also telling you she heard the excitement in Mama's voice and it sounded different from the excitement Mama has for her. She will not say either of these things.)", conflict: "Apologizing for not telling her first", salvation: false },
-  { hani: "I'm not jealous. Why would I be jealous? We're sisters. I'm happy for you.", subtext: "(She is jealous. Not the small kind. The kind that has been building since the year you got better grades and Baba framed your report card. She is also genuinely happy. Both are true. She can't hold them both at once.)", conflict: "Accepting 'I'm not jealous' too quickly", salvation: false },
-  { hani: "Do you remember when we were kids and you used to tell Mama everything I did wrong? I was thinking about that the other day.", subtext: "(She has been thinking about this for longer than the other day. This is the first thing she wanted to say when she sat down. She took twenty minutes to get here.)", conflict: "Defending your childhood behavior", salvation: false },
-  { hani: "I'm not bringing up old things. I just — sometimes I wonder if things were always like this between us or if something changed.", subtext: "(Something changed. She knows when. She doesn't want to say when because saying when makes it too specific and too real.)", conflict: "Asking her to name when", salvation: true },
-  { hani: "You were always Baba's favorite. I know you don't think so. But you were.", subtext: "(She has carried this her entire life. She is not saying it to wound you. She is saying it because she has been holding it alone and it has gotten too heavy.)", conflict: "Arguing about who was the favorite", salvation: true },
-  { hani: "I'm not angry about it. That's what I want you to understand. I've worked through it. I just — I needed you to know I know.", subtext: "(She is a little angry about it. She has worked through most of it. But the knowing sits differently once you've said it out loud. She is watching your face right now.)", conflict: "Moving on before she's ready", salvation: false },
-  { hani: "Ahmed thinks you're amazing, by the way. He always talks about how successful you are. Every family dinner.", subtext: "(Her husband talks about you at every family dinner. She laughs it off. She has been laughing it off for two years.)", conflict: "Asking if it bothers her", salvation: true },
-  { hani: "I love my life. I want to be clear about that. I love my life.", subtext: "(She is reminding herself. The repetition is the tell. She loves her life and there are parts of it she would have chosen differently and she has made peace with most of them.)", conflict: "Reassuring her that her life is good", salvation: false },
-  { hani: "Do you ever feel like — in the family, you're the one who succeeded and I'm the one who survived? Not in a bad way. Just — is that how it looks from the outside?", subtext: "(She is asking if that's how it looks from your side. She already knows how it looks from hers. She wants to know if you see it too or if she has been carrying this alone.)", conflict: "Denying the framing entirely", salvation: true },
-  { hani: "I'm proud of you. I want you to know that. I don't say it because — I don't know. It feels complicated. But I am.", subtext: "(It is complicated. She is proud of you the way you are proud of something that also makes you aware of what you don't have. She is saying it anyway because she decided, walking here, that she would.)", conflict: "Making it less complicated than it is", salvation: true },
-  { hani: "We used to talk every day when we were at university. Do you remember? Every day.", subtext: "(She remembers every conversation. She has kept some of the voice notes. She hasn't told you this.)", conflict: "Focusing on why it changed instead of the memory", salvation: true },
-  { hani: "I think I've been waiting for you to notice. That something was off between us. I kept thinking — she'll bring it up. She'll ask.", subtext: "(She has been waiting for two years. She rewrote this conversation in her head so many times she lost count. You never brought it up because you didn't notice, or you noticed and you waited too. She doesn't know which is worse.)", conflict: "Explaining why you didn't bring it up", salvation: false },
-  { hani: "I don't want to fight. I'm so tired of being in my own head about this. I just want it to be normal between us again.", subtext: "(She means this completely. She also doesn't know what normal looks like because normal, for them, was always this — close and slightly wounded. She is asking for something new while calling it something old.)", conflict: "Promising things will go back to how they were", salvation: true },
-  { hani: "Can I tell you something without you making it a whole thing?", subtext: "(She is about to tell you something she has been holding for a long time. The warning is a form of protection — for both of you.)", conflict: "Making it a whole thing before she says it", salvation: true },
-  { hani: "When you got the promotion — my first feeling, before the happiness — was this moment of: why not me. And then immediately after I felt terrible for thinking it. And then I called Mama and said congratulations and I meant it. All three things happened in about four seconds.", subtext: "(She is being more honest with you right now than she has been in years. She is trusting you with the version of herself she usually edits out. This is the most open door she has offered.)", conflict: "Telling her she shouldn't have felt that way", salvation: true },
-  { hani: "I think we got competitive and we never talked about it. It just — became the thing between us.", subtext: "(It became the thing between them because no one named it. She is naming it now. This is the bravest thing she has said today.)", conflict: "Agreeing too clinically or analyzing it", salvation: true },
-  { hani: "I miss you. Is that weird to say? We see each other at every family thing. But I miss you.", subtext: "(It's not weird. She misses the version of their closeness before comparison entered the room. She doesn't know if that version still exists. She is asking if it might.)", conflict: "Explaining why you've been distant", salvation: true },
-  { hani: "Tell me something. Anything. Tell me something you haven't told anyone.", subtext: "(She is trying to start over in the middle of a conversation. She wants the old rhythm back — where you told each other things before you told the world. She's offering to go first if you do.)", conflict: "Telling something safe or surface-level", salvation: true },
-  { hani: "I think you're the person I know best and the person I understand least. Does that make sense?", subtext: "(It makes perfect sense. She has been trying to resolve this paradox her entire adult life. You are her sister. She can read your face across a room. She has no idea why you do half the things you do.)", conflict: "Explaining yourself instead of sitting in it", salvation: true },
-  { hani: "I don't want to fix everything today. I just want to — leave this conversation differently than we came into it. Is that possible?", subtext: "(She walked in holding every grievance like a case file. She has set most of them down. She is asking you to meet her where she has arrived.)", conflict: "Trying to fix everything anyway", salvation: true },
-  { hani: "You know I love you, right? Even when I'm being — whatever I am. I love you.", subtext: "(She is ending the conversation the way she wanted to start it. It took twenty-two moves to get here. She means every word.)", conflict: "Adding conditions or caveats", salvation: true },
-  { hani: "Okay. Good. Let's get tea. And you can tell me about the promotion properly this time — not the version Mama told.", subtext: "(She is ready. She chose tea. She chose you. She is letting the morning become something lighter than it started as.)", conflict: "Bringing up anything unresolved", salvation: true }
+  { hani: "You look good. Are you doing something different?", subtext: "(She means it. She also means: I noticed before you noticed that I noticed. Sara has been watching Hira's life the way you watch something you want and tell yourself you don't.)", conflict: "Accepting the compliment simply", salvation: false,
+    soft: ["Thank you, Sara. That actually means a lot coming from you.", "Aw, you noticed. Just sleeping more, honestly. You look good too.", "Thanks. I've missed you noticing things about me, weirdly."],
+    aggressive: ["Why does that sound like an accusation?", "Doing something different? Like what, exactly?", "You're already keeping score and we just sat down."],
+    silent: ["Not really.", "Same as always.", "Thanks, I guess."] },
+
+  { hani: "Mama told me about your promotion. She was so excited. I've never heard her that excited.", subtext: "(She is telling you that Mama told her before you did. She is also telling you she heard the excitement in Mama's voice and it sounded different from the excitement Mama has for her. She will not say either of these things.)", conflict: "Apologizing for not telling her first", salvation: false,
+    soft: ["I should've told you myself first, Sara. I'm sorry you heard it from Mama.", "I wanted to call you. I just got in my own head about it. That's on me.", "You should've been the first person I told, not the last. I'm sorry."],
+    aggressive: ["Is this going to be about who I told first?", "So you're tracking who hears what now?", "I can't win — too quiet or too loud about my own life."],
+    silent: ["Yeah, she was happy.", "It wasn't a big deal.", "Okay."] },
+
+  { hani: "I'm not jealous. Why would I be jealous? We're sisters. I'm happy for you.", subtext: "(She is jealous. Not the small kind. The kind that has been building since the year you got better grades and Baba framed your report card. She is also genuinely happy. Both are true. She can't hold them both at once.)", conflict: "Accepting 'I'm not jealous' too quickly", salvation: false,
+    soft: ["You're allowed to feel more than one thing, Sara. I'd understand if part of you ached.", "Happy and something else can both be true. I won't think less of you for it.", "You don't have to convince me. I just want you here, honestly."],
+    aggressive: ["Nobody said you were jealous, Sara.", "You brought up jealousy, not me.", "Okay. You're not jealous. Noted."],
+    silent: ["Okay.", "I know we're sisters.", "Sure."] },
+
+  { hani: "Do you remember when we were kids and you used to tell Mama everything I did wrong? I was thinking about that the other day.", subtext: "(She has been thinking about this for longer than the other day. This is the first thing she wanted to say when she sat down. She took twenty minutes to get here.)", conflict: "Defending your childhood behavior", salvation: false,
+    soft: ["I did do that. I'm sorry, Sara. I didn't know what it cost you back then.", "I was a little tattletale, wasn't I. That can't have felt fair to you.", "I made you the one who got in trouble. I think about that too. I'm sorry."],
+    aggressive: ["We were kids, Sara. You did things to me too.", "Are we really relitigating childhood right now?", "That was twenty years ago. Let it go."],
+    silent: ["I don't really remember that.", "We were kids.", "Okay."] },
+
+  { hani: "I'm not bringing up old things. I just — sometimes I wonder if things were always like this between us or if something changed.", subtext: "(Something changed. She knows when. She doesn't want to say when because saying when makes it too specific and too real.)", conflict: "Asking her to name when", salvation: true,
+    soft: ["Something did change. I've felt it too, Sara. I just never said so.", "I don't think we were always like this. I miss before. Do you?", "You're right that something shifted. I'd rather face it with you than pretend."],
+    aggressive: ["Then when, Sara? Pick a date if you're so sure.", "Things change. That's life. Don't make it a mystery.", "Nothing changed. You're overthinking us."],
+    silent: ["I don't know.", "Maybe.", "It's always been fine."] },
+
+  { hani: "You were always Baba's favorite. I know you don't think so. But you were.", subtext: "(She has carried this her entire life. She is not saying it to wound you. She is saying it because she has been holding it alone and it has gotten too heavy.)", conflict: "Arguing about who was the favorite", salvation: true,
+    soft: ["I'm so sorry you carried that alone, Sara. That must have been so heavy.", "If it felt that way to you, then it was real — and I'm sorry I never saw it.", "I didn't know you felt that your whole life. That breaks my heart a little."],
+    aggressive: ["That is not true and you know it.", "Favorite? He framed YOUR art, Sara.", "We are not doing the 'who Baba loved more' thing."],
+    silent: ["I don't think that's true.", "Okay.", "If you say so."] },
+
+  { hani: "I'm not angry about it. That's what I want you to understand. I've worked through it. I just — I needed you to know I know.", subtext: "(She is a little angry about it. She has worked through most of it. But the knowing sits differently once you've said it out loud. She is watching your face right now.)", conflict: "Moving on before she's ready", salvation: false,
+    soft: ["I hear you. And I'm glad you told me, even if it took years to say.", "Take whatever time you need with it. I'm not going anywhere.", "Thank you for trusting me with that. I know it wasn't easy to say out loud."],
+    aggressive: ["Okay, well, now I know you know. So we're good?", "You sound a little angry for someone who's worked through it.", "Great, that's settled. Tea?"],
+    silent: ["Okay.", "Noted.", "Alright then."] },
+
+  { hani: "Ahmed thinks you're amazing, by the way. He always talks about how successful you are. Every family dinner.", subtext: "(Her husband talks about you at every family dinner. She laughs it off. She has been laughing it off for two years.)", conflict: "Asking if it bothers her", salvation: true,
+    soft: ["That can't be easy to sit through, Sara. I'd hate it if it were reversed.", "I'd much rather he bragged about you. You built a whole home.", "Does that bother you? It would bother me. You can be honest with me."],
+    aggressive: ["And that's my fault somehow?", "What do you want me to do, tell him to stop?", "So now I'm the problem at your dinner table?"],
+    silent: ["That's nice of him.", "Okay.", "He's just being polite."] },
+
+  { hani: "I love my life. I want to be clear about that. I love my life.", subtext: "(She is reminding herself. The repetition is the tell. She loves her life and there are parts of it she would have chosen differently and she has made peace with most of them.)", conflict: "Reassuring her that her life is good", salvation: false,
+    soft: ["I know you do. You built something real, Sara. I see that.", "You don't have to convince me. But you can tell me the messy parts too.", "I believe you. And the parts you'd have done differently are okay to say to me."],
+    aggressive: ["Who said you didn't?", "You're saying it twice, so… do you?", "Okay, you love your life. Noted, again."],
+    silent: ["That's good.", "Okay.", "Glad to hear it."] },
+
+  { hani: "Do you ever feel like — in the family, you're the one who succeeded and I'm the one who survived? Not in a bad way. Just — is that how it looks from the outside?", subtext: "(She is asking if that's how it looks from your side. She already knows how it looks from hers. She wants to know if you see it too or if she has been carrying this alone.)", conflict: "Denying the framing entirely", salvation: true,
+    soft: ["I think you survived things I never had to. That's its own kind of strength, Sara.", "From where I stand, you held the family together while I chased a title.", "I don't see it as success vs survival. But I hear that you've been carrying it."],
+    aggressive: ["That's a really unfair way to put it.", "So I'm the villain for doing well now?", "Don't rewrite my life into your narrative."],
+    silent: ["I don't see it like that.", "That's not true.", "Hm."] },
+
+  { hani: "I'm proud of you. I want you to know that. I don't say it because — I don't know. It feels complicated. But I am.", subtext: "(It is complicated. She is proud of you the way you are proud of something that also makes you aware of what you don't have. She is saying it anyway because she decided, walking here, that she would.)", conflict: "Making it less complicated than it is", salvation: true,
+    soft: ["I know it's complicated. That's what makes you saying it mean so much.", "Thank you, Sara. Coming from you — knowing it's complicated — it lands deeper.", "I'm proud of you too. The complicated, honest kind. The real kind."],
+    aggressive: ["Complicated how? Just say it.", "You don't sound very proud, honestly.", "If it's that hard to say, don't force it."],
+    silent: ["Thanks.", "Okay.", "That's nice."] },
+
+  { hani: "We used to talk every day when we were at university. Do you remember? Every day.", subtext: "(She remembers every conversation. She has kept some of the voice notes. She hasn't told you this.)", conflict: "Focusing on why it changed instead of the memory", salvation: true,
+    soft: ["Every single day. God, I miss that, Sara. That was us at our best.", "I remember. You knew everything about my life back then. I want that again.", "We did. I'd give a lot to have those daily calls back."],
+    aggressive: ["And then life happened. People drift.", "Why does everything come back to how it used to be?", "We're adults now, Sara. It's different."],
+    silent: ["Yeah, we did.", "That was a long time ago.", "I remember."] },
+
+  { hani: "I think I've been waiting for you to notice. That something was off between us. I kept thinking — she'll bring it up. She'll ask.", subtext: "(She has been waiting for two years. She rewrote this conversation in her head so many times she lost count. You never brought it up because you didn't notice, or you noticed and you waited too. She doesn't know which is worse.)", conflict: "Explaining why you didn't bring it up", salvation: false,
+    soft: ["You waited two years for me to ask, and I didn't. I'm so sorry, Sara.", "I should have noticed. The fact that you waited tells me how much I missed.", "You shouldn't have had to wait for me. That's on me, and I hate it."],
+    aggressive: ["You could've brought it up too, you know.", "I'm not a mind reader, Sara.", "So this is my fault for not asking?"],
+    silent: ["I didn't realise.", "Okay.", "You should've said something."] },
+
+  { hani: "I don't want to fight. I'm so tired of being in my own head about this. I just want it to be normal between us again.", subtext: "(She means this completely. She also doesn't know what normal looks like because normal, for them, was always this — close and slightly wounded. She is asking for something new while calling it something old.)", conflict: "Promising things will go back to how they were", salvation: true,
+    soft: ["I don't want to fight either. Let's build a new normal — a better one.", "Me too, Sara. I'm tired of the distance. Let's find our way back.", "I want that too. Not the old normal — something honest this time."],
+    aggressive: ["It'll be normal when you stop keeping score.", "You started this conversation, not me.", "Normal? We haven't been normal in years."],
+    silent: ["Okay.", "Sure.", "Me too, I guess."] },
+
+  { hani: "Can I tell you something without you making it a whole thing?", subtext: "(She is about to tell you something she has been holding for a long time. The warning is a form of protection — for both of you.)", conflict: "Making it a whole thing before she says it", salvation: true,
+    soft: ["Of course. I'll just listen. No reaction, I promise.", "Yes. Tell me. I'm here, calmly. Go ahead.", "I won't make it a thing. You're safe with me. Say it."],
+    aggressive: ["Depends what it is, honestly.", "Why do you assume I'll overreact?", "That's a loaded way to start, Sara."],
+    silent: ["Okay.", "Go on.", "Sure."] },
+
+  { hani: "When you got the promotion — my first feeling, before the happiness — was this moment of: why not me. And then immediately after I felt terrible for thinking it. And then I called Mama and said congratulations and I meant it. All three things happened in about four seconds.", subtext: "(She is being more honest with you right now than she has been in years. She is trusting you with the version of herself she usually edits out. This is the most open door she has offered.)", conflict: "Telling her she shouldn't have felt that way", salvation: true,
+    soft: ["That's so human, Sara. All three at once. Thank you for trusting me with it.", "I'd have felt the same. That you still meant the congratulations — that's love.", "You don't have to feel terrible for the 'why not me.' I love you more for telling me."],
+    aggressive: ["You shouldn't feel that way about your own sister.", "So you DID resent it. I knew it.", "Wow. 'Why not you.' Okay."],
+    silent: ["Okay.", "That's honest, I guess.", "Hm."] },
+
+  { hani: "I think we got competitive and we never talked about it. It just — became the thing between us.", subtext: "(It became the thing between them because no one named it. She is naming it now. This is the bravest thing she has said today.)", conflict: "Agreeing too clinically or analyzing it", salvation: true,
+    soft: ["Yeah. It became the thing because we both stayed quiet. I'm glad you said it.", "We did. And I let it sit there for years. I'm sorry we never named it.", "That's exactly it. Two people loving each other through a fog of comparison."],
+    aggressive: ["You got competitive. I was just living my life.", "Textbook sibling rivalry. Can we move on?", "We? You're the one keeping the scoreboard."],
+    silent: ["Maybe.", "I guess.", "Okay."] },
+
+  { hani: "I miss you. Is that weird to say? We see each other at every family thing. But I miss you.", subtext: "(It's not weird. She misses the version of their closeness before comparison entered the room. She doesn't know if that version still exists. She is asking if it might.)", conflict: "Explaining why you've been distant", salvation: true,
+    soft: ["It's not weird at all. I miss you too, Sara — the real you, not the dinner-table version.", "I miss you so much. Seeing you isn't the same as having you.", "Not weird. I've missed my sister even with you in the same room."],
+    aggressive: ["We see each other constantly, Sara.", "If you missed me, you could've called.", "How do you miss someone you see every week?"],
+    silent: ["I've been busy.", "Yeah.", "Same, I guess."] },
+
+  { hani: "Tell me something. Anything. Tell me something you haven't told anyone.", subtext: "(She is trying to start over in the middle of a conversation. She wants the old rhythm back — where you told each other things before you told the world. She's offering to go first if you do.)", conflict: "Telling something safe or surface-level", salvation: true,
+    soft: ["Okay. Honestly? Some days the success feels empty without you to share it with.", "Here's one: I'm scared I traded closeness for a title. You're the only one I'd admit that to.", "I cried after the promotion. Not from joy — from how alone the top felt. Only you get that."],
+    aggressive: ["Why, so you can use it later?", "I don't really do the deep-confession thing.", "You first. I'm not going to be the only vulnerable one."],
+    silent: ["Um. I don't know.", "Nothing comes to mind.", "Like what?"] },
+
+  { hani: "I think you're the person I know best and the person I understand least. Does that make sense?", subtext: "(It makes perfect sense. She has been trying to resolve this paradox her entire adult life. You are her sister. She can read your face across a room. She has no idea why you do half the things you do.)", conflict: "Explaining yourself instead of sitting in it", salvation: true,
+    soft: ["It makes perfect sense. I feel exactly that about you, Sara.", "That's the most accurate thing anyone's ever said about us.", "Yeah. We know each other's whole story but not each other. Let's fix that part."],
+    aggressive: ["What's so hard to understand about me?", "Maybe you just never actually asked.", "That sounds like a you problem, Sara."],
+    silent: ["I guess.", "Maybe.", "Sure, it does."] },
+
+  { hani: "I don't want to fix everything today. I just want to — leave this conversation differently than we came into it. Is that possible?", subtext: "(She walked in holding every grievance like a case file. She has set most of them down. She is asking you to meet her where she has arrived.)", conflict: "Trying to fix everything anyway", salvation: true,
+    soft: ["It's possible. We don't have to solve it all — just closer than when we walked in.", "Yeah. Let's leave lighter than we arrived. That's enough for today.", "I'd love that. One honest conversation is a start, Sara. Let's take it."],
+    aggressive: ["No, let's actually settle all of it right now.", "We can't just leave half of this open.", "If we're doing this, let's do the whole thing."],
+    silent: ["Okay.", "Sure.", "I guess so."] },
+
+  { hani: "You know I love you, right? Even when I'm being — whatever I am. I love you.", subtext: "(She is ending the conversation the way she wanted to start it. It took twenty-two moves to get here. She means every word.)", conflict: "Adding conditions or caveats", salvation: true,
+    soft: ["I love you too, Sara. Even the whatever-you-are parts. Especially those.", "I know. And I love you — no asterisks. Always have.", "I do know. And I needed to hear it. I love you too."],
+    aggressive: ["Love me even while keeping score, you mean.", "Do you, though? It hasn't always felt like it.", "Sure. When it's convenient."],
+    silent: ["Love you too.", "I know.", "Okay."] },
+
+  { hani: "Okay. Good. Let's get tea. And you can tell me about the promotion properly this time — not the version Mama told.", subtext: "(She is ready. She chose tea. She chose you. She is letting the morning become something lighter than it started as.)", conflict: "Bringing up anything unresolved", salvation: true,
+    soft: ["I'd love that. Tea, and I'll tell you the whole messy story. Just us.", "Yes. Let me tell you the real version — the one only my sister gets.", "Tea sounds perfect, Sara. Thank you for wanting to hear it from me."],
+    aggressive: ["Wait, we still haven't actually dealt with —", "Tea? After everything we just opened up?", "Don't just paper over it with tea."],
+    silent: ["Okay.", "Sure.", "Tea's fine."] }
 ];
 
 // ─── Scenario 6: Daniyal & Colleague (Workplace Betrayal) ───────────────────
