@@ -2182,16 +2182,16 @@ function renderChatList() {
   const msgsLeft   = Math.max(0, HB_FREE_LIMIT - usedMsgs);
   const isPro      = isUpgraded();
 
-  // ── Default item (shows play count badge) ─────────────────────────────
+  // ── Default item (ALWAYS shows play count — ∞ for pro/admin, X/10 for free) ──
   const makeDefaultItem = (c) => {
-    const pinned    = _isPinned(c);
-    const plays     = getDefaultPlayCount(c.id);
-    const playsLeft = DEFAULT_PLAY_LIMIT - plays;
-    const limitHit  = !isPro && plays >= DEFAULT_PLAY_LIMIT;
-    const playsHtml = !isPro
-      ? `<span style="font-size:9px;font-weight:700;color:${limitHit ? 'var(--red)' : 'var(--muted)'};letter-spacing:.3px">${limitHit ? '🔒 LIMIT' : plays + '/' + DEFAULT_PLAY_LIMIT}</span>`
-      : '';
-    const tagHtml   = c.tag ? `<span class="ci-rel-tag"${c.tagStyle ? ` style="${c.tagStyle}"` : ''}>${c.tag}</span>` : '';
+    const pinned   = _isPinned(c);
+    const plays    = getDefaultPlayCount(c.id);
+    const limitHit = !isPro && plays >= DEFAULT_PLAY_LIMIT;
+    // Always show counter — admin/pro see ∞, free users see X/10
+    const countLabel = isPro ? '∞' : `${plays}/${DEFAULT_PLAY_LIMIT}`;
+    const countColor = limitHit ? 'var(--red)' : isPro ? 'var(--green)' : plays > 0 ? 'var(--accent)' : 'var(--muted)';
+    const playsHtml  = `<span style="font-size:9px;font-weight:700;color:${countColor};letter-spacing:.3px">${limitHit ? '🔒 LIMIT' : countLabel}</span>`;
+    const tagHtml    = c.tag ? `<span class="ci-rel-tag"${c.tagStyle ? ` style="${c.tagStyle}"` : ''}>${c.tag}</span>` : '';
     return `
       <div class="chat-item${limitHit ? ' ci-dimmed' : ''}${currentChatId === c.id ? ' active' : ''}" data-id="${c.id}" onclick="${c.action}">
         <div class="ci-avatar ci-emoji" style="background:${c.grad};${limitHit ? 'opacity:0.55' : ''}">${c.emoji}</div>
@@ -2205,29 +2205,33 @@ function renderChatList() {
       </div>`;
   };
 
-  // ── Custom item — locked or open ───────────────────────────────────────
+  // ── Custom item — locked (free), or open (free+unlocked / pro / bestfriend) ──
   const makeCustomItem = (c) => {
-    const pinned  = _isPinned(c);
-    const isFree  = CUSTOM_ALWAYS_FREE.includes(c.id);
-    const isOpen  = isFree || unlocked;
+    const pinned    = _isPinned(c);
+    const isFree    = CUSTOM_ALWAYS_FREE.includes(c.id);
+    // For lock logic: isPro users see all open; free users need 5 defaults
+    const isOpen    = isFree || unlocked; // unlocked = isPro || defaults>=5
     const previewId = ` id="prev_${c.id}"`;
 
     if (!isOpen) {
-      // LOCKED
+      // 🔒 LOCKED — free user, not enough defaults
       return `
         <div class="chat-item ci-locked" data-id="${c.id}"
-             onclick="showToast('Complete ${UNLOCK_THRESHOLD} default scenarios to unlock custom chats (${doneCount}/${UNLOCK_THRESHOLD} done).','error')"
+             onclick="showToast('Complete ${UNLOCK_THRESHOLD} default chats to unlock (${doneCount}/${UNLOCK_THRESHOLD} done).','error')"
              title="Locked — complete ${UNLOCK_THRESHOLD - doneCount} more default chats">
-          <div class="ci-avatar ci-emoji" style="background:${c.grad};opacity:0.35;filter:grayscale(0.7)">${c.emoji}</div>
-          <div class="ci-info" style="opacity:0.4">
+          <div class="ci-avatar ci-emoji" style="background:${c.grad};opacity:0.3;filter:grayscale(0.8)">${c.emoji}</div>
+          <div class="ci-info" style="opacity:0.38">
             <div class="ci-name">${c.name}</div>
-            <div class="ci-preview">🔒 Unlock after ${UNLOCK_THRESHOLD} defaults</div>
+            <div class="ci-preview">🔒 Complete ${UNLOCK_THRESHOLD - doneCount} more defaults to unlock</div>
           </div>
-          <div class="ci-meta"><span style="font-size:16px;opacity:0.5">🔒</span></div>
+          <div class="ci-meta"><span style="font-size:15px;opacity:0.45">🔒</span></div>
         </div>`;
     }
 
-    const tagHtml = c.tag ? `<span class="ci-rel-tag"${c.tagStyle ? ` style="${c.tagStyle}"` : ''}>${c.tag}</span>` : '';
+    const tagHtml  = c.tag ? `<span class="ci-rel-tag"${c.tagStyle ? ` style="${c.tagStyle}"` : ''}>${c.tag}</span>` : '';
+    // Pro/admin badge on each open custom chat
+    const proBadge = isPro && !isFree
+      ? `<span style="font-size:8px;font-weight:800;color:var(--green);letter-spacing:.5px">✓ PRO</span>` : '';
     return `
       <div class="chat-item${currentChatId === c.id ? ' active' : ''}" data-id="${c.id}" onclick="openChat('${c.id}')">
         <div class="ci-avatar ci-emoji" style="background:${c.grad}">${c.emoji}</div>
@@ -2235,8 +2239,8 @@ function renderChatList() {
           <div class="ci-name">${c.name}</div>
           <div class="ci-preview"${previewId}>${c.sub}</div>
         </div>
-        <div class="ci-meta" style="display:flex;align-items:center;gap:5px">
-          ${tagHtml}${makePin(c.id, pinned)}
+        <div class="ci-meta" style="display:flex;flex-direction:column;align-items:flex-end;gap:3px">
+          ${tagHtml}${proBadge}${makePin(c.id, pinned)}
         </div>
       </div>`;
   };
