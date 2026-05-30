@@ -429,8 +429,8 @@ body {
 .hang-scene {
   position: relative;
   width: 100%;
-  max-width: 420px;
-  height: 230px;
+  max-width: 560px;      /* wider — cards spread out more */
+  height: 250px;
   margin: 0 auto 8px;
 }
 
@@ -443,9 +443,9 @@ body {
   transform-origin: top center;
   opacity: 0;
 }
-.hang-left   { left: 42px;  top: 44px; }
+.hang-left   { left: 60px;  top: 48px; }
 .hang-center { left: 50%;   top: 0;    transform: translateX(-50%); }
-.hang-right  { right: 42px; top: 44px; }
+.hang-right  { right: 60px; top: 48px; }
 
 /* Rope — fades from invisible at top to visible at bottom */
 .hu-rope {
@@ -539,35 +539,30 @@ body {
 [data-theme="light"] .hu-e { background: #fff; }
 [data-theme="light"] .hu-p { background: #fff; }
 
-/* ── LC ROPE LOGO (center of hang-scene) ── */
-.hang-logo {
+/* ── 🪢 KNOT CENTER ELEMENT ── */
+.hang-knot {
   position: absolute;
   left: 50%;
-  top: 95px;
+  top: 130px;
   transform: translateX(-50%);
+  font-size: 32px;
   opacity: 0;
   z-index: 2;
+  filter: drop-shadow(0 0 12px rgba(198,120,221,0.4));
+  animation: knotFloat 3.6s ease-in-out infinite, knotGlow 3.6s ease-in-out infinite;
+  animation-play-state: paused; /* started by JS */
+}
+.hang-knot.active {
+  animation-play-state: running;
 }
 
-/* Rope draw animation */
-@keyframes drawRope {
-  to { stroke-dashoffset: 0; }
+@keyframes knotFloat {
+  0%,100% { transform: translateX(-50%) translateY(0)   rotate(-8deg); opacity: 0.85; }
+  50%      { transform: translateX(-50%) translateY(-8px) rotate(8deg);  opacity: 1;    }
 }
-@keyframes lcFadeIn {
-  to { opacity: 1; }
-}
-
-.lc-draw { animation: drawRope 1.4s cubic-bezier(0.4,0,0.2,1) forwards; }
-.lc-circle { animation-delay: 0.6s; }
-.lc-bow    { animation-delay: 1.8s; animation-duration: 0.7s; }
-.lc-join   { animation-delay: 1.6s; animation-duration: 0.3s; }
-.lc-text   { opacity: 0; animation: lcFadeIn 0.5s 2.5s ease forwards; }
-
-/* Logo drop-in (triggered by JS same as cards) */
-.hang-logo.dropping { opacity: 1; }
-.hang-logo.swaying  {
-  opacity: 1;
-  animation: swayCenter 5s 0.5s ease-in-out infinite;
+@keyframes knotGlow {
+  0%,100% { filter: drop-shadow(0 0 8px  rgba(198,120,221,0.35)); }
+  50%     { filter: drop-shadow(0 0 18px rgba(86,182,194,0.55));  }
 }
 
 /* ── HERO SIDE AMBIENT TERMS ── */
@@ -580,22 +575,22 @@ body {
   gap: 18px;
   pointer-events: none;
 }
-.hero-side-left  { left: 32px; text-align: right; }
-.hero-side-right { right: 32px; text-align: left; }
+.hero-side-left  { left: 64px;  text-align: right; }
+.hero-side-right { right: 64px; text-align: left; }
 
 .hero-side span {
   display: block;
   font-family: 'Space Grotesk', sans-serif;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
-  letter-spacing: 1.5px;
+  letter-spacing: 1.8px;
   text-transform: uppercase;
   color: var(--muted);
   opacity: 0;
   animation: sideTermFade 5s var(--d, 0s) ease-in-out infinite;
 }
-.hero-side-left  span { border-right: 1.5px solid rgba(139,148,158,0.2); padding-right: 10px; }
-.hero-side-right span { border-left:  1.5px solid rgba(139,148,158,0.2); padding-left:  10px; }
+.hero-side-left  span { border-right: 1.5px solid rgba(139,148,158,0.18); padding-right: 12px; }
+.hero-side-right span { border-left:  1.5px solid rgba(139,148,158,0.18); padding-left:  12px; }
 
 @keyframes sideTermFade {
   0%   { opacity: 0;    transform: translateY(4px); }

@@ -854,14 +854,14 @@ function runHeroCardAnimation() {
   const hu0  = document.getElementById('hu0');      // D - left
   const hu1  = document.getElementById('hu1');      // E - center
   const hu2  = document.getElementById('hu2');      // P - right
-  const logo = document.getElementById('hangLogo'); // LC rope logo
+  const knot = document.getElementById('hangKnot'); // 🪢 center knot
   if (!hu0 || !hu1 || !hu2) return;
 
   const units    = [hu0, hu1, hu2];
   const isCenter = [false, true, false];
   const bounce   = 'cubic-bezier(0.34, 1.42, 0.64, 1)';
 
-  // ── Reset all ────────────────────────────────────────────────────────
+  // ── Reset ────────────────────────────────────────────────────────────
   units.forEach((el, i) => {
     el.classList.remove('swaying', 'dropping');
     el.style.animation  = 'none';
@@ -871,22 +871,13 @@ function runHeroCardAnimation() {
       ? 'translateX(-50%) translateY(-110px)'
       : 'translateY(-110px)';
   });
-  if (logo) {
-    logo.classList.remove('swaying', 'dropping');
-    logo.style.animation  = 'none';
-    logo.style.opacity    = '0';
-    logo.style.transition = 'none';
-    logo.style.transform  = 'translateX(-50%) translateY(-110px)';
-    // Reset SVG rope draw animations
-    logo.querySelectorAll('.lc-draw,.lc-text').forEach(el => {
-      el.style.animation = 'none';
-      void el.offsetWidth; // force reflow
-      el.style.animation = '';
-    });
+  if (knot) {
+    knot.classList.remove('active');
+    knot.style.opacity = '0';
   }
 
-  // ── Phase 1: staggered drop-in ───────────────────────────────────────
-  const dropDelays = [200, 420, 640]; // D → E → P
+  // ── Phase 1: staggered drop-in — D → E → P ───────────────────────────
+  const dropDelays = [200, 420, 640];
   units.forEach((el, i) => {
     setTimeout(() => {
       el.style.transition = `transform 0.75s ${bounce}, opacity 0.3s ease`;
@@ -895,16 +886,7 @@ function runHeroCardAnimation() {
     }, dropDelays[i]);
   });
 
-  // Logo drops in between D and P (after them)
-  if (logo) {
-    setTimeout(() => {
-      logo.style.transition = `transform 0.75s ${bounce}, opacity 0.3s ease`;
-      logo.style.opacity    = '1';
-      logo.style.transform  = 'translateX(-50%) translateY(0)';
-    }, 860);
-  }
-
-  // ── Phase 2: sway (different phases so they move independently) ──────
+  // ── Phase 2: sway after landing ──────────────────────────────────────
   const swayDelays = [1050, 1200, 1350];
   const swayPhases = ['0s', '-1.4s', '-2.8s'];
   units.forEach((el, i) => {
@@ -916,13 +898,16 @@ function runHeroCardAnimation() {
       el.style.animationDelay = swayPhases[i];
     }, swayDelays[i]);
   });
-  if (logo) {
+
+  // ── Phase 3: 🪢 knot fades in + starts floating after cards land ─────
+  if (knot) {
     setTimeout(() => {
-      logo.style.transition = '';
-      logo.style.transform  = '';
-      logo.style.animation  = '';
-      logo.classList.add('swaying');
-      logo.style.animationDelay = '-0.7s';
+      knot.style.transition = 'opacity 0.6s ease';
+      knot.style.opacity    = '1';
+      setTimeout(() => {
+        knot.style.transition = '';
+        knot.classList.add('active');
+      }, 650);
     }, 1500);
   }
 }
