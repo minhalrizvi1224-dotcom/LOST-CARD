@@ -46,8 +46,16 @@ service cloud.firestore {
 
     // ── Lockouts — read by anyone (pre-login check), CF writes via Admin SDK
     match /lockouts/{id} {
-      allow read:  if true;
+      allow read:  if request.auth != null; // authenticated only — prevents enumeration
       allow write: if false;
+    }
+
+    // ── Public HB config — Gemini keys for Hair Band, readable by all auth users
+    // Admin writes here when saving Gemini pool keys. Keys are rate-limited so
+    // exposure risk is low; without this regular users can't use Hair Band.
+    match /publicConfig/{doc} {
+      allow read:  if request.auth != null;
+      allow write: if isAdmin();
     }
 
     // ── Sent messages log ───────────────────────────────────────────────

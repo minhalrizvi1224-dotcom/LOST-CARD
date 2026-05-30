@@ -2305,6 +2305,7 @@ async function addGeminiPoolKey() {
   try {
     _poolGeminiKeys.push(key);
     await adDB.collection('adminSettings').doc('config').set({ geminiPoolKeys: _poolGeminiKeys }, { merge: true });
+    await adDB.collection('publicConfig').doc('hb').set({ geminiKeys: _poolGeminiKeys }, { merge: true });
     input.value = '';
     _renderGeminiPoolKeys();
     if (status) { status.style.color='var(--green)'; status.textContent=`✅ Gemini Key ${_poolGeminiKeys.length} added!`; setTimeout(()=>{status.textContent='';},3000); }
@@ -2320,6 +2321,7 @@ async function removeGeminiPoolKey(idx) {
   try {
     _poolGeminiKeys.splice(idx, 1);
     await adDB.collection('adminSettings').doc('config').set({ geminiPoolKeys: _poolGeminiKeys }, { merge: true });
+    await adDB.collection('publicConfig').doc('hb').set({ geminiKeys: _poolGeminiKeys }, { merge: true });
     _renderGeminiPoolKeys();
     if (status) { status.style.color='var(--accent2)'; status.textContent=`Key removed. Gemini pool: ${_poolGeminiKeys.length} key(s).`; setTimeout(()=>{status.textContent='';},3000); }
   } catch(e) {

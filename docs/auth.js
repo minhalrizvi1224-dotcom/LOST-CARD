@@ -146,8 +146,8 @@ function initAuth() {
       pkrPriceAnnual    = c.pkrPriceAnnual   || 9800;
     }
 
-    // Only admin loads pool keys — regular users call Cloud Function (keys never sent to browser)
     if (docData.isAdmin === true) {
+      // Admin: load full pool (all providers) from adminSettings
       await firebaseDB.collection('adminSettings').doc('config').get().then(cfg => {
         if (cfg.exists) _applyAdminConfig(cfg.data());
       }).catch(() => {});
@@ -155,6 +155,23 @@ function initAuth() {
       firebaseDB.collection('adminSettings').doc('config').onSnapshot(cfg => {
         if (cfg.exists) {
           _applyAdminConfig(cfg.data());
+          window.dispatchEvent(new CustomEvent('lc-pool-updated'));
+        }
+      }, () => {});
+    } else {
+      // Regular users: load Gemini keys for Hair Band from publicConfig/hb
+      // Keys are rate-limited — this is safe for authenticated users
+      firebaseDB.collection('publicConfig').doc('hb').get().then(cfg => {
+        if (cfg.exists && Array.isArray(cfg.data().geminiKeys) && cfg.data().geminiKeys.length) {
+          poolGeminiKeys = cfg.data().geminiKeys;
+          window.dispatchEvent(new CustomEvent('lc-pool-updated'));
+        }
+      }).catch(() => {});
+
+      // Real-time listener — keys update immediately when admin changes them
+      firebaseDB.collection('publicConfig').doc('hb').onSnapshot(cfg => {
+        if (cfg.exists && Array.isArray(cfg.data().geminiKeys)) {
+          poolGeminiKeys = cfg.data().geminiKeys;
           window.dispatchEvent(new CustomEvent('lc-pool-updated'));
         }
       }, () => {});
