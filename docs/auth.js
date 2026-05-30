@@ -170,6 +170,8 @@ function initAuth() {
           poolGroqKeys = d.groqKeys;
           poolGroqKey  = poolGroqKeys[0] || null;
         }
+        if (Array.isArray(d.cerebrasKeys) && d.cerebrasKeys.length)
+          poolCerebrasKeys = d.cerebrasKeys;
         if (d.paymentNumber) adminPayNum     = d.paymentNumber;
         if (d.whatsappNumber) adminWANum     = d.whatsappNumber;
         if (d.jazzCashTitle) jazzCashTitle   = d.jazzCashTitle;
