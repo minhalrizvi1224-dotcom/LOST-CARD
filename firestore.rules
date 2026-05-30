@@ -18,7 +18,7 @@ service cloud.firestore {
     function safeUserUpdate() {
       return !request.resource.data.diff(resource.data).affectedKeys().hasAny([
         'isAdmin','suspended','hbPlan','planExpiry','upgradePlan',
-        'upgradedAt','upgradeApprovedBy','warningCount','warnings'
+        'upgradedAt','upgradeApprovedBy','warningCount','warnings','geminiKey'
       ]);
     }
     // hbCount (free-message counter) may only go UP for a self-update — stops
