@@ -608,6 +608,7 @@
         <div style="display:flex;gap:8px">
           <select id="complaintFilterStatus" onchange="loadComplaints()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:8px;font-size:12px">
             <option value="all">All</option>
+            <option value="unresolved" selected>🔴🟡 Unresolved</option>
             <option value="new">🔴 New</option>
             <option value="seen">🟡 Seen</option>
             <option value="resolved">🟢 Resolved</option>
@@ -721,16 +722,16 @@
 
         <!-- Payment Info — JazzCash + WhatsApp -->
         <div style="background:var(--surface);border:1px solid rgba(88,166,255,.3);border-radius:12px;padding:22px">
-          <div style="font-size:14px;font-weight:800;margin-bottom:2px">💰 JazzCash / EasyPaisa</div>
-          <div style="font-size:12px;color:var(--muted);margin-bottom:16px">Shown to users when they select a plan. Set your number, account name, and PKR amounts.</div>
+          <div style="font-size:14px;font-weight:800;margin-bottom:2px">💳 Payment Details</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:16px">Shown to users when they select a plan. Set your card/account number and name.</div>
 
           <div class="field" style="margin-bottom:10px">
             <label style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Account Holder Name</label>
             <input id="jazzCashTitle" type="text" placeholder="e.g. Minhal Rizvi" style="width:100%;padding:9px 11px;background:var(--bg);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:13px;outline:none"/>
           </div>
           <div class="field" style="margin-bottom:10px">
-            <label style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">JazzCash / EasyPaisa Number</label>
-            <input id="paymentNum" type="text" placeholder="03XX-XXXXXXX" style="width:100%;padding:9px 11px;background:var(--bg);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:13px;outline:none"/>
+            <label style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Card / Account Number</label>
+            <input id="paymentNum" type="text" placeholder="Card or account number" style="width:100%;padding:9px 11px;background:var(--bg);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:13px;outline:none;font-family:monospace;letter-spacing:1px"/>
           </div>
           <div class="field" style="margin-bottom:10px">
             <label style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">WhatsApp Number (with country code)</label>
@@ -1003,11 +1004,19 @@ async function loadComplaints() {
   const container = document.getElementById('complaintsTable');
   if (!container) return;
   container.innerHTML = '<div class="loading"><span class="spinner"></span>Loading...</div>';
-  const filterStatus = document.getElementById('complaintFilterStatus')?.value || 'all';
+  const filterStatus = document.getElementById('complaintFilterStatus')?.value || 'unresolved';
   try {
     let q = adDB.collection('complaints').orderBy('createdAt', 'desc');
-    if (filterStatus !== 'all') q = q.where('status', '==', filterStatus);
+    if (filterStatus === 'unresolved') {
+      // Show new + seen (not resolved)
+      q = adDB.collection('complaints').where('status', 'in', ['new', 'seen']).orderBy('createdAt', 'desc');
+    } else if (filterStatus !== 'all') {
+      q = q.where('status', '==', filterStatus);
+    }
     const snap = await q.limit(100).get();
+
+    // Auto-delete oldest if total complaints >= 100
+    _autoDeleteOldComplaints();
 
     // Update badge
     const newCount = snap.docs.filter(d => d.data().status === 'new').length;
@@ -1040,6 +1049,7 @@ async function loadComplaints() {
                 <option value="resolved" ${d.status==='resolved' ?'selected':''}>🟢 Resolved</option>
               </select>
               ${d.uid ? `<button onclick="openDirectMsgModal('${d.uid}','${esc2(d.email||'')}','${esc2(d.displayName||'User')}')" title="Send message to user" style="background:rgba(88,166,255,.1);border:1px solid rgba(88,166,255,.3);color:var(--accent);border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer">✉ Message</button>` : ''}
+              <button onclick="deleteComplaint('${doc.id}')" title="Delete complaint" style="background:rgba(248,81,73,.1);border:1px solid rgba(248,81,73,.3);color:var(--red);border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer">🗑</button>
             </div>
           </div>
           <div style="font-size:14px;color:var(--text);line-height:1.7;white-space:pre-wrap;word-break:break-word;padding:12px;background:var(--surface2);border-radius:8px;margin-bottom:8px">${esc2(d.message || '')}</div>
@@ -1055,14 +1065,10 @@ async function updateComplaintStatus(id, status, uid, email, displayName) {
   await adDB.collection('complaints').doc(id).update({ status }).catch(err => console.error(err));
 
   if (status === 'resolved') {
-    // Remove card from DOM immediately
-    const card = document.getElementById('complaint-' + id);
-    if (card) {
-      card.style.transition = 'opacity .3s,transform .3s';
-      card.style.opacity = '0'; card.style.transform = 'translateY(-6px)';
-      setTimeout(() => card.remove(), 320);
-    }
-    // Send notification to user if we have their uid
+    // Remove card from DOM immediately with animation
+    _removeComplaintCard(id);
+
+    // Send resolution notification to user
     if (uid) {
       await adDB.collection('users').doc(uid).collection('adminMessages').add({
         type:        'complaint_resolved',
@@ -1072,6 +1078,7 @@ async function updateComplaintStatus(id, status, uid, email, displayName) {
         createdAt:   firebase.firestore.FieldValue.serverTimestamp()
       }).catch(() => {});
     }
+    adToast('Resolved ✓ — user notified');
   }
 
   // Refresh badge count
@@ -1079,6 +1086,40 @@ async function updateComplaintStatus(id, status, uid, email, displayName) {
     const cb = document.getElementById('complaintsBadge');
     if (cb) { cb.textContent = snap.size; cb.style.display = snap.size ? 'inline' : 'none'; }
   }).catch(() => {});
+}
+
+function _removeComplaintCard(id) {
+  const card = document.getElementById('complaint-' + id);
+  if (!card) return;
+  card.style.transition = 'opacity .3s, transform .3s, max-height .4s';
+  card.style.opacity = '0';
+  card.style.transform = 'translateY(-6px)';
+  setTimeout(() => { card.style.maxHeight = '0'; card.style.margin = '0'; card.style.padding = '0'; }, 280);
+  setTimeout(() => card.remove(), 500);
+}
+
+async function deleteComplaint(id) {
+  if (!confirm('Delete this complaint permanently?')) return;
+  await adDB.collection('complaints').doc(id).delete().catch(err => { adToast('Error: ' + err.message); return; });
+  _removeComplaintCard(id);
+  adToast('Complaint deleted');
+  // Refresh badge
+  adDB.collection('complaints').where('status','==','new').get().then(snap => {
+    const cb = document.getElementById('complaintsBadge');
+    if (cb) { cb.textContent = snap.size; cb.style.display = snap.size ? 'inline' : 'none'; }
+  }).catch(() => {});
+}
+
+async function _autoDeleteOldComplaints() {
+  try {
+    const snap = await adDB.collection('complaints').orderBy('createdAt', 'desc').get();
+    if (snap.size < 100) return;
+    // Delete oldest (everything after first 80 to keep some buffer)
+    const toDelete = snap.docs.slice(80);
+    const batch = adDB.batch();
+    toDelete.forEach(d => batch.delete(d.ref));
+    await batch.commit();
+  } catch(e) { /* non-critical */ }
 }
 
 function esc2(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }

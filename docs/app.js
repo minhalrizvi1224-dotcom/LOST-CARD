@@ -2043,10 +2043,10 @@ function selectPlan(plan) {
         + '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:14px">Step 1 — Send Payment</div>'
         + '<div style="background:var(--surface);border:1px solid rgba(88,166,255,.25);border-radius:10px;padding:14px 16px;margin-bottom:14px">'
         + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
-        + '<span style="font-size:12px;color:var(--muted)">Send to (JazzCash / EasyPaisa)</span>'
+        + '<span style="font-size:12px;color:var(--muted)">Send payment to</span>'
         + '</div>'
         + (jcTitle ? '<div style="font-size:13px;font-weight:700;margin-bottom:4px">' + jcTitle + '</div>' : '')
-        + '<div style="font-size:18px;font-weight:800;font-family:monospace;letter-spacing:1px;color:var(--accent)">' + payNum + '</div>'
+        + '<div style="font-size:18px;font-weight:800;font-family:monospace;letter-spacing:2px;color:var(--accent)">' + payNum + '</div>'
         + '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">'
         + '<span style="font-size:12px;color:var(--muted)">Amount</span>'
         + '<span style="font-size:20px;font-weight:800;color:var(--green)">Rs ' + pkr.toLocaleString() + '</span>'
@@ -2218,11 +2218,11 @@ function renderChatList() {
       return `
         <div class="chat-item ci-locked" data-id="${c.id}"
              onclick="showToast('Complete ${UNLOCK_THRESHOLD} default chats to unlock (${doneCount}/${UNLOCK_THRESHOLD} done).','error')"
-             title="Locked — complete ${UNLOCK_THRESHOLD - doneCount} more default chats">
+             title="Locked — complete ${Math.max(0, UNLOCK_THRESHOLD - doneCount)} more default chats">
           <div class="ci-avatar ci-emoji" style="background:${c.grad};opacity:0.3;filter:grayscale(0.8)">${c.emoji}</div>
           <div class="ci-info" style="opacity:0.38">
             <div class="ci-name">${c.name}</div>
-            <div class="ci-preview">🔒 Complete ${UNLOCK_THRESHOLD - doneCount} more defaults to unlock</div>
+            <div class="ci-preview">🔒 Complete ${Math.max(0, UNLOCK_THRESHOLD - doneCount)} more defaults to unlock</div>
           </div>
           <div class="ci-meta"><span style="font-size:15px;opacity:0.45">🔒</span></div>
         </div>`;
@@ -4196,7 +4196,7 @@ async function selectHBPlan(planKey, priceLabel) {
       // ── JazzCash / EasyPaisa flow ──────────────────────────────────
       payHtml += '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px">Step 1 — Send Payment</div>'
         + '<div style="background:rgba(88,166,255,.06);border:1px solid rgba(88,166,255,.2);border-radius:10px;padding:12px 14px;margin-bottom:12px">'
-        + '<div style="font-size:11px;color:var(--muted);margin-bottom:4px">JazzCash / EasyPaisa</div>'
+        + '<div style="font-size:11px;color:var(--muted);margin-bottom:4px">Send payment to</div>'
         + (jcTitle ? '<div style="font-size:13px;font-weight:700;margin-bottom:2px">' + jcTitle + '</div>' : '')
         + '<div style="font-size:17px;font-weight:800;font-family:monospace;letter-spacing:1px;color:var(--accent)">' + payNum + '</div>'
         + '<div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;align-items:center">'
