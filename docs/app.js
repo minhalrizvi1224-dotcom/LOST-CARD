@@ -1831,16 +1831,22 @@ function confirmSetup() {
 // In-memory cache — fastest, guaranteed to work within same session
 const _setupCache = {};
 
+// Setup storage is scoped to the logged-in user so one account can NEVER read
+// another account's saved names/scenario on a shared browser.
+function _setupKey(chatId) { return `lc_setup_${currentUser?.uid || 'anon'}_${chatId}`; }
+
 function getSavedSetup(chatId) {
-  // 1. In-memory (always works in same session)
-  if (_setupCache[chatId]) return _setupCache[chatId];
-  // 2. localStorage (survives page refresh)
-  try { return JSON.parse(localStorage.getItem(`lc_setup_${chatId}`)); }
+  const ck = `${currentUser?.uid || 'anon'}_${chatId}`;
+  // 1. In-memory (always works in same session, scoped to this user)
+  if (_setupCache[ck]) return _setupCache[ck];
+  // 2. localStorage (survives page refresh, scoped to this user)
+  try { return JSON.parse(localStorage.getItem(_setupKey(chatId))); }
   catch(e) { return null; }
 }
 function saveSetup(chatId, setup) {
-  _setupCache[chatId] = setup;  // in-memory first — instant, always works
-  localStorage.setItem(`lc_setup_${chatId}`, JSON.stringify(setup));
+  const ck = `${currentUser?.uid || 'anon'}_${chatId}`;
+  _setupCache[ck] = setup;  // in-memory first — instant, always works
+  localStorage.setItem(_setupKey(chatId), JSON.stringify(setup));
   // Firestore — persists across sign-out and devices (debounced to 1.5s)
   if (typeof firebaseDB !== 'undefined' && firebaseDB && currentUser?.uid) {
     const patch = {};
@@ -1853,7 +1859,8 @@ function saveSetup(chatId, setup) {
 // Called by "⚙ Setup" button in chat header — clears saved setup and re-opens modal
 function resetAndSetup() {
   if (!currentChatId) return;
-  localStorage.removeItem(`lc_setup_${currentChatId}`);
+  localStorage.removeItem(_setupKey(currentChatId));
+  delete _setupCache[`${currentUser?.uid || 'anon'}_${currentChatId}`];
   document.getElementById('chatConv').style.display    = 'none';
   document.getElementById('chatWelcome').style.display = '';
   openSetupModal(currentChatId);
@@ -5128,7 +5135,8 @@ function exitChat() {
   if (currentChatId) delete customAIHistories[currentChatId];
   // Clear saved setup so next click always shows fresh names/scenario modal
   if (currentChatId && currentChatId !== 'default' && currentChatId !== 'ai_assistant') {
-    localStorage.removeItem(`lc_setup_${currentChatId}`);
+    localStorage.removeItem(_setupKey(currentChatId));
+    delete _setupCache[`${currentUser?.uid || 'anon'}_${currentChatId}`];
   }
   currentChatId        = null;
   currentChatSetup     = null;

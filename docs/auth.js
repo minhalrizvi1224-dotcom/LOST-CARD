@@ -132,9 +132,10 @@ function initAuth() {
     }
 
     // ── Load saved chat setups from Firestore into localStorage ──────────
+    // Scoped by uid so they only ever belong to this account on this browser.
     if (docData.chatSetups && typeof docData.chatSetups === 'object') {
       Object.entries(docData.chatSetups).forEach(([chatId, setup]) => {
-        if (setup) localStorage.setItem(`lc_setup_${chatId}`, JSON.stringify(setup));
+        if (setup) localStorage.setItem(`lc_setup_${uid}_${chatId}`, JSON.stringify(setup));
       });
     }
 
