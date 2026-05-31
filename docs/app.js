@@ -3615,6 +3615,14 @@ function hairBandFallback(text) {
       : "It sounds like you're frustrated — that's okay, you can say what you feel here. I'm still here to help. If something about LOST CARD isn't working or isn't making sense, just tell me what it is and I'll do my best to sort it out." };
   }
 
+  // ── Crisis / self-harm — respond human-first with real help (highest priority) ──
+  const crisisKw = [' suicide',' suicidal',' kill myself',' end my life',' end it all',' self harm',' self-harm',' hurt myself',' marna chahta',' mar jana',' mar jaun',' khudkushi',' khud kushi',' jeena nahi chah',' jeene ka dil',' nahi jeena',' end myself',' no reason to live',' want to die',' mar jau'];
+  if (crisisKw.some(k => t.includes(k))) {
+    return { matched: true, answer: ur
+      ? "Main sun raha hoon, aur jo aap mehsoos kar rahe hain woh maayne rakhta hai. Aap akele ismein se nahi guzar sakte — please abhi kisi se baat karein jo aapke saath ho sake. Pakistan mein Umang helpline: 0311-7786264. Beghair Pakistan: https://www.iasp.info/resources/Crisis_Centres/. Aap kisi bharose wale insaan ko bhi call karein. Aap ahem hain, aur is lamhe ko akele face karne ki zaroorat nahi."
+      : "I hear you, and what you're feeling matters. You don't have to carry this alone — please reach out to someone who can be with you right now. In Pakistan, the Umang helpline is 0311-7786264. Internationally: https://www.iasp.info/resources/Crisis_Centres/. Call a person you trust, too. You matter, and you don't have to face this moment by yourself." };
+  }
+
   // ── Personal / emotional struggle — empathetic, routes to the right chat ──
   const personalKw = [' ex ',' breakup',' broke up',' broke-up',' left me',' chora',' chhora',' chod',' chhod diya',' galti kis',' galti bhi',' galti thi',' kiski galti',' dhoka',' cheat',' betray',' ignore',' ignore kar',' miss kar',' miss him',' miss her',' dukhi',' hurt',' rota',' roya',' depress',' breakup ho',' why did',' q chora',' q chhora',' kyun chora',' chala gaya',' chali gayi',' chodd',' fight ho',' larai',' jhagra',' jhagda',' talaq',' divorce',' toot gaya',' dil toot'];
   const personalScore = personalKw.reduce((s, k) => s + (t.includes(k) ? 1 : 0), 0);
@@ -3659,7 +3667,39 @@ function hairBandFallback(text) {
 
     { id:'thanks', kw:[' thanks',' thank you',' thankyou',' shukriya',' shukria',' meherbani',' great',' helpful',' appreciate'],
       en:"Anytime — that's exactly what I'm here for. If anything else comes up about LOST CARD, the theory, or a relationship you're working through, just ask.",
-      ur:"Bilkul — main isi liye to yahan hoon. LOST CARD, theory, ya kisi rishte ke baare mein aur kuch ho to bila jhijhak poochein." }
+      ur:"Bilkul — main isi liye to yahan hoon. LOST CARD, theory, ya kisi rishte ke baare mein aur kuch ho to bila jhijhak poochein." },
+
+    { id:'complaint', kw:[' complain',' complaint',' feedback',' report a bug',' report bug',' report it',' contact',' contact dev',' developer se',' shikayat',' shikaayat',' masla report',' issue report',' bug report',' kaise complain',' complain karu',' complain karni',' raabta',' rabta',' suggestion'],
+      en:"To send a complaint, feedback, or report a bug: tap '📮 Complaints & Feedback' in the left sidebar (under Support). Type your message there and it goes straight to the developer — you'll get a reply right inside the app. You can also reach me here for anything about how the app works.",
+      ur:"Complaint, feedback, ya bug report karne ke liye: left sidebar mein 'Support' ke neeche '📮 Complaints & Feedback' par tap karein. Wahan apna message likhein — woh seedha developer ke paas jaata hai, aur jawab aapko app ke andar hi mil jaata hai. App kaise kaam karta hai, uske liye aap mujhse bhi yahan pooch sakte hain." },
+
+    { id:'whoareyou', kw:[' who are you',' what are you',' tum kon',' tum kaun',' aap kon',' aap kaun',' what is hair band',' hair band kya',' kya ho tum',' tumhara naam'],
+      en:"I'm Hair Band 🪢 — the built-in guide and psychological companion of LOST CARD. I know the whole app — the theory, the psychology, how to use it, and how to apply it to a real relationship. Ask me anything: how the simulation works, why something is happening, or a situation of your own you're trying to understand.",
+      ur:"Main Hair Band hoon 🪢 — LOST CARD ka built-in guide aur psychological companion. Mujhe poora app pata hai — theory, psychology, ise istemaal karne ka tareeqa, aur asli rishte par lagaane ka tareeqa. Kuch bhi poochein: simulation kaise chalta hai, kuch kyun ho raha hai, ya apni koi situation jise aap samajhna chahte hain." },
+
+    { id:'limit', kw:[' free message',' how many message',' kitne message',' message limit',' 50 message',' messages left',' kitni baar',' free limit',' daily limit',' kitne free'],
+      en:"Free accounts get 50 AI messages total, shared across Hair Band and custom chats, plus 10 plays per default chat. You can see how many you've used in Settings → Hair Band Plan. When you run out, you can upgrade in Settings → Upgrade for unlimited.",
+      ur:"Free accounts ko kul 50 AI messages milte hain — Hair Band aur custom chats mein share hote hain — aur har default chat ke 10 plays. Aap Settings → Hair Band Plan mein dekh sakte hain kitne istemaal hue. Khatam hone par Settings → Upgrade se unlimited le sakte hain." },
+
+    { id:'history', kw:[' history',' my sessions',' past session',' purani chat',' purani session',' previous chat',' meri history',' saved chat',' record of',' pichli'],
+      en:"All your past sessions are saved under the History tab at the bottom. Open any one to see its full report — the moves you made, which cards dropped, your NLI pattern, and the archetype it assigned. It's the best way to track how your patterns change over time.",
+      ur:"Aapki saari purani sessions neeche History tab mein save hoti hain. Kisi bhi ek ko khol kar uski poori report dekhein — aapki moves, kaunse cards gire, NLI pattern, aur jo archetype assign hua. Yeh dekhne ka behtareen tareeqa hai ke waqt ke saath aapke patterns kaise badalte hain." },
+
+    { id:'account', kw:[' delete account',' delete my account',' account delete',' delete my data',' remove my account',' close account',' account khatam',' data delete',' forgot password',' password bhool',' reset password',' password reset',' cant login',' cannot login',' login nahi'],
+      en:"For account help — deleting your account/data, or a password reset — send a quick note through '📮 Complaints & Feedback' in the sidebar and the developer will handle it directly. For a forgotten password, use the 'Forgot password?' option on the login screen to get a reset email.",
+      ur:"Account se related madad ke liye — account/data delete karna, ya password reset — sidebar mein '📮 Complaints & Feedback' se ek chhota sa message bhej dein, developer seedha handle kar dega. Password bhool gaye hain to login screen par 'Forgot password?' option se reset email mangwa lein." },
+
+    { id:'bug', kw:[' bug',' not working',' nahi chal',' nhi chal',' error',' stuck',' crash',' freeze',' load nahi',' loading',' glitch',' problem ho',' kaam karna band',' atak'],
+      en:"Sorry that's happening. A couple of quick things usually fix it: refresh the page, and if you're on mobile, close and reopen the app. If it keeps happening, tap '📮 Complaints & Feedback' in the sidebar and describe exactly what you did and what went wrong — that goes straight to the developer and gets fixed fast.",
+      ur:"Maaf kijiye yeh ho raha hai. Aksar yeh chhoti cheezein theek kar deti hain: page refresh karein, aur mobile par ho to app band karke dobara kholein. Agar phir bhi ho raha hai to sidebar mein '📮 Complaints & Feedback' par tap karke bilkul wahi likhein jo aapne kiya aur kya galat hua — woh seedha developer ke paas jaata hai aur jaldi theek hota hai." },
+
+    { id:'install', kw:[' install',' download',' app store',' play store',' mobile app',' phone par',' download karu',' install karu',' apk',' pwa'],
+      en:"LOST CARD runs right in your browser — there's nothing to download. On a phone you can 'Add to Home Screen' from your browser menu and it'll open like a normal app, full-screen. Same account, same data, everywhere.",
+      ur:"LOST CARD seedha aapke browser mein chalta hai — kuch download karne ki zaroorat nahi. Phone par browser menu se 'Add to Home Screen' kar lein, phir yeh ek normal app ki tarah full-screen khulega. Wahi account, wahi data, har jagah." },
+
+    { id:'languages', kw:[' which language',' what language',' urdu mein',' urdu me',' kya tum urdu',' hindi',' english only',' kis zaban',' kaunsi zaban',' language support'],
+      en:"Type in whatever language you're comfortable with — English, Roman Urdu, or a mix — and I'll match it. The simulation reads your messages the same way regardless of language.",
+      ur:"Aap jis zaban mein comfortable hain usi mein likhein — English, Roman Urdu, ya mix — main usi mein jawab dunga. Simulation aapke messages ko zaban se hat kar usi tarah padhta hai." }
   ];
 
   // Score each intent: longer keywords count double (more specific)
@@ -3681,8 +3721,8 @@ function hairBandFallback(text) {
   if (!top || top.score === 0) {
     _hbLastIntent = null;
     return { matched: false, answer: ur
-      ? "Yeh waqai achha sawal hai, aur main andaaza lagane ke bajaye aapko sahi jawab dena chahta hoon. Maine ise note kar liya hai — thodi der mein aapko proper jawab mil jayega. Filhaal, LOST CARD, iski theory, ya aapki apni situation ke baare mein kuch ho to main madad kar sakta hoon."
-      : "That's genuinely a good question, and I'd rather give you an answer that's actually right than guess. I've flagged it so you'll get a proper response shortly. In the meantime, is there anything about LOST CARD, the theory, or your own situation I can help with?" };
+      ? "Yeh achha sawal hai — main ise note kar raha hoon taake aapko iska proper jawab mile. Filhaal main in cheezon mein foran madad kar sakta hoon:\n\n• LOST CARD kya hai aur kaise madad karta hai\n• Ise apne kisi asli rishte par kaise use karein\n• Theory — teen cards, NLI, aur game ke rules\n• Custom chats lock kyun hain / kaise khulti hain\n• Upgrade plans aur free message limit\n• Complaint ya feedback kaise bhejein\n\nIn mein se kuch poochein, ya apni situation thoda detail mein batayein — main usi par guide karunga."
+      : "That's a good question — I'm noting it so you get a proper answer. In the meantime, I can help right away with any of these:\n\n• What LOST CARD is and how it helps\n• How to use it on a real relationship of yours\n• The theory — the three cards, NLI, and the rules of the game\n• Why custom chats are locked / how to unlock them\n• Upgrade plans and the free message limit\n• How to send a complaint or feedback\n\nAsk me one of those, or tell me a bit more about your situation and I'll guide you through it." };
   }
 
   // Build the answer — combine the top two if the question clearly asks two things
