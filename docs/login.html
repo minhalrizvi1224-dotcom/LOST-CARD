@@ -375,6 +375,20 @@ let auth = null, db = null;
 let isSigningUp = false;
 let _pendingVerifyUser = null; // holds unverified user for resend
 
+// Base Firestore user document — created ONLY after email is verified, so
+// unverified / fake-email signups never appear in the admin panel.
+function _baseUserDoc(email, name) {
+  return {
+    email, displayName: name || (email ? email.split('@')[0] : 'User'),
+    emailVerified:  true,
+    createdAt:      firebase.firestore.FieldValue.serverTimestamp(),
+    lastLogin:      firebase.firestore.FieldValue.serverTimestamp(),
+    totalSessions:  0,
+    archetype:      null,
+    platform:       navigator.userAgent.includes('Mobile') ? 'mobile' : 'desktop'
+  };
+}
+
 // Lockout is enforced server-side via Cloud Functions — not localStorage
 
 function initFirebase() {
@@ -542,16 +556,10 @@ async function handleAuth(e) {
 
       _pendingVerifyUser = cred.user;
 
-      // Save to Firestore (emailVerified: false — blocked from app until link clicked)
-      await db.collection('users').doc(cred.user.uid).set({
-        email, displayName: name,
-        emailVerified:  false,
-        createdAt:      firebase.firestore.FieldValue.serverTimestamp(),
-        lastLogin:      firebase.firestore.FieldValue.serverTimestamp(),
-        totalSessions:  0,
-        archetype:      null,
-        platform:       navigator.userAgent.includes('Mobile') ? 'mobile' : 'desktop'
-      });
+      // NOTE: we deliberately do NOT create the Firestore user doc here.
+      // The doc is created only once the email is actually verified (in the
+      // polling success handler / first verified sign-in). This keeps fake or
+      // never-verified signups out of the admin panel entirely.
 
       // Keep user signed in — polling needs auth.currentUser to call reload()
       isSigningUp = false;
@@ -595,12 +603,20 @@ async function handleAuth(e) {
           return;
         }
 
-        // 5. Success — clear failed attempts, update login time
+        // 5. Success — clear failed attempts, update login time.
         await _clearAttempts(email);
-        await db.collection('users').doc(user.uid).update({
-          lastLogin:     firebase.firestore.FieldValue.serverTimestamp(),
-          emailVerified: true
-        }).catch(() => {});
+        if (userDoc && userDoc.exists) {
+          // Existing account — just refresh login time (don't reset createdAt etc.)
+          await db.collection('users').doc(user.uid).update({
+            lastLogin:     firebase.firestore.FieldValue.serverTimestamp(),
+            emailVerified: true
+          }).catch(() => {});
+        } else {
+          // Verified via email link without polling — create the doc now
+          await db.collection('users').doc(user.uid)
+            .set(_baseUserDoc(user.email, user.displayName), { merge: true })
+            .catch(() => {});
+        }
 
         window.location.href = 'index.html';
 
@@ -722,11 +738,10 @@ function _startPolling() {
         document.querySelector('#verifyPanel svg').style.display = 'none';
         document.getElementById('timerNum').style.display = 'none';
 
-        // Save verified status to Firestore
-        await db.collection('users').doc(_pendingVerifyUser.uid).update({
-          emailVerified: true,
-          lastLogin:     firebase.firestore.FieldValue.serverTimestamp()
-        }).catch(() => {});
+        // Email verified — NOW create the Firestore doc (first time it exists)
+        await db.collection('users').doc(_pendingVerifyUser.uid)
+          .set(_baseUserDoc(_pendingVerifyUser.email, _pendingVerifyUser.displayName), { merge: true })
+          .catch(() => {});
 
         // Sign out and redirect to login so user manually signs in
         await auth.signOut().catch(() => {});
