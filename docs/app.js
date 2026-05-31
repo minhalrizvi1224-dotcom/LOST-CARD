@@ -1337,6 +1337,27 @@ function closeSettingsModal() {
   if (modal) modal.style.display = 'none';
 }
 
+// ── Legal / Info slide-in panel (About, Terms, Privacy, Refund) ───────
+function openLegal(page, title) {
+  closeSettingsModal();
+  const panel = document.getElementById('legalPanel');
+  const frame = document.getElementById('legalFrame');
+  const t     = document.getElementById('legalPanelTitle');
+  if (!panel || !frame) return;
+  if (t) t.textContent = title || '';
+  frame.src = page;                       // load the page in the panel's iframe
+  requestAnimationFrame(() => panel.classList.add('open'));  // slide in from the left
+}
+function closeLegal() {
+  const panel = document.getElementById('legalPanel');
+  if (!panel) return;
+  panel.classList.remove('open');         // slide out
+  setTimeout(() => {                       // clear src after the animation finishes
+    const frame = document.getElementById('legalFrame');
+    if (frame) frame.src = 'about:blank';
+  }, 350);
+}
+
 function _populateSettings() {
   // Plan status
   const planEl = document.getElementById('set_planStatus');

@@ -1245,18 +1245,18 @@
     <!-- Legal & Info -->
     <div class="set-section-label" style="margin-top:18px">Legal &amp; Info</div>
     <div class="set-pref-list">
-      <a href="about.html" target="_blank" rel="noopener" class="set-toggle-row" style="text-decoration:none;color:inherit">
-        <span>ℹ️ About LOST CARD</span><span style="color:var(--muted);font-size:13px">↗</span>
-      </a>
-      <a href="terms.html" target="_blank" rel="noopener" class="set-toggle-row" style="text-decoration:none;color:inherit">
-        <span>📄 Terms of Service</span><span style="color:var(--muted);font-size:13px">↗</span>
-      </a>
-      <a href="privacy.html" target="_blank" rel="noopener" class="set-toggle-row" style="text-decoration:none;color:inherit">
-        <span>🔒 Privacy Policy</span><span style="color:var(--muted);font-size:13px">↗</span>
-      </a>
-      <a href="refund.html" target="_blank" rel="noopener" class="set-toggle-row" style="text-decoration:none;color:inherit">
-        <span>💳 Refund Policy</span><span style="color:var(--muted);font-size:13px">↗</span>
-      </a>
+      <div onclick="openLegal('about.html','About LOST CARD')" class="set-toggle-row" style="cursor:pointer">
+        <span>ℹ️ About LOST CARD</span><span style="color:var(--muted);font-size:14px">›</span>
+      </div>
+      <div onclick="openLegal('terms.html','Terms of Service')" class="set-toggle-row" style="cursor:pointer">
+        <span>📄 Terms of Service</span><span style="color:var(--muted);font-size:14px">›</span>
+      </div>
+      <div onclick="openLegal('privacy.html','Privacy Policy')" class="set-toggle-row" style="cursor:pointer">
+        <span>🔒 Privacy Policy</span><span style="color:var(--muted);font-size:14px">›</span>
+      </div>
+      <div onclick="openLegal('refund.html','Refund Policy')" class="set-toggle-row" style="cursor:pointer">
+        <span>💳 Refund Policy</span><span style="color:var(--muted);font-size:14px">›</span>
+      </div>
     </div>
 
     <div class="modal-btns" style="margin-top:22px">
@@ -1264,6 +1264,31 @@
       <button class="modal-btn primary" onclick="saveSettings()">Save</button>
     </div>
   </div>
+</div>
+
+<!-- ════════════════ LEGAL / INFO SLIDE-IN PANEL ════════════════ -->
+<style>
+  #legalPanel{position:fixed;inset:0;z-index:4000;background:var(--bg,#0D1117);
+    transform:translateX(-100%);transition:transform .33s cubic-bezier(.4,0,.2,1);
+    display:flex;flex-direction:column;pointer-events:none}
+  #legalPanel.open{transform:translateX(0);pointer-events:auto;box-shadow:0 0 60px rgba(0,0,0,.6)}
+  #legalPanel .lp-header{display:flex;align-items:center;gap:10px;padding:11px 14px;
+    background:var(--surface,#161B22);border-bottom:1px solid var(--border,#30363D);flex-shrink:0}
+  #legalPanel .lp-btn{display:inline-flex;align-items:center;gap:6px;background:var(--surface2,#1C2128);
+    border:1px solid var(--border,#30363D);color:var(--text,#E6EDF3);border-radius:9px;
+    padding:7px 13px;font-size:13px;font-weight:700;cursor:pointer;transition:background .15s}
+  #legalPanel .lp-btn:hover{background:var(--border,#30363D)}
+  #legalPanel .lp-title{flex:1;text-align:center;font-weight:800;font-size:15px;color:var(--text,#E6EDF3);
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #legalPanel .lp-frame{flex:1;width:100%;border:none;background:var(--bg,#0D1117)}
+</style>
+<div id="legalPanel">
+  <div class="lp-header">
+    <button class="lp-btn" onclick="closeLegal()">← Back</button>
+    <span class="lp-title" id="legalPanelTitle"></span>
+    <button class="lp-btn" onclick="closeLegal()" aria-label="Close">✕</button>
+  </div>
+  <iframe id="legalFrame" class="lp-frame" title="LOST CARD"></iframe>
 </div>
 
 <!-- ════════════════════ UPGRADE MODAL ════════════════════ -->
