@@ -55,7 +55,7 @@ service cloud.firestore {
     // ── Complaints ─────────────────────────────────────────────────────
     match /complaints/{id} {
       allow create: if request.auth != null;
-      allow read, update: if isAdmin();
+      allow read, update, delete: if isAdmin();
     }
 
     // ── Admin settings (pool keys, payment config) ─────────────────────
