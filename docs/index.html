@@ -24,8 +24,10 @@
   <!-- ── Coming Soon Gate — auto-removed at 6pm PKT 29 May 2026 ── -->
   <script>
     (function(){
-      // ── MAINTENANCE MODE — set to false when update is done ──
-      var MAINTENANCE = true;
+      // ── MAINTENANCE MODE — auto-lifts at launch time, no manual toggle ──
+      // Launch: Monday 1 June 2026, 6:00 AM PKT (UTC+5).
+      var LAUNCH_TS  = new Date('2026-06-01T06:00:00+05:00').getTime();
+      var MAINTENANCE = Date.now() < LAUNCH_TS;
       var p = new URLSearchParams(window.location.search);
       if(p.get('dev')==='2443141856934ee5') sessionStorage.setItem('lc_preview','1');
       if(MAINTENANCE && sessionStorage.getItem('lc_preview')!=='1'){
