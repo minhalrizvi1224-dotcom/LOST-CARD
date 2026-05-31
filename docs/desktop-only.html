@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+  <title>LOST CARD — Open on Laptop / Desktop</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{--bg:#0D1117;--surface:#161B22;--border:#30363D;--text:#E6EDF3;--muted:#8B949E;--accent:#58A6FF;--purple:#C678DD}
+    html,body{height:100%}
+    body{
+      background:radial-gradient(1200px 600px at 50% -10%, #18202b 0%, var(--bg) 55%);
+      color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+      display:flex;align-items:center;justify-content:center;
+      min-height:100vh;padding:28px;text-align:center;
+      -webkit-font-smoothing:antialiased;
+    }
+    .wrap{max-width:440px;width:100%;animation:rise .6s cubic-bezier(.2,.7,.2,1) both}
+    @keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+    .brand{display:inline-flex;align-items:center;gap:10px;margin-bottom:34px}
+    .brand-mark{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#C678DD,#58A6FF);
+      display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;color:#0D1117;letter-spacing:-.5px}
+    .brand-name{font-weight:800;letter-spacing:3px;font-size:14px}
+    .icon{font-size:60px;line-height:1;margin-bottom:22px;filter:drop-shadow(0 8px 22px rgba(88,166,255,.25))}
+    h1{font-size:23px;font-weight:800;line-height:1.3;margin-bottom:14px;letter-spacing:-.3px}
+    .accent{background:linear-gradient(90deg,#C678DD,#58A6FF);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+    p{font-size:14px;line-height:1.75;color:var(--muted);margin-bottom:10px}
+    .ur{font-size:13px;color:#768390;margin-top:4px}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:30px 26px;margin-top:8px;
+      box-shadow:0 24px 60px rgba(0,0,0,.45)}
+    .why{margin-top:22px;padding-top:18px;border-top:1px solid var(--border);font-size:12.5px;color:var(--muted);line-height:1.7}
+    .foot{margin-top:26px;font-size:11px;color:#586069;letter-spacing:.4px}
+    .dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:#3FB950;margin-right:7px;vertical-align:middle;box-shadow:0 0 0 4px rgba(63,185,80,.12)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="brand">
+        <div class="brand-mark">LC</div>
+        <div class="brand-name">LOST CARD</div>
+      </div>
+      <div class="icon">💻</div>
+      <h1>Built for the <span class="accent">bigger screen</span></h1>
+      <p>LOST CARD runs a live simulation with seven data structures, real-time charts, and side-by-side reports. It needs the focus and space of a <strong style="color:var(--text)">laptop or desktop</strong> to work the way it's meant to.</p>
+      <p class="ur">Yeh experience laptop ya PC ke liye banaya gaya hai — please wahan se kholein.</p>
+      <div class="why">
+        Open this same link on a computer and you'll get the full experience — the chat, the NLI bars, the chess engine, and your psychology reports.
+      </div>
+    </div>
+    <div class="foot"><span class="dot"></span>LOST CARD · S. M. Minhal Abbas Rizvi</div>
+  </div>
+</body>
+</html>

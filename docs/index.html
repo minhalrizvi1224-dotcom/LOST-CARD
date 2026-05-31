@@ -2,6 +2,25 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
+  <!-- ── Device Gate — LOST CARD is laptop/desktop only ── -->
+  <script>
+    function _lcIsMobile(){
+      try{
+        var ua = navigator.userAgent || navigator.vendor || '';
+        if(/Android|iPhone|iPod|Windows Phone|webOS|BlackBerry|IEMobile|Opera Mini|Mobile|Tablet|PlayBook|Silk|Kindle/i.test(ua)) return true;
+        // iPad on iPadOS reports as Mac with a touch screen
+        if(navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) return true;
+        // touch + coarse pointer + small screen = phone/tablet
+        var coarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+        var minDim = Math.min(screen.width || 9999, screen.height || 9999);
+        if(navigator.maxTouchPoints > 0 && coarse && minDim < 820) return true;
+        return false;
+      }catch(e){ return false; }
+    }
+    if(_lcIsMobile()){ window.location.replace('desktop-only.html'); }
+    // Keep blocking if the viewport is later resized into a mobile shape
+    window.addEventListener('resize', function(){ if(_lcIsMobile()) window.location.replace('desktop-only.html'); });
+  </script>
   <!-- ── Coming Soon Gate — auto-removed at 6pm PKT 29 May 2026 ── -->
   <script>
     (function(){
