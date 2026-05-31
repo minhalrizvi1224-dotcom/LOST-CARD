@@ -100,6 +100,18 @@ function initAuth() {
       chatPlayCounts:            docData.chatPlayCounts            || {}
     };
 
+    // ── Clear stale per-browser data when a DIFFERENT account logs in ────
+    // localStorage is shared across all accounts on one device. Without this,
+    // a new user inherits the previous user's chat setups, history & prefs.
+    const _lastUid = localStorage.getItem('lc_last_uid');
+    if (_lastUid && _lastUid !== user.uid) {
+      Object.keys(localStorage).filter(k =>
+        k.startsWith('lc_setup_') || k === 'lc_sessions' || k === 'lc_profile' ||
+        k.startsWith('lc_set_')   || k === 'lc_gemini_key' || k === 'lc_groq_key'
+      ).forEach(k => localStorage.removeItem(k));
+    }
+    localStorage.setItem('lc_last_uid', user.uid);
+
     // ── Restore profile data from Firestore into localStorage ────────────
     const uid = user.uid;
     if (docData.bio)        localStorage.setItem('lc_bio_'      + uid, docData.bio);
