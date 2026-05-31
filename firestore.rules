@@ -23,9 +23,10 @@ service cloud.firestore {
     }
     // hbCount (free-message counter) may only go UP for a self-update — stops
     // a user resetting it to 0 in the console to get unlimited free messages.
+    // Uses .get(...,0) so a missing hbCount field (new accounts) still works —
+    // otherwise the X >= null comparison silently denied every increment.
     function hbCountNotReset() {
-      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(['hbCount'])
-        || request.resource.data.hbCount >= resource.data.hbCount;
+      return request.resource.data.get('hbCount', 0) >= resource.data.get('hbCount', 0);
     }
     match /users/{uid} {
       allow read:   if isOwner(uid) || isAdmin();

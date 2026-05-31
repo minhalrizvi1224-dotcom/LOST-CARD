@@ -383,6 +383,7 @@ function _baseUserDoc(email, name) {
     emailVerified:  true,
     createdAt:      firebase.firestore.FieldValue.serverTimestamp(),
     lastLogin:      firebase.firestore.FieldValue.serverTimestamp(),
+    hbCount:        0,
     totalSessions:  0,
     archetype:      null,
     platform:       navigator.userAgent.includes('Mobile') ? 'mobile' : 'desktop'
