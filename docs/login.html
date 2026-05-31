@@ -391,6 +391,16 @@ let auth = null, db = null;
 let isSigningUp = false;
 let _pendingVerifyUser = null; // holds unverified user for resend
 
+// Strong password policy — returns an error string, or '' if the password is OK.
+function _validatePassword(pw) {
+  if (!pw || pw.length < 8)       return 'Password must be at least 8 characters.';
+  if (!/[a-z]/.test(pw))          return 'Password needs at least one lowercase letter.';
+  if (!/[A-Z]/.test(pw))          return 'Password needs at least one uppercase letter.';
+  if (!/[0-9]/.test(pw))          return 'Password needs at least one number.';
+  if (!/[^A-Za-z0-9]/.test(pw))   return 'Password needs at least one special character (e.g. ! @ # $).';
+  return '';
+}
+
 // Base Firestore user document — created ONLY after email is verified, so
 // unverified / fake-email signups never appear in the admin panel.
 function _baseUserDoc(email, name) {
@@ -554,6 +564,9 @@ async function handleAuth(e) {
   try {
     if (currentTab === 'signup') {
       if (!name) { showAuthMsg('Please enter your name.', 'error'); resetBtn(btn); return; }
+      // ── Strong password policy: 8+ chars, upper, lower, number, special ──
+      const pwErr = _validatePassword(password);
+      if (pwErr) { showAuthMsg(pwErr, 'error'); resetBtn(btn); return; }
       isSigningUp = true;
 
       const cred = await auth.createUserWithEmailAndPassword(email, password);
