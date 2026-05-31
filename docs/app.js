@@ -3550,22 +3550,137 @@ async function sendAIMessage() {
         '| Gemini keys:', pool.filter(e=>e.provider==='gemini').length,
         '| Groq keys:', pool.filter(e=>e.provider==='groq-hb').length);
     }
-    const isRateErr = /rate.?limit|429|busy|quota|exhaust|too.many|capacity|HTTP 429|TPM|resource/i.test(errMsg);
-    const isKeyErr  = /HTTP 4[0-9][0-9]|invalid.*key|api.key|permission|forbidden|not.*found/i.test(errMsg);
-    if (isRateErr || isKeyErr) {
-      _hbRateRetry(text);
-    } else if (!errMsg || errMsg === 'All API keys unavailable.') {
-      // Pool empty or all keys failed — show specific message
-      const pool = _getHBPool();
-      addMessage('them', 'Hair Band',
-        pool.length === 0
-          ? 'No API keys configured. Admin: add Gemini keys in the admin panel under Pool Keys.'
-          : `All ${pool.length} keys are currently rate-limited. Try again in a moment.`
-      );
-    } else {
-      addMessage('them', 'Hair Band', _friendlyAPIError(err, 'Hair Band'));
-    }
+    // AI unavailable for ANY reason (quota/rate/key/network/pool-empty) —
+    // answer from the local fallback brain so the user never sees a failure.
+    _hbAnswerLocally(text);
   }
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// HAIR BAND — LOCAL FALLBACK BRAIN
+// When the AI is unavailable (quota/rate/key), Hair Band answers from this
+// built-in knowledge base so the user NEVER sees a failure. Pure local logic
+// (never sent to any API), so it can be as large as needed. Bilingual:
+// detects Roman-Urdu input and replies in kind, else English.
+// ══════════════════════════════════════════════════════════════════════
+function _isRomanUrdu(text) {
+  const s = ' ' + String(text || '').toLowerCase() + ' ';
+  const markers = [' hai ',' hai?',' kya ',' kia ',' kaise ',' kese ',' kyu',' kyun',' q ',' q?',
+    ' mujhe ',' mera ',' meri ',' mere ',' nahi ',' nhi ',' nahe ',' kar ',' karo ',' karna ',' kr ',
+    ' ka ',' ki ',' ko ',' ke ',' mein ',' me ',' hum ',' ham ',' tum ',' aap ',' acha ',' accha ',
+    ' acha?',' rishta ',' rishtay ',' banaya ',' bnaya ',' kon ',' kaun ',' batao ',' bata ',' chal ',
+    ' raha ',' rahi ',' hoon ',' hou ',' upgrade kaise ',' lock ',' jeet ',' jeetna ',' haar '];
+  return markers.some(m => s.includes(m));
+}
+
+function hairBandFallback(text) {
+  const t  = ' ' + String(text || '').toLowerCase().replace(/[?!.,]/g,' ') + ' ';
+  const ur = _isRomanUrdu(text);
+  const has = (...kw) => kw.some(k => t.includes(k));
+
+  // Greeting — only for short, clearly-greeting messages
+  if (/^\s*(hi|hii|hey|hello|salam|assalam|aoa|yo|hru|hi there|hey there|good morning|good evening)\b/i.test(String(text||'').trim()) && String(text||'').trim().length < 30) {
+    return { matched: true, answer: ur
+      ? "Salam — main Hair Band hoon, yahan aapka guide. LOST CARD ke baare mein, ise istemaal karne ka tareeqa, iske peeche ki theory, ya koi asli rishta jise aap samajhna chahte hain — kuch bhi poochein. Kya chal raha hai?"
+      : "Hey — I'm Hair Band, your guide here. Ask me anything about LOST CARD, how to use it, the theory behind it, or a real relationship you're trying to work through. What's on your mind?" };
+  }
+
+  // Creator
+  if (has('who made','who created','who built','creator','developer','banaya','bnaya','kisne','kis ne','banane wala','owner of','author','minhal')) {
+    return { matched: true, answer: ur
+      ? "LOST CARD ko poori tarah S. M. Minhal Abbas Rizvi ne akele banaya hai — koi team ya co-creator nahi. Woh Software Engineering ke student hain aur aane wali kitaab 'The Bet of Belief' (2028) ke musannif. LOST CARD usi kitaab ke ek theorem ka kaam karta hua roop hai: ke rishton ka bigaadna ek computable, predictable pattern follow karta hai."
+      : "LOST CARD was created entirely by S. M. Minhal Abbas Rizvi — alone, with no co-creator or team. He's a Software Engineering student and the author of the upcoming book 'The Bet of Belief' (2028). LOST CARD is a working implementation of one theorem from that book: that the way relationships decay follows computable, predictable rules." };
+  }
+
+  // Why are custom chats locked / how to unlock
+  if (has('custom chat lock','custom lock','locked','unlock','kholna','khulega','kholna','kholne','lock kyu','kyu lock','lock q','q lock','kaise khul','custom kab')) {
+    return { matched: true, answer: ur
+      ? "Custom chats tab khulti hain jab aap 7 mein se 5 default conversations 'complete' karte hain — sirf kholne se nahi. Iska matlab hai poori conversation (21+ moves) khelna aur us dauran teeno cards bachana. Shuru mein lock isliye hain taake aap pehle samajh lein ke system aapki har move ko kaise padhta hai, phir apna asli rishta laayein. Settings mein aap apna progress (X/5) dekh sakte hain."
+      : "Custom chats unlock once you 'complete' 5 of the 7 default conversations — and not just by opening them. Completing means playing a full conversation (21+ moves) and keeping all three cards through it. They're locked at first so you learn how the system reads each of your moves before you bring in a real relationship of your own. You can see your progress (X/5) in Settings." };
+  }
+
+  // Why can't I win default chats (DON'T reveal how to win)
+  if (has('cant win','can t win','cannot win','cant beat','not winning','nahi jeet','nhi jeet','jeet nahi','jeet nhi','kaise jeet','win nahi','why lose','keep losing','always lose','har jata','haar jata')) {
+    return { matched: true, answer: ur
+      ? "Default chat 'jeetna' ka matlab hai 23 moves tak teeno cards bachana — aur yeh jaan-boojh ke bohot mushkil rakha gaya hai. Zyadatar log kisi aise pattern ki wajah se card khote hain jo unhe us waqt nazar nahi aata. Yehi to maqsad hai: simulation aapko woh pattern dikhata hai. Main aapko 'cheat code' nahi dunga — yeh khud samajhna ke aapki kaunsi choice ne card khoya, yehi asli sabaq hai. Apni session report parhiye; woh exact batati hai kaunsi move ne nuksan kiya."
+      : "Winning a default chat means holding all three cards through all 23 moves — and it's deliberately very hard. Most people lose a card because of a pattern they don't notice while it's happening. That's the entire point: the simulation shows you the pattern. I won't hand you a 'cheat code' — discovering how your own choices cost you a card is exactly the lesson. Read your session report; it tells you precisely which move did the damage." };
+  }
+
+  // Upgrade / plans / pricing
+  if (has('upgrade','premium','plan','price','pricing',' cost','paisa','kitne ka','kitna','subscription','subscribe','how to pay','payment','paid','unlimited','buy')) {
+    return { matched: true, answer: ur
+      ? "LOST CARD shuru mein free hai — Hair Band aur custom chats ke liye 50 AI messages milte hain, aur har default chat ke 10 plays. Unlimited ke liye Settings → Upgrade kholein. Teen plans hain: $2 / 15 din, $5 / mahina, ya $35 / saal (best value). Upgrade karne se message limit hat jaati hai aur priority access milta hai. Payment ki tafseel upgrade screen par milti hai."
+      : "LOST CARD is free to start — you get 50 AI messages shared across Hair Band and custom chats, plus 10 plays per default chat. To go unlimited, open Settings → Upgrade. There are three plans: $2 for 15 days, $5 monthly, or $35 for a year (best value). Upgrading removes the message limit and gives priority access. Payment details appear on the upgrade screen." };
+  }
+
+  // I want to improve / fix my relationship
+  if (has('improve','fix my','repair','acha karna','acha bana','behtar','sudhar','theek kar','rishta acha','relation acha','save my relationship','better relation','rishta behtar','make it better','work on my relationship')) {
+    return { matched: true, answer: ur
+      ? "Apne asli rishte ke liye LOST CARD aese use karein: 1) Custom Chat kholein aur matching type chunein (partner, dost, family, waghaira). 2) Asli naam daalein aur sachai se situation likhein. 3) Jo aap waqai unse kehte, wahi type karein. 4) Khatam hone par report parhein — dekhein kaunsa card pehle gira aur kahan; yeh batata hai rishta kahan sabse zyada dabaav mein hai. 5) Ise rehearsal ki tarah istemaal karein — mushkil baat asal mein karne se pehle yahan chala lein. Mujhe rishte ki type aur masla batayein, main soch-samajh mein madad karunga."
+      : "Here's how to use LOST CARD for a real relationship: 1) Open Custom Chat and pick the type that matches (partner, friend, family, etc.). 2) Enter the real names and describe the actual situation honestly. 3) Type what you'd genuinely say to them. 4) When it ends, read the report — see which card dropped first and where; that shows you exactly where the relationship is under the most strain. 5) Use it as a rehearsal — run the hard conversation here before you have it for real. Tell me the relationship type and what's going wrong, and I'll help you think it through." };
+  }
+
+  // The theory / cards / NLI
+  if (has('theory','bet of belief','three card','3 card','what are the card','nli','neuro','devotion','excitement','presence','how does the game','what is the game')) {
+    return { matched: true, answer: ur
+      ? "Asli idea, 'The Bet of Belief' se, yeh hai: rishte mein har lafz ek card hai jo aap ek aise game mein khelte hain jiska aapko ehsaas hi nahi. Aapke paas teen cards hain — Devotion 💜 (aapki investment), Excitement 💙 (rishte ki energy), aur Presence 💚 (aap waqai mojood hain ya nahi). Yeh ek larai se nahi jaate; patterns se jaate hain. NLI naapta hai ke har lamhe aapka nervous system kitna overloaded hai — ek hadd ke baad rational dimaag band ho jaata hai aur lafz waqai chune nahi jaate. Poora model in chhupe patterns ko nazar aane laata hai."
+      : "The core idea, from 'The Bet of Belief': every word in a relationship is a card you play in a game you don't realize you're in. You hold three cards — Devotion 💜 (your investment), Excitement 💙 (the energy in the connection), and Presence 💚 (whether you actually show up). You don't lose them from one fight; you lose them from patterns. NLI measures how overloaded your nervous system is at each moment — past a threshold your rational brain goes offline and the words aren't really chosen. The whole model makes those invisible patterns visible." };
+  }
+
+  // How custom chat works
+  if (has('custom chat','real conversation','custom kaise','how custom','what is custom')) {
+    return { matched: true, answer: ur
+      ? "Custom Chat asli logon ke saath conversations simulate karta hai. Aap apna naam, saamne wale ka asli naam aur gender, rishte ki type, aur asli situation daalte hain. AI us shakhs ko us rishte ke psychological profile ke hisaab se nibhata hai. Aapka har message SOFT / AGGRESSIVE / SILENT mein classify hota hai aur saari structures live update hoti hain. Yeh generic roleplay nahi — yeh aapke asli rishte ka computational model hai."
+      : "Custom Chat simulates conversations with real people. You enter your name, the other person's real name and gender, the relationship type, and the real situation. The AI plays that person based on the relationship's psychological profile. Every message you send is classified as SOFT / AGGRESSIVE / SILENT and all the structures update live. It's not generic roleplay — it's a computational model of your actual relationship." };
+  }
+
+  // Skepticism / counter-argument (someone challenges the app)
+  if (has('fake','scam','useless','doesn t work','does not work','dont work','kaam nahi','kaam nhi','bekaar','fizool','faltu','nonsense','not real','waste','bullshit','stupid app','pointless')) {
+    return { matched: true, answer: ur
+      ? "Shak karna jaiz hai — zyadatar relationship apps mubham, feel-good cheezein hoti hain. LOST CARD alag hai kyunki yeh deterministic hai: aapki conversation ko saat asli data structures aur chess logic se guzaarta hai, aur ek hi input hamesha ek hi nateeja deta hai. Yeh aapko nahi batata ke kya mehsoos karein — yeh dikhata hai ke aapke nervous system ne mechanically kya kiya. Ek session asli situation ke saath chala kar report parhiye; uski specificity shak ka jawab mujhse behtar de deti hai."
+      : "That's fair to be skeptical about — most relationship apps are vague, feel-good tools. LOST CARD is different because it's deterministic: it runs your conversation through seven real data structures and chess logic, and the same input always produces the same breakdown. It isn't telling you how to feel — it's showing you the mechanics of what your nervous system actually did. Run one session with a real situation and read the report; the specificity usually answers the doubt better than I can." };
+  }
+
+  // What is it / how does it help / how to use
+  if (has('what is','what s lost card','whats lost card','how does this','how does it','what can i do','what does this app','purpose','kaam kya','kya hai','kya karta','kaise use','how to use','how do i use','help me','madad','what do you do')) {
+    return { matched: true, answer: ur
+      ? "LOST CARD aapko aapke apne relational patterns ka data deta hai jo emotions us waqt nahi dikha sakte. Jab aap asli behes mein hote hain to nervous system flooded hota hai — aap khud ko dekh nahi sakte. Yeh aapko wahi conversation thande dimaag se chalaane deta hai aur dikhata hai asal mein kya hua: kaunsi move ne nuksan kiya, aapka pattern kya hai, aur ise alag kaise karein. Ise mushkil baaton ka 'flight simulator' samajhein."
+      : "LOST CARD gives you data about your own relational patterns that your emotions can't show you in the moment. In a real argument your nervous system is flooded — you can't observe yourself. This lets you run the same conversation calmly and see what actually happened: which move caused the damage, what your pattern is, and how to do it differently. Think of it as a flight simulator for difficult conversations." };
+  }
+
+  // Unknown — flagged for the admin to answer
+  return { matched: false, answer: ur
+    ? "Yeh waqai achha sawal hai, aur main andaaza lagane ke bajaye aapko sahi jawab dena chahta hoon. Maine ise note kar liya hai — thodi der mein aapko proper jawab mil jayega. Filhaal, LOST CARD, iski theory, ya aapki apni situation ke baare mein kuch ho to main madad kar sakta hoon."
+    : "That's genuinely a good question, and I'd rather give you an answer that's actually right than guess. I've flagged it so you'll get a proper response shortly. In the meantime, is there anything about LOST CARD, the theory, or your own situation I can help with?" };
+}
+
+// Answer locally with a natural typing delay — the user never sees the AI failed.
+function _hbAnswerLocally(text) {
+  const fb = hairBandFallback(text);
+  const typingEl = addTypingIndicator('Hair Band');
+  isAITyping = true;
+  setTimeout(() => {
+    typingEl.remove();
+    isAITyping = false;
+    aiAssistantHistory.push({ role: 'user', content: text });
+    aiAssistantHistory.push({ role: 'assistant', content: fb.answer });
+    addMessage('them', 'Hair Band', fb.answer);
+    scrollMessages();
+    if (!fb.matched) _logUnansweredHB(text);
+  }, 750 + Math.floor(Math.random() * 700));
+}
+
+// Log a question Hair Band couldn't answer → admin "Unanswered" tab
+function _logUnansweredHB(text) {
+  if (typeof firebaseDB === 'undefined' || !firebaseDB || !currentUser || !currentUser.uid) return;
+  firebaseDB.collection('hbUnanswered').add({
+    uid:         currentUser.uid,
+    email:       currentUser.email || null,
+    displayName: currentUser.displayName || null,
+    question:    String(text || '').slice(0, 1000),
+    answered:    false,
+    createdAt:   firebase.firestore.FieldValue.serverTimestamp()
+  }).catch(() => {});
 }
 
 function _hbRateRetry(originalText) {
