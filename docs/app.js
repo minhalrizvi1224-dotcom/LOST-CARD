@@ -1545,7 +1545,7 @@ function selectPlan(plan) {
         + '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px">Step 1 — Send Payment</div>'
         + '<div style="background:var(--surface);border:1px solid rgba(88,166,255,.25);border-radius:10px;padding:14px 16px;margin-bottom:16px">'
         + (jcTitle ? '<div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:3px">Account Holder</div><div style="font-size:14px;font-weight:800;margin-bottom:10px">' + jcTitle + '</div>' : '')
-        + '<div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:3px">Account Number (SadaPay)</div>'
+        + '<div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:3px">Account / Card Number</div>'
         + '<div style="font-size:20px;font-weight:800;font-family:monospace;letter-spacing:3px;color:var(--accent);margin-bottom:10px">' + payNum + '</div>'
         + '<div style="padding-top:10px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">'
         + '<span style="font-size:12px;color:var(--muted)">Amount to send</span>'
@@ -1555,7 +1555,7 @@ function selectPlan(plan) {
         // Step 2 — User enters their own account number
         + '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px">Step 2 — Enter Your Account Number</div>'
         + '<div style="font-size:11px;color:var(--muted);margin-bottom:8px">So we can verify your payment</div>'
-        + '<input id="upUserAccount" type="text" placeholder="Your SadaPay account number" maxlength="30"'
+        + '<input id="upUserAccount" type="text" placeholder="Your account / card number" maxlength="30"'
         + ' style="width:100%;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;font-family:monospace;letter-spacing:1px;outline:none;margin-bottom:16px;box-sizing:border-box"/>'
 
         // Step 3 — Upload payment screenshot

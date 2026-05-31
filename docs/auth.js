@@ -440,9 +440,14 @@ async function saveProfile() {
 function handleProfilePicChange(input) {
   const file = input.files[0];
   if (!file) return;
+  // Guard: must be an image, max 5MB (canvas re-encode below also strips any payload)
+  if (!/^image\//.test(file.type)) { alert('Please choose an image file.'); input.value = ''; return; }
+  if (file.size > 5 * 1024 * 1024) { alert('Image too large — please choose one under 5MB.'); input.value = ''; return; }
   const reader = new FileReader();
+  reader.onerror = () => alert('Could not read that image. Try another file.');
   reader.onload = (e) => {
     const img = new Image();
+    img.onerror = () => alert('That file is not a valid image.');
     img.onload = () => {
       const canvas = document.createElement('canvas');
       canvas.width = 120; canvas.height = 120;
