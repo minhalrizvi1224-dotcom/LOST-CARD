@@ -3623,13 +3623,20 @@ function hairBandFallback(text) {
       : "I hear you, and what you're feeling matters. You don't have to carry this alone — please reach out to someone who can be with you right now. In Pakistan, the Umang helpline is 0311-7786264. Internationally: https://www.iasp.info/resources/Crisis_Centres/. Call a person you trust, too. You matter, and you don't have to face this moment by yourself." };
   }
 
+  // ── Greeting — short, clearly-a-greeting messages ──
+  if (/^(hi+|hey+|hello+|yo|hola|salam|salaam|assalam|assalamualaikum|aoa|hru|sup|good (morning|evening|afternoon)|how are you|kaise ho|kya haal|kaise ho)\b/i.test(raw) && raw.length < 32) {
+    return { matched: true, answer: ur
+      ? "Salam! Main Hair Band hoon 🪢 — LOST CARD ka guide aur psychological companion. App kaise kaam karta hai, theory, ya koi asli rishta jise aap samajhna chahte hain — kuch bhi poochein. Kya chal raha hai?"
+      : "Hey! I'm Hair Band 🪢 — the guide and psychological companion inside LOST CARD. Ask me anything: how the app works, the theory behind it, or a real relationship you're trying to figure out. What's on your mind?" };
+  }
+
   // ── Personal / emotional struggle — empathetic, routes to the right chat ──
   const personalKw = [' ex ',' breakup',' broke up',' broke-up',' left me',' chora',' chhora',' chod',' chhod diya',' galti kis',' galti bhi',' galti thi',' kiski galti',' dhoka',' cheat',' betray',' ignore',' ignore kar',' miss kar',' miss him',' miss her',' dukhi',' hurt',' rota',' roya',' depress',' breakup ho',' why did',' q chora',' q chhora',' kyun chora',' chala gaya',' chali gayi',' chodd',' fight ho',' larai',' jhagra',' jhagda',' talaq',' divorce',' toot gaya',' dil toot'];
   const personalScore = personalKw.reduce((s, k) => s + (t.includes(k) ? 1 : 0), 0);
 
   // ── Intent table (scored) ────────────────────────────────────────────────
   const INTENTS = [
-    { id:'creator', kw:[' who made',' who created',' who built',' creator',' developer',' banaya',' bnaya',' kisne bana',' kis ne bana',' banane wala',' owner of',' author of',' minhal kon',' kis ka'],
+    { id:'creator', kw:[' who made',' who created',' who built',' who is behind',' creator',' developer',' banaya',' bnaya',' kisne bana',' kis ne bana',' banane wala',' owner of',' author of',' minhal',' kis ne',' kisne',' founder',' made this',' made it',' build this'],
       en:"LOST CARD was created entirely by S. M. Minhal Abbas Rizvi — alone, with no co-creator or team. He's a Software Engineering student and the author of the upcoming book 'The Bet of Belief' (2028). LOST CARD is a working implementation of one theorem from that book: that the way relationships decay follows computable, predictable rules.",
       ur:"LOST CARD ko poori tarah S. M. Minhal Abbas Rizvi ne akele banaya hai — koi team ya co-creator nahi. Woh Software Engineering ke student hain aur aane wali kitaab 'The Bet of Belief' (2028) ke musannif. LOST CARD usi kitaab ke ek theorem ka kaam karta hua roop hai: ke rishton ka bigaadna ek computable, predictable pattern follow karta hai." },
 
@@ -3649,7 +3656,7 @@ function hairBandFallback(text) {
       en:"Here's how to use it: 1) Open Custom Chat and pick the relationship type that matches (partner, friend, family, ex, etc.). 2) Enter the real names and describe the actual situation honestly. 3) Type what you'd genuinely say. 4) When it ends, read the report — which card dropped first and where; that shows you exactly where the relationship is under the most strain. 5) Use it as a rehearsal — run the hard conversation here before you have it for real.",
       ur:"Aese use karein: 1) Custom Chat kholein aur matching rishta chunein (partner, dost, family, ex, waghaira). 2) Asli naam daalein aur sachai se situation likhein. 3) Jo aap waqai kehte, wahi type karein. 4) Khatam hone par report parhein — kaunsa card pehle gira aur kahan; yeh batata hai rishta kahan sabse zyada dabaav mein hai. 5) Ise rehearsal ki tarah istemaal karein — mushkil baat asal mein karne se pehle yahan chala lein." },
 
-    { id:'help', kw:[' how does this help',' how does it help',' daily life',' madad kaise',' help me in',' kaam kya',' kya karta',' what can i do',' what does this app',' purpose',' faida',' fayda',' benefit',' kis kaam'],
+    { id:'help', kw:[' what is',' what s ',' whats ',' what does',' what can',' what exactly',' tell me about',' tell me more',' explain',' about lost',' about this',' about the app',' how does this',' how does it',' how it work',' how it help',' how does this help',' how does it help',' daily life',' madad kaise',' help me in',' kaam kya',' kya hai',' kya hota',' kya cheez',' kya karta',' what can i do',' what does this app',' purpose',' faida',' fayda',' benefit',' kis kaam',' batao',' bata do',' samjha',' samjhao',' lost card kya',' lost card kia',' info',' information'],
       en:"LOST CARD gives you data about your own relational patterns that your emotions can't show you in the moment. In a real argument your nervous system is flooded — you can't observe yourself. This lets you run the same conversation calmly and see what actually happened: which move caused the damage, what your pattern is, and how to do it differently. In daily life it's a rehearsal space — run a hard conversation before you have it, and learn the exact point where you tend to lose control.",
       ur:"LOST CARD aapko aapke apne relational patterns ka data deta hai jo emotions us waqt nahi dikha sakte. Asli behes mein nervous system flooded hota hai — aap khud ko dekh nahi sakte. Yeh aapko wahi conversation thande dimaag se chalaane deta hai aur dikhata hai asal mein kya hua: kaunsi move ne nuksan kiya, aapka pattern kya hai, aur ise alag kaise karein. Rozmarra zindagi mein yeh ek rehearsal space hai — mushkil baat karne se pehle yahan chala lein aur woh exact point seekhein jahan aap control khote hain." },
 
@@ -3720,9 +3727,12 @@ function hairBandFallback(text) {
 
   if (!top || top.score === 0) {
     _hbLastIntent = null;
+    // No keyword hit — give a genuinely useful, conversational answer instead of a
+    // cold "I don't know". Most unmatched questions are general curiosity, so lead
+    // with what LOST CARD actually is, then invite specifics. Still logged for admin.
     return { matched: false, answer: ur
-      ? "Yeh achha sawal hai — main ise note kar raha hoon taake aapko iska proper jawab mile. Filhaal main in cheezon mein foran madad kar sakta hoon:\n\n• LOST CARD kya hai aur kaise madad karta hai\n• Ise apne kisi asli rishte par kaise use karein\n• Theory — teen cards, NLI, aur game ke rules\n• Custom chats lock kyun hain / kaise khulti hain\n• Upgrade plans aur free message limit\n• Complaint ya feedback kaise bhejein\n\nIn mein se kuch poochein, ya apni situation thoda detail mein batayein — main usi par guide karunga."
-      : "That's a good question — I'm noting it so you get a proper answer. In the meantime, I can help right away with any of these:\n\n• What LOST CARD is and how it helps\n• How to use it on a real relationship of yours\n• The theory — the three cards, NLI, and the rules of the game\n• Why custom chats are locked / how to unlock them\n• Upgrade plans and the free message limit\n• How to send a complaint or feedback\n\nAsk me one of those, or tell me a bit more about your situation and I'll guide you through it." };
+      ? "Achha sawal. Chalein main shuru se batata hoon: LOST CARD ek computational model hai jo dikhata hai ke rishtey kaise — patterns ki wajah se, ek larai se nahi — kamzor padte hain. Aap ek asli conversation yahan chala kar dekh sakte hain ke aapki kaunsi move ne nuksan kiya, aapka pattern kya hai, aur ise alag kaise karein. Mujhe thoda batayein aap kya jaanna chahte hain — theory, ise apne rishte par use karna, ya kuch khaas — main usi par tafseel se guide kar deta hoon."
+      : "Good question. Let me start from the ground: LOST CARD is a computational model that shows how relationships break down — through patterns, not a single fight. You can run a real conversation here and see which move caused the damage, what your pattern is, and how to do it differently. Tell me a little more about what you'd like to know — the theory, using it on your own relationship, or something specific — and I'll walk you through it in detail." };
   }
 
   // Build the answer — combine the top two if the question clearly asks two things
