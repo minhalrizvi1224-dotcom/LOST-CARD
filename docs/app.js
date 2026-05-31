@@ -2613,10 +2613,12 @@ function startCustomMode(chatId, setup) {
         oninput="autoResizeInput(this)"></textarea>
       <button class="ai-send-btn" id="customSendBtn" onclick="sendCustomMessage()">Send</button>
     </div>
-    <div style="padding:4px 8px 6px;display:flex;align-items:center;gap:8px">
+    <div style="padding:4px 8px 6px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
       <button id="patternInterruptBtn" onclick="triggerPatternInterrupt()" title="Pattern Interrupt - say something genuinely different. Once per session. Risky if trust < 60%." style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;border:1px solid rgba(88,166,255,0.4);background:rgba(88,166,255,0.08);color:var(--blue);cursor:pointer;letter-spacing:0.5px">⚡ Pattern Interrupt</button>
       <span style="font-size:10px;color:var(--muted)" title="Use once per session for a genuine breakthrough move">once per session · risk based on trust level</span>
+      <span id="customMsgCounter" style="font-size:10px;font-weight:700;margin-left:auto"></span>
     </div>`;
+  _updateCustomMsgCounter();
   buildEmojiPicker('emojiPickerCustom', 'customInput');
 
   // Restore sidebars
@@ -2911,6 +2913,7 @@ async function generateCustomReply(chatId, setup, userText) {
     // Count toward the shared 50-message free limit — server-enforced
     if (!isUpgraded()) {
       const allowed = await incrementHBCount();
+      _updateCustomMsgCounter();
       if (!allowed) {
         addMessage('them', setup.theirName,
           '⚠️ You\'ve reached the 50 free AI message limit. Upgrade in Settings to keep chatting.');
@@ -2930,6 +2933,15 @@ async function generateCustomReply(chatId, setup, userText) {
 }
 
 // ── User sends a free-text message in custom chat ─────────────────────
+function _updateCustomMsgCounter() {
+  const el = document.getElementById('customMsgCounter');
+  if (!el) return;
+  if (isUpgraded()) { el.textContent = '✨ Unlimited'; el.style.color = 'var(--green)'; return; }
+  const left = Math.max(0, HB_FREE_LIMIT - (hbCountLocal || 0));
+  el.textContent = `💬 ${left}/${HB_FREE_LIMIT} free messages left`;
+  el.style.color = left <= 5 ? 'var(--red)' : left <= 15 ? '#E5C07B' : 'var(--muted)';
+}
+
 function sendCustomMessage() {
   if (!currentChatSetup || !currentChatId) return;
   if (isAITyping) return;          // AI is mid-reply - wait for it
