@@ -160,7 +160,7 @@ Writing: *The Bet of Belief* - a framework for belief reconstruction (2028)
 
 LOST CARD is one theory from that book, turned into code.
 
-**[Live App](https://lost-card.netlify.app)** · **[GitHub](https://github.com/minhalrizvi1224-dotcom/LOST-CARD)** · **[LinkedIn](https://www.linkedin.com/in/minhal-rizvi)**
+**[Live App](https://lost-card.netlify.app)** · **[GitHub](https://github.com/minhalrizvi1224-dotcom/LOST-CARD)** · **[LinkedIn](https://www.linkedin.com/in/minhal-rizvi-a14478354/)**
 
 ---
 
