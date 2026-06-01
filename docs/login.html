@@ -236,6 +236,101 @@
     @media (max-width: 480px) {
       .auth-box { padding: 28px 20px; border-radius: 12px; }
     }
+
+    /* ── Spam-awareness ticker banner ── */
+    .spam-ticker-wrap {
+      border-radius: 10px;
+      border: 1px solid rgba(229,192,107,0.40);
+      background: linear-gradient(135deg,rgba(229,192,107,0.10),rgba(229,192,107,0.04));
+      padding: 0;
+      margin-bottom: 18px;
+      overflow: hidden;
+    }
+    .spam-ticker-header {
+      display: flex; align-items: center; gap: 7px;
+      padding: 9px 14px 6px;
+      font-size: 10px; font-weight: 800; letter-spacing: .8px;
+      color: #E5C07B; text-transform: uppercase;
+    }
+    .spam-ticker-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: #E5C07B;
+      animation: tickerPulse 1.4s ease-in-out infinite;
+    }
+    @keyframes tickerPulse {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: .4; transform: scale(.7); }
+    }
+    .spam-ticker-track {
+      overflow: hidden;
+      border-top: 1px solid rgba(229,192,107,0.18);
+      padding: 9px 0;
+    }
+    .spam-ticker-inner {
+      display: flex;
+      gap: 0;
+      white-space: nowrap;
+      animation: tickerScroll 22s linear infinite;
+    }
+    .spam-ticker-inner:hover { animation-play-state: paused; }
+    @keyframes tickerScroll {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    .spam-ticker-item {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 11.5px; font-weight: 600; color: rgba(229,192,107,0.85);
+      padding: 0 28px;
+    }
+    .spam-ticker-sep {
+      display: inline-block;
+      font-size: 10px; opacity: .35; padding: 0 4px;
+    }
+
+    /* ── Phone verify sub-panel ── */
+    .phone-panel {
+      text-align: left;
+      border-top: 1px solid var(--border);
+      padding-top: 18px; margin-top: 18px;
+    }
+    .phone-panel-title {
+      font-size: 14px; font-weight: 700; margin-bottom: 4px; color: var(--text);
+    }
+    .phone-panel-sub {
+      font-size: 11.5px; color: var(--text-muted); margin-bottom: 14px; line-height: 1.5;
+    }
+    .phone-input-row {
+      display: flex; gap: 8px; margin-bottom: 12px;
+    }
+    .phone-code-sel {
+      flex: 0 0 88px;
+      padding: 11px 8px;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text);
+      font-size: 13px; outline: none; cursor: pointer;
+    }
+    .phone-code-sel:focus { border-color: var(--accent); }
+    .phone-num-input {
+      flex: 1;
+      padding: 11px 12px;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text);
+      font-size: 14px; outline: none;
+    }
+    .phone-num-input:focus { border-color: var(--accent); }
+    .phone-num-input::placeholder { color: var(--text-muted); }
+    .otp-input-row {
+      display: flex; gap: 8px; margin-bottom: 12px;
+    }
+    .otp-input {
+      flex: 1; padding: 13px;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text);
+      font-size: 20px; font-weight: 800; text-align: center;
+      letter-spacing: 8px; outline: none;
+    }
+    .otp-input:focus { border-color: var(--accent); }
+    .otp-input::placeholder { letter-spacing: 2px; font-size: 14px; font-weight: 400; }
   </style>
 </head>
 <body>
@@ -330,6 +425,45 @@
 
     <!-- ── Verify email notice (shown after signup) ── -->
     <div id="verifyPanel" style="display:none;text-align:center;padding:8px 0">
+
+      <!-- Animated spam-awareness banner -->
+      <div class="spam-ticker-wrap">
+        <div class="spam-ticker-header">
+          <div class="spam-ticker-dot"></div>
+          From LOST CARD Team
+        </div>
+        <div class="spam-ticker-track">
+          <div class="spam-ticker-inner" id="spamTickerInner">
+            <!-- items injected twice for seamless loop -->
+            <span class="spam-ticker-item">📩 Verification email sent!</span>
+            <span class="spam-ticker-sep">◆</span>
+            <span class="spam-ticker-item">Gmail users — check your <strong style="color:#E5C07B">Spam</strong> folder</span>
+            <span class="spam-ticker-sep">◆</span>
+            <span class="spam-ticker-item">Outlook / Hotmail — check <strong style="color:#E5C07B">Junk</strong></span>
+            <span class="spam-ticker-sep">◆</span>
+            <span class="spam-ticker-item">Yahoo — check <strong style="color:#E5C07B">Spam</strong></span>
+            <span class="spam-ticker-sep">◆</span>
+            <span class="spam-ticker-item">Sender: <em style="color:rgba(229,192,107,0.7)">noreply@lostcard-app.firebaseapp.com</em></span>
+            <span class="spam-ticker-sep">◆</span>
+            <span class="spam-ticker-item">Can't find it? Use <strong style="color:#E5C07B">phone verification</strong> below</span>
+            <span class="spam-ticker-sep">◆</span>
+            <!-- duplicate for infinite loop -->
+            <span class="spam-ticker-item">📩 Verification email sent!</span>
+            <span class="spam-ticker-sep">◆</span>
+            <span class="spam-ticker-item">Gmail users — check your <strong style="color:#E5C07B">Spam</strong> folder</span>
+            <span class="spam-ticker-sep">◆</span>
+            <span class="spam-ticker-item">Outlook / Hotmail — check <strong style="color:#E5C07B">Junk</strong></span>
+            <span class="spam-ticker-sep">◆</span>
+            <span class="spam-ticker-item">Yahoo — check <strong style="color:#E5C07B">Spam</strong></span>
+            <span class="spam-ticker-sep">◆</span>
+            <span class="spam-ticker-item">Sender: <em style="color:rgba(229,192,107,0.7)">noreply@lostcard-app.firebaseapp.com</em></span>
+            <span class="spam-ticker-sep">◆</span>
+            <span class="spam-ticker-item">Can't find it? Use <strong style="color:#E5C07B">phone verification</strong> below</span>
+            <span class="spam-ticker-sep">◆</span>
+          </div>
+        </div>
+      </div>
+
       <div style="font-size:32px;margin-bottom:10px">📧</div>
       <div style="font-weight:700;font-size:16px;margin-bottom:6px">Verify your email</div>
       <div style="font-size:13px;color:var(--text-muted);margin-bottom:4px;line-height:1.6">
@@ -365,7 +499,57 @@
         <button class="auth-btn" onclick="resendVerification()" id="resendBtn">Resend Verification Email</button>
       </div>
 
-      <button type="button" onclick="backToSignin()" style="background:none;border:none;color:var(--text-muted);font-size:11px;cursor:pointer;text-decoration:underline;margin-top:4px">Cancel — Back to Sign In</button>
+      <!-- Try another way -->
+      <div id="tryAnotherWayRow" style="margin-top:14px">
+        <button type="button" onclick="showPhoneVerify()" style="background:rgba(88,166,255,0.07);border:1px solid rgba(88,166,255,0.25);border-radius:8px;color:var(--accent);font-size:12px;font-weight:600;cursor:pointer;padding:8px 18px;width:100%">📱 Try another way — Verify via phone</button>
+      </div>
+
+      <!-- Phone verification sub-panel -->
+      <div id="phoneVerifyPanel" style="display:none">
+        <div class="phone-panel">
+          <div class="phone-panel-title">Verify via Phone</div>
+          <div class="phone-panel-sub">We'll send a one-time code (OTP) to your phone. Enter it below to complete verification.</div>
+
+          <!-- Step 1: phone number input -->
+          <div id="phoneSendStep">
+            <div class="phone-input-row">
+              <select class="phone-code-sel" id="phoneCountryCode">
+                <option value="+92">🇵🇰 +92</option>
+                <option value="+1">🇺🇸 +1</option>
+                <option value="+44">🇬🇧 +44</option>
+                <option value="+91">🇮🇳 +91</option>
+                <option value="+971">🇦🇪 +971</option>
+                <option value="+966">🇸🇦 +966</option>
+                <option value="+61">🇦🇺 +61</option>
+                <option value="+49">🇩🇪 +49</option>
+                <option value="+33">🇫🇷 +33</option>
+                <option value="+86">🇨🇳 +86</option>
+              </select>
+              <input type="tel" class="phone-num-input" id="phoneNumInput" placeholder="3001234567" maxlength="15" inputmode="numeric"/>
+            </div>
+            <div id="recaptcha-container"></div>
+            <button class="auth-btn" onclick="sendPhoneOTP()" id="phoneSendBtn" style="margin-bottom:8px">Send OTP</button>
+          </div>
+
+          <!-- Step 2: OTP input (hidden initially) -->
+          <div id="phoneOtpStep" style="display:none">
+            <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;text-align:left">Enter the 6-digit code sent to <strong id="phoneShown" style="color:var(--text)"></strong></div>
+            <div class="otp-input-row">
+              <input type="text" class="otp-input" id="otpInput" placeholder="······" maxlength="6" inputmode="numeric" oninput="this.value=this.value.replace(/\D/g,'')"/>
+            </div>
+            <button class="auth-btn" onclick="confirmPhoneOTP()" id="phoneConfirmBtn" style="margin-bottom:8px">Verify & Continue</button>
+            <button type="button" onclick="resetPhoneStep()" style="background:none;border:none;color:var(--text-muted);font-size:11px;cursor:pointer;text-decoration:underline;display:block;margin:0 auto">← Change number</button>
+          </div>
+
+          <!-- Phone success -->
+          <div id="phoneSuccess" style="display:none;text-align:center;padding:8px 0">
+            <div style="font-size:28px">✅</div>
+            <div style="font-weight:700;color:var(--success);margin-top:6px">Phone verified! Signing you in…</div>
+          </div>
+        </div>
+      </div>
+
+      <button type="button" onclick="backToSignin()" style="background:none;border:none;color:var(--text-muted);font-size:11px;cursor:pointer;text-decoration:underline;margin-top:14px;display:block">Cancel — Back to Sign In</button>
     </div>
 
     <!-- Quote -->
@@ -721,6 +905,16 @@ function _showVerifyPanel(email) {
   document.getElementById('verifyPanel').style.display = 'block';
   document.getElementById('verifyExpired').style.display  = 'none';
   document.getElementById('verifySuccess').style.display  = 'none';
+  // Reset phone panel to clean state
+  document.getElementById('phoneVerifyPanel').style.display = 'none';
+  document.getElementById('tryAnotherWayRow').style.display = 'block';
+  document.getElementById('phoneSendStep').style.display    = 'block';
+  document.getElementById('phoneOtpStep').style.display     = 'none';
+  document.getElementById('phoneSuccess').style.display     = 'none';
+  document.getElementById('phoneNumInput').value = '';
+  document.getElementById('otpInput').value      = '';
+  _phoneConfirmResult = null;
+  if (_recaptchaVerifier) { _recaptchaVerifier.clear(); _recaptchaVerifier = null; }
   _startCountdown();
   _startPolling();
 }
@@ -843,6 +1037,101 @@ async function resendVerificationEmail() {
     if (btn) { btn.disabled = false; btn.textContent = '🔁 Resend Verification Email'; }
     showAuthMsg('Could not resend. Wait a moment and try again.', 'error');
   }
+}
+
+// ── Phone Verification ─────────────────────────────────────────────────
+let _recaptchaVerifier  = null;
+let _phoneConfirmResult = null;
+
+function showPhoneVerify() {
+  document.getElementById('phoneVerifyPanel').style.display = 'block';
+  document.getElementById('tryAnotherWayRow').style.display = 'none';
+  // Scroll into view smoothly
+  document.getElementById('phoneVerifyPanel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  // Init invisible reCAPTCHA (only once)
+  if (!_recaptchaVerifier) {
+    _recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+      size: 'invisible',
+      callback: () => {}
+    });
+    _recaptchaVerifier.render().catch(() => {});
+  }
+}
+
+async function sendPhoneOTP() {
+  const code   = document.getElementById('phoneCountryCode').value;
+  const num    = document.getElementById('phoneNumInput').value.trim().replace(/\s+/g, '');
+  if (!num) { showAuthMsg('Enter your phone number.', 'error'); return; }
+  const fullNum = code + num;
+
+  const btn = document.getElementById('phoneSendBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Sending OTP…';
+
+  try {
+    // Link phone to existing (unverified email) Firebase user
+    _phoneConfirmResult = await _pendingVerifyUser.linkWithPhoneNumber(fullNum, _recaptchaVerifier);
+    document.getElementById('phoneShown').textContent = fullNum;
+    document.getElementById('phoneSendStep').style.display = 'none';
+    document.getElementById('phoneOtpStep').style.display  = 'block';
+  } catch(err) {
+    btn.disabled = false;
+    btn.innerHTML = 'Send OTP';
+    // Reset reCAPTCHA so it can retry
+    if (_recaptchaVerifier) { _recaptchaVerifier.clear(); _recaptchaVerifier = null; }
+    const errMap = {
+      'auth/invalid-phone-number': 'Invalid phone number. Include country code (e.g. 3001234567 for Pakistan).',
+      'auth/too-many-requests':    'Too many attempts. Please wait before retrying.',
+      'auth/provider-already-linked': 'This phone number is already linked to another account.',
+    };
+    showAuthMsg(errMap[err.code] || 'Could not send OTP. Try again.', 'error');
+  }
+}
+
+async function confirmPhoneOTP() {
+  const otp = document.getElementById('otpInput').value.trim();
+  if (otp.length < 6) { showAuthMsg('Enter the 6-digit OTP.', 'error'); return; }
+
+  const btn = document.getElementById('phoneConfirmBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Verifying…';
+
+  try {
+    await _phoneConfirmResult.confirm(otp);
+
+    // Phone verified — create Firestore doc now (same as email verification path)
+    await db.collection('users').doc(_pendingVerifyUser.uid)
+      .set(_baseUserDoc(_pendingVerifyUser.email, _pendingVerifyUser.displayName), { merge: true })
+      .catch(() => {});
+
+    clearInterval(_timerInterval);
+    clearInterval(_pollInterval);
+
+    document.getElementById('phoneOtpStep').style.display  = 'none';
+    document.getElementById('phoneSuccess').style.display  = 'block';
+
+    // Sign out and redirect to login (same as email verify success)
+    await auth.signOut().catch(() => {});
+    setTimeout(() => { window.location.href = 'login.html?verified=1'; }, 1500);
+  } catch(err) {
+    btn.disabled = false;
+    btn.innerHTML = 'Verify & Continue';
+    const errMap = {
+      'auth/invalid-verification-code': 'Wrong OTP. Please check and try again.',
+      'auth/code-expired':              'OTP expired. Go back and request a new one.',
+    };
+    showAuthMsg(errMap[err.code] || 'Verification failed. Try again.', 'error');
+  }
+}
+
+function resetPhoneStep() {
+  document.getElementById('phoneOtpStep').style.display  = 'none';
+  document.getElementById('phoneSendStep').style.display = 'block';
+  document.getElementById('otpInput').value = '';
+  document.getElementById('phoneSendBtn').disabled = false;
+  document.getElementById('phoneSendBtn').innerHTML = 'Send OTP';
+  _phoneConfirmResult = null;
+  if (_recaptchaVerifier) { _recaptchaVerifier.clear(); _recaptchaVerifier = null; }
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────
