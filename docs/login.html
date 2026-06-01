@@ -1082,7 +1082,7 @@ async function sendPhoneOTP() {
       'auth/too-many-requests':    'Too many attempts. Please wait before retrying.',
       'auth/captcha-check-failed': 'Security check failed. Please refresh and try again.',
     };
-    showAuthMsg(errMap[err.code] || ('Could not send OTP. ' + (err.message || 'Try again.')), 'error');
+    showAuthMsg(errMap[err.code] || ('OTP Error: ' + err.code + ' — ' + (err.message || '')), 'error');
   }
 }
 
