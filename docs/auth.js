@@ -531,7 +531,7 @@ async function saveSessionToFirestore(sessionData, chatId, displayNameOverride) 
 async function _autoPurgeSessions(uid) {
   const snap = await firebaseDB.collection('sessions')
     .where('uid', '==', uid)
-    .orderBy('savedAt', 'asc')
+    .orderBy('timestamp', 'asc')
     .get();
   if (snap.size < 100) return;
 
