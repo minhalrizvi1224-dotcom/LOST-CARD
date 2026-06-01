@@ -1069,22 +1069,20 @@ async function sendPhoneOTP() {
   btn.innerHTML = '<span class="spinner"></span>Sending OTP…';
 
   try {
-    // Link phone to existing (unverified email) Firebase user
-    _phoneConfirmResult = await _pendingVerifyUser.linkWithPhoneNumber(fullNum, _recaptchaVerifier);
+    _phoneConfirmResult = await firebase.auth().signInWithPhoneNumber(fullNum, _recaptchaVerifier);
     document.getElementById('phoneShown').textContent = fullNum;
     document.getElementById('phoneSendStep').style.display = 'none';
     document.getElementById('phoneOtpStep').style.display  = 'block';
   } catch(err) {
     btn.disabled = false;
     btn.innerHTML = 'Send OTP';
-    // Reset reCAPTCHA so it can retry
     if (_recaptchaVerifier) { _recaptchaVerifier.clear(); _recaptchaVerifier = null; }
     const errMap = {
-      'auth/invalid-phone-number': 'Invalid phone number. Include country code (e.g. 3001234567 for Pakistan).',
+      'auth/invalid-phone-number': 'Invalid phone number. (e.g. 3001234567 for Pakistan)',
       'auth/too-many-requests':    'Too many attempts. Please wait before retrying.',
-      'auth/provider-already-linked': 'This phone number is already linked to another account.',
+      'auth/captcha-check-failed': 'Security check failed. Please refresh and try again.',
     };
-    showAuthMsg(errMap[err.code] || 'Could not send OTP. Try again.', 'error');
+    showAuthMsg(errMap[err.code] || ('Could not send OTP. ' + (err.message || 'Try again.')), 'error');
   }
 }
 
@@ -1097,11 +1095,16 @@ async function confirmPhoneOTP() {
   btn.innerHTML = '<span class="spinner"></span>Verifying…';
 
   try {
-    await _phoneConfirmResult.confirm(otp);
+    // Save pending user info before phone sign-in overwrites currentUser
+    const _savedEmail = _pendingVerifyUser ? _pendingVerifyUser.email : null;
+    const _savedName  = _pendingVerifyUser ? _pendingVerifyUser.displayName : null;
 
-    // Phone verified — create Firestore doc now (same as email verification path)
-    await db.collection('users').doc(_pendingVerifyUser.uid)
-      .set(_baseUserDoc(_pendingVerifyUser.email, _pendingVerifyUser.displayName), { merge: true })
+    const result = await _phoneConfirmResult.confirm(otp);
+    const phoneUid = result.user.uid;
+
+    // Create Firestore doc for the phone-verified user
+    await db.collection('users').doc(phoneUid)
+      .set(_baseUserDoc(_savedEmail, _savedName), { merge: true })
       .catch(() => {});
 
     clearInterval(_timerInterval);
