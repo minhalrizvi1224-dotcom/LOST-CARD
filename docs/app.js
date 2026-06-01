@@ -1987,6 +1987,16 @@ function startDefaultMode(scenarioId = 'hani') {
   showConv('default');
   sim = new LostCardSim(scenarioId);
   const meta = sim._meta;
+  // Update header with actual scenario name/avatar
+  const sMeta = (typeof SCENARIO_META !== 'undefined') ? SCENARIO_META[scenarioId] : null;
+  if (sMeta) {
+    const avatarEl = document.getElementById('cchAvatar');
+    if (avatarEl) { avatarEl.textContent = sMeta.emoji || '🃏'; avatarEl.style.fontSize = '20px'; avatarEl.style.fontWeight = 'normal'; }
+    const nameEl = document.getElementById('cchName');
+    if (nameEl) nameEl.textContent = sMeta.title || sMeta.character || scenarioId;
+    const subEl = document.getElementById('cchSub');
+    if (subEl) subEl.textContent = `Default · Scripted · 23 moves`;
+  }
   updateSimUI({ nli: sim.ns.nli, trust: sim.trust, state: sim.ns.getStateLabel(),
     stateColor: sim.ns.getStateColor(), cards: { ...sim.cards }, stackSize: 0,
     exitDist: sim.dag.lastExitDist });
