@@ -77,9 +77,13 @@ let _cfAvailable = null;
 async function _detectCF() {
   if (_cfAvailable !== null) return _cfAvailable;
   try {
-    // Ping the CF with a minimal call to check it's live
-    const fn = firebase.functions().httpsCallable('ai');
-    await fn({ provider: 'groq', messages: [{ role: 'user', content: 'ping' }], maxTokens: 1 });
+    // Ping the CF with a minimal call to check it's live.
+    // MUST use the same region (asia-south1) the function is deployed in —
+    // firebase.functions() defaults to us-central1, where it does NOT exist,
+    // so the ping failed with CORS/404 and the app silently abandoned the CF.
+    _initCloudFn();
+    if (!_cloudAIFn) { _cfAvailable = false; return _cfAvailable; }
+    await _cloudAIFn({ provider: 'groq', messages: [{ role: 'user', content: 'ping' }], maxTokens: 1 });
     _cfAvailable = true;
   } catch(e) {
     // CF unavailable or not deployed — fall back to direct pool
