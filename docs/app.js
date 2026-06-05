@@ -54,9 +54,13 @@ function _initCloudFn() {
   if (_cloudAIFn) return;
   try {
     if (typeof firebase !== 'undefined' && firebase.functions) {
-      // Region must match where the function is deployed (asia-south1)
-      const _fn = firebase.app().functions('asia-south1');
-      _cloudAIFn = _fn.httpsCallable('ai', { timeout: 30000 });
+      // Region must match where the function is deployed. The server code in
+      // functions/index.js declares no .region(), so all functions deploy to
+      // the Gen1 default us-central1 — same region login.html's checkLock /
+      // clearLock callables use. Pinning this to asia-south1 (where nothing is
+      // deployed) caused every 'ai' call to fail CORS and fall back to the
+      // direct, key-exposing, quota-exhausted browser pool.
+      _cloudAIFn = firebase.functions().httpsCallable('ai', { timeout: 30000 });
     }
   } catch(e) {}
 }
