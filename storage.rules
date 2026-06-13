@@ -1,12 +1,19 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
-    // Payment screenshots — authenticated users can upload their own, admin can read all
-    match /paymentScreenshots/{file} {
+    // Payment screenshots — each user uploads under their own uid folder.
+    // Read is limited to the owner and admins (no longer every signed-in user).
+    // NOTE: the app currently stores payment proofs as base64 inside the user's
+    // Firestore doc, so this path is unused — these rules are defense-in-depth
+    // in case Storage uploads are ever enabled.
+    match /paymentScreenshots/{uid}/{file} {
       allow write: if request.auth != null
+                   && request.auth.uid == uid
                    && request.resource.size < 5 * 1024 * 1024  // 5MB max
                    && request.resource.contentType.matches('image/.*');
-      allow read:  if request.auth != null;
+      allow read:  if request.auth != null
+                   && (request.auth.uid == uid
+                       || firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.isAdmin == true);
     }
   }
 }

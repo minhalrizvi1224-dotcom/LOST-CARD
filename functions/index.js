@@ -142,8 +142,12 @@ exports.sendVerificationEmail = functions
     throw new functions.https.HttpsError('unauthenticated', 'Login required.');
   }
 
-  const { email, displayName } = data || {};
-  if (!email) throw new functions.https.HttpsError('invalid-argument', 'Email required.');
+  const { displayName } = data || {};
+  // Use the caller's OWN authenticated email — never an arbitrary address from
+  // the client. Otherwise any signed-in user could send verification mail
+  // (through our Resend account) to any address they like.
+  const email = context.auth.token && context.auth.token.email;
+  if (!email) throw new functions.https.HttpsError('failed-precondition', 'Your account has no email address to verify.');
 
   // Load Resend key from Firestore only — never hardcoded in source
   let resendKey = null;
@@ -160,7 +164,10 @@ exports.sendVerificationEmail = functions
     .generateEmailVerificationLink(email)
     .catch(err => { throw new functions.https.HttpsError('internal', 'Could not generate link: ' + err.message); });
 
-  const name = displayName || email.split('@')[0];
+  // Escape any HTML in the display name before embedding it in the email body.
+  const escapeHtml = (s) => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+                                     .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const name = escapeHtml(displayName || email.split('@')[0]);
 
   // Beautiful HTML email
   const html = `<!DOCTYPE html>

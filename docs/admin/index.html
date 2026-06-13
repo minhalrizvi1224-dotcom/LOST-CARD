@@ -1068,16 +1068,16 @@ async function loadComplaints() {
           <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px">
             <div>
               <span style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;font-size:10px;font-weight:700;padding:2px 8px;color:var(--muted);margin-right:8px">${d.category || 'Other'}</span>
-              <span style="font-size:11px;color:var(--muted)">${d.displayName || 'Anonymous'} · ${d.email || '—'} · ${d.platform || '—'}</span>
+              <span style="font-size:11px;color:var(--muted)">${esc2(d.displayName || 'Anonymous')} · ${esc2(d.email || '—')} · ${esc2(d.platform || '—')}</span>
             </div>
             <div style="display:flex;align-items:center;gap:8px">
               <span id="sbadge-${doc.id}" style="font-size:11px;font-weight:700;color:${statusColor[d.status]||'var(--muted)'}">${statusLabel[d.status]||d.status}</span>
-              <select onchange="updateComplaintStatus('${doc.id}', this.value, ${JSON.stringify(d.uid||null)}, ${JSON.stringify(d.email||null)}, ${JSON.stringify(d.displayName||null)})" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:3px 8px;border-radius:6px;font-size:11px">
+              <select onchange="updateComplaintStatus('${doc.id}', this.value, ${esc(JSON.stringify(d.uid||null))}, ${esc(JSON.stringify(d.email||null))}, ${esc(JSON.stringify(d.displayName||null))})" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:3px 8px;border-radius:6px;font-size:11px">
                 <option value="new"      ${d.status==='new'      ?'selected':''}>🔴 New</option>
                 <option value="seen"     ${d.status==='seen'     ?'selected':''}>🟡 Seen</option>
                 <option value="resolved" ${d.status==='resolved' ?'selected':''}>🟢 Resolved</option>
               </select>
-              ${d.uid ? `<button onclick="openDirectMsgModal('${d.uid}','${esc2(d.email||'')}','${esc2(d.displayName||'User')}')" title="Send message to user" style="background:rgba(88,166,255,.1);border:1px solid rgba(88,166,255,.3);color:var(--accent);border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer">✉ Message</button>` : ''}
+              ${d.uid ? `<button onclick="openDirectMsgModal(${esc(JSON.stringify(d.uid))}, ${esc(JSON.stringify(d.email||''))}, ${esc(JSON.stringify(d.displayName||'User'))})" title="Send message to user" style="background:rgba(88,166,255,.1);border:1px solid rgba(88,166,255,.3);color:var(--accent);border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer">✉ Message</button>` : ''}
               <button onclick="deleteComplaint('${doc.id}')" title="Delete complaint" style="background:rgba(248,81,73,.1);border:1px solid rgba(248,81,73,.3);color:var(--red);border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer">🗑</button>
             </div>
           </div>
@@ -1173,7 +1173,7 @@ async function loadUnanswered() {
           <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px">
             <span style="font-size:11px;color:var(--muted)">${esc2(d.displayName||'User')} · ${esc2(d.email||'—')} · ${when}</span>
             <div style="display:flex;gap:8px">
-              ${d.uid ? `<button onclick="openDirectMsgModal('${d.uid}','${esc2(d.email||'')}','${esc2(d.displayName||'User')}')" style="background:rgba(88,166,255,.1);border:1px solid rgba(88,166,255,.3);color:var(--accent);border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer">✉ Reply</button>` : ''}
+              ${d.uid ? `<button onclick="openDirectMsgModal(${esc(JSON.stringify(d.uid))}, ${esc(JSON.stringify(d.email||''))}, ${esc(JSON.stringify(d.displayName||'User'))})" style="background:rgba(88,166,255,.1);border:1px solid rgba(88,166,255,.3);color:var(--accent);border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer">✉ Reply</button>` : ''}
               <button onclick="resolveUnanswered('${doc.id}')" style="background:rgba(86,211,100,.1);border:1px solid rgba(86,211,100,.3);color:var(--green);border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer">✓ Resolve</button>
               <button onclick="deleteUnanswered('${doc.id}')" style="background:rgba(248,81,73,.1);border:1px solid rgba(248,81,73,.3);color:var(--red);border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer">🗑</button>
             </div>
